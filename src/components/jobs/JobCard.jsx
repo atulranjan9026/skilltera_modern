@@ -1,11 +1,11 @@
 import React from 'react';
-import { Heart, Briefcase, MapPin, Clock } from 'lucide-react';
+import { Heart, Briefcase, MapPin, Clock, Eye } from 'lucide-react';
 import { THEME_CLASSES } from '../../theme';
 
 /**
  * JobCard Component - Displays a single job listing
  */
-export default function JobCard({ job, onSave, onApply, isSaved }) {
+export default function JobCard({ job, onSave, onViewDescription, isSaved }) {
   return (
     <div className={`${THEME_CLASSES.cards} p-5 transition-all duration-200`}>
       {/* Header */}
@@ -55,10 +55,11 @@ export default function JobCard({ job, onSave, onApply, isSaved }) {
 
       {/* CTA Button */}
       <button
-        onClick={() => onApply(job.id)}
-        className={`w-full ${THEME_CLASSES.buttons.primary} py-2 rounded-lg font-medium text-sm transition-all duration-200 hover:shadow-md`}
+        onClick={() => onViewDescription(job.id)}
+        className={`w-full ${THEME_CLASSES.buttons.primary} py-2 rounded-lg font-medium text-sm transition-all duration-200 hover:shadow-md flex items-center justify-center gap-2`}
       >
-        Apply Now
+        <Eye size={16} />
+        View Description
       </button>
     </div>
   );

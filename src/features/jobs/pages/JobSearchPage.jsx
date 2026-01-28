@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import SearchBar from '../../../components/jobs/SearchBar';
-import FilterDropdown from '../../../components/jobs/FilterDropdown';
 import JobCard from '../../../components/jobs/JobCard';
+import JobDescription from '../../../components/jobs/JobDescription';
 import EmptyState from '../../../components/common/EmptyState';
 import { MOCK_JOBS, JOB_TYPES, EXPERIENCE_LEVELS, SALARY_RANGES } from '../../../data/mockData';
 
@@ -11,6 +11,7 @@ import { MOCK_JOBS, JOB_TYPES, EXPERIENCE_LEVELS, SALARY_RANGES } from '../../..
 export default function JobSearchPage() {
   const [jobs, setJobs] = useState(MOCK_JOBS);
   const [savedJobs, setSavedJobs] = useState([]);
+  const [selectedJob, setSelectedJob] = useState(null);
   const [filters, setFilters] = useState({
     jobTypes: [],
     experience: [],
@@ -47,9 +48,15 @@ export default function JobSearchPage() {
     );
   };
 
-  const handleApplyJob = (jobId) => {
-    alert(`Applied for job ID: ${jobId}`);
-    // In real app, this would call an API
+  const handleViewDescription = (jobId) => {
+    const job = jobs.find(j => j.id === jobId);
+    if (job) {
+      setSelectedJob(job);
+    }
+  };
+
+  const handleCloseDescription = () => {
+    setSelectedJob(null);
   };
 
   const handleFilterChange = (newFilters) => {
@@ -61,65 +68,52 @@ export default function JobSearchPage() {
       <div className="sticky top-0 bg-white border-b border-slate-200 z-20 py-4">
         <div className="container mx-auto px-4">
           <SearchBar onSearch={handleSearch} />
-
-          {/* Filter Pills Row */}
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            <FilterDropdown
-              label="Job Type"
-              options={JOB_TYPES}
-              value={filters.jobTypes}
-              onChange={(val) => setFilters({ ...filters, jobTypes: val })}
-              isMulti={true}
-            />
-            <FilterDropdown
-              label="Experience"
-              options={EXPERIENCE_LEVELS}
-              value={filters.experience}
-              onChange={(val) => setFilters({ ...filters, experience: val })}
-              isMulti={true}
-            />
-            <FilterDropdown
-              label="Salary"
-              options={SALARY_RANGES.map(r => r.label)}
-              value={filters.salaryRange}
-              onChange={(val) => setFilters({ ...filters, salaryRange: val })}
-            />
-
-            {(filters.jobTypes.length > 0 || filters.experience.length > 0 || filters.salaryRange) && (
-              <button
-                onClick={() => setFilters({ jobTypes: [], experience: [], salaryRange: '' })}
-                className="text-sm font-medium text-primary-600 hover:text-primary-700 ml-2 px-2 py-1"
-              >
-                Clear all
-              </button>
-            )}
-          </div>
         </div>
       </div>
 
       {/* Results Counter */}
-      <div className="bg-white border-b border-slate-200 py-3">
+      {/* <div className="bg-white border-b border-slate-200 py-3">
         <div className="container mx-auto px-4">
           <p className="text-sm text-slate-600">
             Showing <span className="font-semibold">{filteredJobs.length}</span> jobs
           </p>
         </div>
-      </div>
+      </div> */}
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
-        {/* Job Listings */}
         {filteredJobs.length > 0 ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredJobs.map((job) => (
-              <JobCard
-                key={job.id}
-                job={job}
-                onSave={handleSaveJob}
-                onApply={handleApplyJob}
-                isSaved={savedJobs.includes(job.id)}
-              />
-            ))}
+          <div className="flex gap-6">
+            {/* Job Listings */}
+            <div className={`transition-all duration-300 ease-out ${
+              selectedJob 
+                ? 'w-full lg:w-2/5 xl:w-1/3' 
+                : 'w-full'
+            }`}>
+              <div className="grid gap-6">
+                {filteredJobs.map((job) => (
+                  <JobCard
+                    key={job.id}
+                    job={job}
+                    onSave={handleSaveJob}
+                    onViewDescription={handleViewDescription}
+                    isSaved={savedJobs.includes(job.id)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Job Description Panel */}
+            {selectedJob && (
+              <div className="hidden lg:block lg:w-3/5 xl:w-2/3 transition-all duration-300 ease-out animate-slide-in">
+                <JobDescription
+                  job={selectedJob}
+                  isSaved={savedJobs.includes(selectedJob.id)}
+                  onSave={handleSaveJob}
+                  onClose={handleCloseDescription}
+                />
+              </div>
+            )}
           </div>
         ) : (
           <EmptyState
@@ -127,8 +121,54 @@ export default function JobSearchPage() {
             description="Try adjusting your search or filters to find more jobs"
           />
         )}
+
+        {/* Mobile Job Description Overlay */}
+        {selectedJob && (
+          <div className="lg:hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl w-full max-h-[90vh] overflow-hidden animate-slide-up">
+              <JobDescription
+                job={selectedJob}
+                isSaved={savedJobs.includes(selectedJob.id)}
+                onSave={handleSaveJob}
+                onClose={handleCloseDescription}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
+      {/* Add CSS animations */}
+      <style jsx>{`
+        @keyframes slide-in {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        
+        @keyframes slide-up {
+          from {
+            transform: translateY(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+        
+        .animate-slide-in {
+          animation: slide-in 0.3s ease-out;
+        }
+        
+        .animate-slide-up {
+          animation: slide-up 0.3s ease-out;
+        }
+      `}</style>
 
     </div>
   );
