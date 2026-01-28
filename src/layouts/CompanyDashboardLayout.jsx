@@ -1,30 +1,71 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, NavLink } from 'react-router-dom';
+import {
+    LayoutDashboard,
+    Briefcase,
+    PlusCircle,
+    FileText,
+    Users,
+    Building,
+    LogOut
+} from 'lucide-react';
 
 /**
  * Company Dashboard Layout
  * Layout wrapper for company dashboard pages
  */
 export default function CompanyDashboardLayout() {
+  const navItems = [
+    { icon: LayoutDashboard, label: 'Dashboard', path: '/company/dashboard' },
+    { icon: Briefcase, label: 'Jobs', path: '/company/jobs' },
+    { icon: PlusCircle, label: 'New Job', path: '/company/jobs/new' },
+    { icon: FileText, label: 'Applications', path: '/company/applications' },
+    { icon: Users, label: 'Team', path: '/company/team' },
+    { icon: Building, label: 'Profile', path: '/company/profile' },
+  ];
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
-      <aside className="w-64 bg-white border-r border-gray-200">
-        <div className="p-6">
-          <h2 className="text-lg font-bold text-slate-900">Company Menu</h2>
-          <nav className="mt-8 space-y-2">
-            <a href="/company/dashboard" className="block px-4 py-2 rounded-lg hover:bg-gray-50 text-slate-700">Dashboard</a>
-            <a href="/company/jobs" className="block px-4 py-2 rounded-lg hover:bg-gray-50 text-slate-700">Manage Jobs</a>
-            <a href="/company/jobs/new" className="block px-4 py-2 rounded-lg hover:bg-gray-50 text-slate-700">Post New Job</a>
-            <a href="/company/applications" className="block px-4 py-2 rounded-lg hover:bg-gray-50 text-slate-700">Applications</a>
-            <a href="/company/team" className="block px-4 py-2 rounded-lg hover:bg-gray-50 text-slate-700">Team Members</a>
-            <a href="/company/profile" className="block px-4 py-2 rounded-lg hover:bg-gray-50 text-slate-700">Company Profile</a>
-          </nav>
+      <aside className="w-20 bg-white border-r border-gray-200">
+        <div className="h-16 flex items-center justify-center border-b border-gray-100">
+          <div className="flex flex-col items-center gap-1">
+            <div className="w-8 h-8 rounded-lg bg-primary-500 flex items-center justify-center text-white">
+              C
+            </div>
+            <span className="text-xs text-slate-900 font-bold">Company</span>
+          </div>
+        </div>
+        
+        <div className="flex-1 py-6 px-2 space-y-2">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) =>
+                `flex flex-col items-center gap-1 px-2 py-3 text-xs font-medium rounded-lg transition-colors ${
+                  isActive
+                    ? "bg-primary-50 text-primary-600"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                }`
+              }
+            >
+              <item.icon className="w-5 h-5" />
+              <span className="text-center leading-tight">{item.label}</span>
+            </NavLink>
+          ))}
+        </div>
+
+        <div className="p-2 border-t border-gray-100">
+          <button className="flex flex-col items-center gap-1 px-2 py-3 text-xs font-medium text-slate-600 hover:text-red-600 w-full hover:bg-red-50 rounded-lg transition-colors">
+            <LogOut className="w-5 h-5" />
+            <span className="text-center leading-tight">Sign Out</span>
+          </button>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1">
+      <main className="flex-1 ml-20">
         <div className="p-8">
           <Outlet />
         </div>

@@ -9,7 +9,7 @@ src/
 ├── components/              # Shared/reusable components
 │   ├── ui/                 # Atomic UI components (Button, Input, Card, etc.)
 │   ├── forms/              # Reusable form components
-│   ├── common/             # Common components (Header, Footer, Navbar)
+│   ├── common/             # Common components (Header, Footer, Sidebar)
 │   └── layouts/            # Layout wrappers (deprecated - now in layouts/ root)
 │
 ├── features/               # Feature-based modules (self-contained)

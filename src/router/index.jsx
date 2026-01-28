@@ -3,7 +3,7 @@ import RootLayout from '../layouts/RootLayout';
 
 // Import modular routes
 import authRoutes from './authRoutes';
-import candidateRoutes from './candidateRoutes';
+import jobRoutes from './candidateRoutes';
 import companyRoutes from './companyRoutes';
 
 // Import pages
@@ -12,15 +12,15 @@ import NotFound from '../pages/NotFound';
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <RootLayout />,
+    // element: <RootLayout />,
     errorElement: <NotFound />,
     children: [
       {
         index: true,
-        element: <Navigate to="/auth/login" replace />,
+        element: <Navigate to="/jobs-search" replace />,
       },
       authRoutes,
-      candidateRoutes,
+      jobRoutes,
       companyRoutes,
       {
         path: '*',

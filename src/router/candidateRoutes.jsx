@@ -1,40 +1,39 @@
 import { Navigate } from 'react-router-dom';
-import CandidateDashboardLayout from '../layouts/CandidateDashboardLayout';
+import UserLayout from '../layouts/UserLayout';
+import LandingPage from '../features/jobs/pages/LandingPage';
+import JobSearchPage from '../features/jobs/pages/JobSearchPage';
+import UserDashboard from '../features/jobs/pages/UserDashboard';
+import ProfilePage from '../features/jobs/pages/ProfilePage';
 import CandidateDashboard from '../features/candidates/pages/CandidateDashboard';
 
 /**
- * Candidate-specific routes
- * Protected routes that require candidate authentication
+ * Job/User routes - Main user-facing pages after login
+ * All routes use UserLayout which includes Sidebar and Footer
  */
-const candidateRoutes = {
-  path: 'candidate',
-  element: <CandidateDashboardLayout />,
+const jobRoutes = {
+  element: <UserLayout />,
   children: [
     {
-      index: true,
-      element: <Navigate to="dashboard" replace />,
+      path: '/',
+      element: <LandingPage />,
+    },
+    {
+      path: 'jobs-search',
+      element: <JobSearchPage />,
     },
     {
       path: 'dashboard',
-      element: <CandidateDashboard />,
+      element: <UserDashboard />,
     },
     {
       path: 'profile',
-      element: <div>Candidate Profile (Coming Soon)</div>,
+      element: <ProfilePage />,
     },
     {
-      path: 'applications',
-      element: <div>My Applications (Coming Soon)</div>,
-    },
-    {
-      path: 'saved-jobs',
-      element: <div>Saved Jobs (Coming Soon)</div>,
-    },
-    {
-      path: '*',
-      element: <Navigate to="/candidate/dashboard" replace />,
+      path: 'candidate',
+      element: <CandidateDashboard />,
     },
   ],
 };
 
-export default candidateRoutes;
+export default jobRoutes;

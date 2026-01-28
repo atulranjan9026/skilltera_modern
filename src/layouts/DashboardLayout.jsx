@@ -22,45 +22,45 @@ export default function DashboardLayout() {
     return (
         <div className="min-h-screen bg-slate-50 flex">
             {/* Sidebar */}
-            <aside className="w-64 bg-white border-r border-slate-200 fixed h-full z-20 hidden md:flex flex-col">
-                <div className="h-16 flex items-center px-6 border-b border-slate-100">
-                    <div className="flex items-center gap-2 font-bold text-xl text-primary-500">
+            <aside className="w-20 bg-white border-r border-slate-200 fixed h-full z-20 hidden md:flex flex-col">
+                <div className="h-16 flex items-center justify-center border-b border-slate-100">
+                    <div className="flex flex-col items-center gap-1">
                         <div className="w-8 h-8 rounded-lg bg-primary-500 flex items-center justify-center text-white">
                             S
                         </div>
-                        <span className="text-slate-900">Skilltera</span>
+                        <span className="text-xs text-slate-900 font-bold">Skilltera</span>
                     </div>
                 </div>
 
-                <div className="flex-1 py-6 px-4 space-y-1">
+                <div className="flex-1 py-6 px-2 space-y-2">
                     {navItems.map((item) => (
                         <NavLink
                             key={item.path}
                             to={item.path}
                             end={item.end}
                             className={({ isActive }) => cn(
-                                "flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors",
+                                "flex flex-col items-center gap-1 px-2 py-3 text-xs font-medium rounded-lg transition-colors",
                                 isActive
                                     ? "bg-primary-50 text-primary-600"
                                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                             )}
                         >
                             <item.icon className="w-5 h-5" />
-                            {item.label}
+                            <span className="text-center leading-tight">{item.label}</span>
                         </NavLink>
                     ))}
                 </div>
 
-                <div className="p-4 border-t border-slate-100">
-                    <button className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-600 hover:text-red-600 w-full hover:bg-red-50 rounded-lg transition-colors">
+                <div className="p-2 border-t border-slate-100">
+                    <button className="flex flex-col items-center gap-1 px-2 py-3 text-xs font-medium text-slate-600 hover:text-red-600 w-full hover:bg-red-50 rounded-lg transition-colors">
                         <LogOut className="w-5 h-5" />
-                        Sign Out
+                        <span className="text-center leading-tight">Sign Out</span>
                     </button>
                 </div>
             </aside>
 
             {/* Main Content */}
-            <div className="flex-1 md:ml-64 flex flex-col min-h-screen">
+            <div className="flex-1 md:ml-20 flex flex-col min-h-screen">
                 <header className="h-16 bg-white border-b border-slate-200 px-8 flex items-center justify-between sticky top-0 z-10">
                     <div className="flex-1 max-w-xl">
                         <div className="relative">

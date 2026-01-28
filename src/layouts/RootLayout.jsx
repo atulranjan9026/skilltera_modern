@@ -14,7 +14,7 @@ export default function RootLayout() {
                         <span>Skilltera</span>
                     </div>
                     <nav className="flex items-center gap-6 text-sm font-medium">
-                        <Link to="/" className="hover:text-primary-500 transition-colors">Home</Link>
+                        {/* <Link to="/" className="hover:text-primary-500 transition-colors">Home</Link> */}
                         <Link to="/auth/login" className="hover:text-primary-500 transition-colors">Login</Link>
                     </nav>
                 </div>
