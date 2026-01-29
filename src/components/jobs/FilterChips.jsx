@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, Briefcase, DollarSign, Clock, Building, MapPin } from 'lucide-react';
+import { THEME_CLASSES } from '../../theme';
 
 /**
  * Filter Chips Component - Displays active filter chips with remove functionality
@@ -66,9 +67,9 @@ const FilterChips = ({ filters, onRemoveFilter, onClearAllFilters }) => {
 
   return (
     <div className="w-full">
-      <div className="bg-white rounded-xl border border-slate-200 p-4">
+      <div className={`${THEME_CLASSES.cards} p-4`}>
         <div className="flex items-center gap-4 flex-wrap">
-          <span className="text-sm font-medium text-slate-700">
+          <span className="text-sm font-medium text-slate-600">
             Active Filters ({activeFilterCount})
           </span>
           <div className="flex flex-wrap gap-2 flex-1">
@@ -77,13 +78,13 @@ const FilterChips = ({ filters, onRemoveFilter, onClearAllFilters }) => {
               return (
                 <div
                   key={`${chip.type}-${chip.value}-${index}`}
-                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary-50 text-primary-700 rounded-lg text-sm font-medium border border-primary-200 hover:bg-primary-100 transition-colors group"
+                  className={`inline-flex items-center gap-2 px-3 py-1.5 bg-primary-50 text-primary-700 border border-primary-200 rounded-lg text-sm font-medium transition-colors group`}
                 >
                   <Icon size={14} />
                   <span>{chip.label}</span>
                   <button
                     onClick={() => onRemoveFilter(chip.type, chip.value)}
-                    className="ml-1 hover:bg-primary-200 rounded-full p-0.5 transition-colors"
+                    className="ml-1 hover:bg-primary-100 rounded-full p-0.5 transition-colors"
                     aria-label={`Remove ${chip.label} filter`}
                   >
                     <X size={14} />

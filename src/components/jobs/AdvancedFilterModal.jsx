@@ -56,9 +56,9 @@ const AdvancedFilterModal = ({ isOpen, onClose, filters, onApplyFilters }) => {
           onClick={(e) => e.stopPropagation()}
         >
           {/* Modal Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50">
+          <div className={`flex items-center justify-between px-6 py-4 border-b ${THEME_CLASSES.borders} bg-slate-50`}>
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary-100 rounded-lg">
+              <div className={`p-2 bg-primary-100 rounded-lg`}>
                 <SlidersHorizontal size={20} className="text-primary-600" />
               </div>
               <div>
@@ -68,7 +68,7 @@ const AdvancedFilterModal = ({ isOpen, onClose, filters, onApplyFilters }) => {
             </div>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-slate-200 rounded-lg transition-colors duration-200"
+              className={`p-2 ${THEME_CLASSES.buttons.ghost} rounded-lg transition-colors duration-200`}
               aria-label="Close modal"
             >
               <X size={20} className="text-slate-500" />
@@ -108,7 +108,7 @@ const AdvancedFilterModal = ({ isOpen, onClose, filters, onApplyFilters }) => {
                 </div>
                 <div className="space-y-2">
                   {['Entry Level', 'Mid Level', 'Senior Level', 'Lead', 'Director', 'Executive'].map(level => (
-                    <label key={level} className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors group">
+                    <label key={level} className={`flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors group`}>
                       <input
                         type="checkbox"
                         checked={localFilters.experience?.includes(level) || false}

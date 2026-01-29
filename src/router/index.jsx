@@ -1,5 +1,5 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
-import RootLayout from '../layouts/RootLayout';
+// import RootLayout from '../layouts/RootLayout';
 
 // Import modular routes
 import authRoutes from './authRoutes';
@@ -12,7 +12,6 @@ import NotFound from '../pages/NotFound';
 export const router = createBrowserRouter([
   {
     path: '/',
-    // element: <RootLayout />,
     errorElement: <NotFound />,
     children: [
       {

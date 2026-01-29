@@ -1,26 +1,34 @@
 import React from 'react';
-import { Heart, Briefcase, MapPin, Clock, Eye } from 'lucide-react';
+import { Heart, Briefcase, MapPin, Clock, ChevronRight } from 'lucide-react';
 import { THEME_CLASSES } from '../../theme';
 
 /**
  * JobCard Component - Displays a single job listing
  */
-export default function JobCard({ job, onSave, onViewDescription, isSaved }) {
+export default function JobCard({ job, onViewDetails, isSaved, onSave, isActive }) {
   return (
-    <div className={`${THEME_CLASSES.cards} p-5 transition-all duration-200`}>
+    <div 
+      className={`${THEME_CLASSES.cards} p-5 transition-all duration-200 cursor-pointer ${
+        isActive ? 'ring-2 ring-primary-500 bg-primary-50/50' : 'hover:shadow-lg'
+      }`}
+      onClick={() => onViewDetails(job)}
+    >
       {/* Header */}
       <div className="flex justify-between items-start mb-3">
         <div className="flex gap-3 flex-1">
           <div className="text-2xl">{job.logo}</div>
           <div className="flex-1">
-            <h3 className="font-semibold text-slate-900 text-base hover:text-primary-600 cursor-pointer">
+            <h3 className="font-semibold text-slate-900 text-base hover:text-primary-600 transition-colors">
               {job.title}
             </h3>
             <p className="text-sm text-slate-600">{job.company}</p>
           </div>
         </div>
         <button
-          onClick={() => onSave(job.id)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onSave(job.id);
+          }}
           className={`p-2 rounded-lg transition-colors ${
             isSaved
               ? 'bg-primary-100 text-primary-600'
@@ -55,11 +63,14 @@ export default function JobCard({ job, onSave, onViewDescription, isSaved }) {
 
       {/* CTA Button */}
       <button
-        onClick={() => onViewDescription(job.id)}
-        className={`w-full ${THEME_CLASSES.buttons.primary} py-2 rounded-lg font-medium text-sm transition-all duration-200 hover:shadow-md flex items-center justify-center gap-2`}
+        onClick={(e) => {
+          e.stopPropagation();
+          onViewDetails(job);
+        }}
+        className={`w-full ${THEME_CLASSES.buttons.primary} py-2 rounded-lg font-medium text-sm transition-all duration-200 hover:shadow-md flex items-center justify-center gap-2 group`}
       >
-        <Eye size={16} />
-        View Description
+        View Details
+        <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform duration-200" />
       </button>
     </div>
   );
