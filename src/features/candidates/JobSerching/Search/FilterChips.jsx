@@ -1,6 +1,6 @@
 import React from 'react';
 import { X, Briefcase, DollarSign, Clock, Building, MapPin } from 'lucide-react';
-import { THEME_CLASSES } from '../../../theme';
+import { THEME_CLASSES } from '../../../../theme';
 
 /**
  * Filter Chips Component - Displays active filter chips with remove functionality

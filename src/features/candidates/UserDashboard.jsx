@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Bookmark, CheckCircle } from 'lucide-react';
-import { MOCK_USER, MOCK_JOBS } from '../../../data/mockData';
-import { THEME_CLASSES } from '../../../theme';
+import { MOCK_USER, MOCK_JOBS } from '../../data/mockData';
+import { THEME_CLASSES } from '../../theme';
 
 /**
  * User Dashboard - View saved and applied jobs

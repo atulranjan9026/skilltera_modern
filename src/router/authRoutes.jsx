@@ -1,7 +1,7 @@
 import { Navigate } from 'react-router-dom';
 import AuthLayout from '../layouts/AuthLayout';
-import Login from '../features/auth/pages/Login';
-import CandidateSignup from '../features/auth/pages/candidateSignup';
+import Login from '../features/candidates/CondidatesAuth.js/CandidateLogin';
+import CandidateSignup from '../features/candidates/CondidatesAuth.js/CandidateSignup';
 
 /**
  * Authentication routes - shared for all users

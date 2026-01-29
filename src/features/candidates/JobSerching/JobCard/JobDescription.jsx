@@ -3,7 +3,7 @@ import {
   X, MapPin, Briefcase, Clock, DollarSign, Building, Users, 
   Calendar, Share2, Bookmark, ExternalLink, ChevronLeft 
 } from 'lucide-react';
-import { THEME_CLASSES } from '../../../theme';
+import { THEME_CLASSES } from '../../../../theme';
 import './job.css';
 
 /**

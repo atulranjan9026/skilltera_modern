@@ -1,6 +1,6 @@
 import React from 'react';
 import { MapPin } from 'lucide-react';
-import { THEME_CLASSES } from '../../../theme';
+import { THEME_CLASSES } from '../../../../theme';
 import AdvancedFilterModal from './AdvancedFilterModal';
 import FilterChips from './FilterChips';
 import SearchInput from './SearchInput';

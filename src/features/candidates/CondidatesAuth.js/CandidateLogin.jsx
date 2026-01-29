@@ -23,7 +23,7 @@ export default function Login() {
 
             // Simulate login
             await new Promise(resolve => setTimeout(resolve, 1000));
-            navigate('/candidate/dashboard');
+            navigate('/profile');
         } catch (error) {
             setErrorMessage(error.message || 'Login failed. Please try again.');
         } finally {

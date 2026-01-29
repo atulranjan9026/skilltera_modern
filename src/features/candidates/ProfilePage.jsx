@@ -5,9 +5,9 @@ import {
   // Social Media Icons
   Github, Linkedin, Dribbble
 } from 'lucide-react';
-import Input from '../../../components/common/Input';
-import { MOCK_USER } from '../../../data/mockData';
-import { THEME_CLASSES } from '../../../theme';
+import Input from '../../components/common/Input';
+import { MOCK_USER } from '../../data/mockData';
+import { THEME_CLASSES } from '../../theme';
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState({

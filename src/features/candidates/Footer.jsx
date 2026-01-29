@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Linkedin, Twitter, Github, MapPin, Phone, Globe, Heart } from 'lucide-react';
-import { THEME, THEME_CLASSES } from '../theme';
+import { THEME, THEME_CLASSES } from '../../theme';
 
 /**
  * Footer - Modern redesigned footer with enhanced layout and styling

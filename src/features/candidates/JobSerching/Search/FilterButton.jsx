@@ -1,6 +1,6 @@
 import React from 'react';
 import { SlidersHorizontal } from 'lucide-react';
-import { THEME_CLASSES } from '../../../theme';
+import { THEME_CLASSES } from '../../../../theme';
 
 /**
  * Filter Button Component - Shows filter count and opens modal

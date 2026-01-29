@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Search, Briefcase, MapPin } from 'lucide-react';
-import SearchBar from '../../../components/jobs/Search/SearchBar';
-import { THEME_CLASSES } from '../../../theme';
+import SearchBar from './JobSerching/Search/SearchBar';
+import { THEME_CLASSES } from '../../theme';
 
 /**
  * Landing Page - Hero section with job search and CTAs

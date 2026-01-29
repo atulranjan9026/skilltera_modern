@@ -1,10 +1,9 @@
 import { Navigate } from 'react-router-dom';
 import UserLayout from '../layouts/UserLayout';
-import LandingPage from '../features/jobs/pages/LandingPage';
-import JobSearchPage from '../features/jobs/pages/JobSearchPage';
-import UserDashboard from '../features/jobs/pages/UserDashboard';
-import ProfilePage from '../features/jobs/pages/ProfilePage';
-import CandidateDashboard from '../features/candidates/pages/CandidateDashboard';
+import LandingPage from '../features/candidates/LandingPage';
+import JobSearchPage from '../features/candidates/JobSearchPage';
+import UserDashboard from '../features/candidates/UserDashboard';
+import ProfilePage from '../features/candidates/ProfilePage';
 
 /**
  * Job/User routes - Main user-facing pages after login
@@ -28,10 +27,6 @@ const jobRoutes = {
     {
       path: 'profile',
       element: <ProfilePage />,
-    },
-    {
-      path: 'candidate',
-      element: <CandidateDashboard />,
     },
   ],
 };

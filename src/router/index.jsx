@@ -4,7 +4,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 // Import modular routes
 import authRoutes from './authRoutes';
 import jobRoutes from './candidateRoutes';
-import companyRoutes from './companyRoutes';
+// import companyRoutes from './companyRoutes';
 
 // Import pages
 import NotFound from '../pages/NotFound';
@@ -20,7 +20,7 @@ export const router = createBrowserRouter([
       },
       authRoutes,
       jobRoutes,
-      companyRoutes,
+      // companyRoutes,
       {
         path: '*',
         element: <NotFound />,
