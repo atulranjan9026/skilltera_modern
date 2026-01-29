@@ -1,6 +1,6 @@
 import React from 'react';
 import { Search } from 'lucide-react';
-import { THEME_CLASSES } from '../../theme';
+// import { THEME_CLASSES } from '../../../theme';
 
 /**
  * Search Input Component

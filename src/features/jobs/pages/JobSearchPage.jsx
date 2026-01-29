@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import SearchBar from '../../../components/jobs/SearchBar';
-import JobListings from '../../../components/jobs/JobListings';
+import SearchBar from '../../../components/jobs/Search/SearchBar';
+import JobListings from '../../../components/jobs/JobCard/JobListings';
 import EmptyState from '../../../components/common/EmptyState';
 import { MOCK_JOBS, JOB_TYPES, EXPERIENCE_LEVELS, SALARY_RANGES } from '../../../data/mockData';
 

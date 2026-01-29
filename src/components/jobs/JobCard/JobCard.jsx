@@ -1,6 +1,6 @@
 import React from 'react';
 import { Heart, Briefcase, MapPin, Clock, ChevronRight } from 'lucide-react';
-import { THEME_CLASSES } from '../../theme';
+import { THEME_CLASSES } from '../../../theme';
 
 /**
  * JobCard Component - Displays a single job listing

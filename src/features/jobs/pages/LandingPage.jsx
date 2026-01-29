@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Search, Briefcase, MapPin } from 'lucide-react';
-import SearchBar from '../../../components/jobs/SearchBar';
+import SearchBar from '../../../components/jobs/Search/SearchBar';
 import { THEME_CLASSES } from '../../../theme';
 
 /**

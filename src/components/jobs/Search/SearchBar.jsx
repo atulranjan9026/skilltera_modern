@@ -1,6 +1,6 @@
 import React from 'react';
 import { MapPin } from 'lucide-react';
-import { THEME_CLASSES } from '../../theme';
+import { THEME_CLASSES } from '../../../theme';
 import AdvancedFilterModal from './AdvancedFilterModal';
 import FilterChips from './FilterChips';
 import SearchInput from './SearchInput';
@@ -146,23 +146,6 @@ export default function SearchBar({ onSearch }) {
         filters={filters}
         onApplyFilters={handleApplyFilters}
       />
-
-      {/* Add CSS animation for modal */}
-      <style jsx>{`
-        @keyframes modal-slide-up {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-modal-slide-up {
-          animation: modal-slide-up 0.3s ease-out;
-        }
-      `}</style>
     </div>
   );
 }
