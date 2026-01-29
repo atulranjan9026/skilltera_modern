@@ -17,19 +17,19 @@ export default function JobListings({ jobs, savedJobs, onSave, onApply }) {
   };
 
   return (
-    <div className="flex gap-6 ">
+    <div className="flex gap-6">
       {/* Left Side - Job Cards List */}
       <div 
-        className={`transition-all duration-500 ease-in-out ${
+        className={`transition-all duration-500 ease-in-out  ${
           selectedJob 
-            ? 'w-full lg:w-2/5 xl:w-1/3' 
-            : 'w-full'
+            ? 'w-full lg:w-2/5 xl:w-1/3 h-[calc(150vh-30px)]' 
+            : 'w-full '
         }`}
       >
         <div className={`${
           selectedJob 
             ? 'h-full overflow-y-auto pr-2 space-y-4 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100 p-2'
-            : 'grid md:grid-cols-2 lg:grid-cols-3 gap-6'
+            : 'h-full overflow-y-auto pr-2 grid md:grid-cols-2 lg:grid-cols-3 gap-6 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100 p-2'
         }`}>
           {jobs.map((job) => (
             <JobCard
@@ -56,7 +56,7 @@ export default function JobListings({ jobs, savedJobs, onSave, onApply }) {
             ${selectedJob ? 'translate-x-0' : 'translate-x-full'}
           `}
         >
-          <div className="h-full overflow-hidden border-l border-slate-200 rounded-lg shadow-xl">
+          <div className="h-full overflow-hidden border-l border-slate-200 rounded-lg shadow-xl h-[calc(150vh-40px)]">
             <JobDescription
               job={selectedJob}
               onClose={handleCloseDetails}
@@ -67,8 +67,6 @@ export default function JobListings({ jobs, savedJobs, onSave, onApply }) {
           </div>
         </div>
       )}
-
-      
     </div>
   );
 }

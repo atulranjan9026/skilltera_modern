@@ -8,7 +8,7 @@ import { THEME_CLASSES } from '../../../theme';
 export default function JobCard({ job, onViewDetails, isSaved, onSave, isActive }) {
   return (
     <div 
-      className={`${THEME_CLASSES.cards} p-5 transition-all duration-200 cursor-pointer ${
+      className={`${THEME_CLASSES.cards} p-5 transition-all duration-200 cursor-pointer max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100 hover:scrollbar-thumb-slate-400 ${
         isActive ? 'ring-2 ring-primary-500 bg-primary-50/50' : 'hover:shadow-lg'
       }`}
       onClick={() => onViewDetails(job)}

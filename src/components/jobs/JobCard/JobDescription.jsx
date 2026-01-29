@@ -111,7 +111,7 @@ export default function JobDescription({ job, onClose, onApply, onSave, isSaved 
       </div>
 
       {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100 hover:scrollbar-thumb-slate-400">
         <div className="p-6 space-y-6">
           {/* Job Description */}
           <section>
