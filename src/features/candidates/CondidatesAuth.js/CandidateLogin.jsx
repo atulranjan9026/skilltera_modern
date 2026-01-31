@@ -1,33 +1,32 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/Button';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
+import { useAuthContext } from '../../../store/context/AuthContext';
 
 export default function Login() {
     const navigate = useNavigate();
-    const [isLoading, setIsLoading] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('');
+    const { login, isLoading, error: authError } = useAuthContext();
     const {
         register,
         handleSubmit,
         formState: { errors },
+        setError: setFormError,
     } = useForm();
 
     const onSubmit = async (data) => {
-        setIsLoading(true);
-        setErrorMessage('');
-
         try {
-            // TODO: Replace with actual login API call
-            // const response = await authService.login(data.email, data.password);
+            await login(data.email, data.password);
 
-            // Simulate login
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            // Navigate to profile after successful login
             navigate('/profile');
         } catch (error) {
-            setErrorMessage(error.message || 'Login failed. Please try again.');
-        } finally {
-            setIsLoading(false);
+            console.error('Login error:', error);
+            // Set form error for display
+            setFormError('root', {
+                type: 'manual',
+                message: error.response?.data?.message || error.message || 'Login failed. Please try again.',
+            });
         }
     };
 
@@ -101,9 +100,9 @@ export default function Login() {
                 </div>
 
                 {/* Error Message */}
-                {errorMessage && (
+                {(errors.root || authError) && (
                     <div className="p-2 bg-red-50 border border-red-200 rounded-lg text-red-600 text-xs">
-                        {errorMessage}
+                        {errors.root?.message || authError}
                     </div>
                 )}
 

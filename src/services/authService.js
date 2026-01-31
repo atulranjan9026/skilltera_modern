@@ -5,34 +5,19 @@ import { get, post, put, del, setAuthToken, clearAuthToken } from './api';
  */
 export const authService = {
   /**
-   * Set JWT token directly (bypass login)
+   * Set JWT token directly (for development/testing)
    */
-  setJWTToken: (token) => {
-    setAuthToken(token);
-  },
-
-  /**
-   * Clear JWT token
-   */
-  clearJWTToken: () => {
-    clearAuthToken();
-  },
-
-  /**
-   * Initialize with JWT token (for bypassing login)
-   */
-  initWithJWT: (token) => {
-    setAuthToken(token);
-    console.log('JWT token set successfully');
-  },
+  // setJWTToken: (token) => {
+  //   setAuthToken(token);
+  // },
 
   /**
    * Login user
    */
   login: async (email, password) => {
-    const response = await post('/auth/login', { email, password });
-    if (response.token) {
-      setAuthToken(response.token);
+    const response = await post('/candidates/auth/login', { email, password });
+    if (response.data?.accessToken) {
+      setAuthToken(response.data.accessToken);
     }
     return response;
   },
@@ -41,7 +26,7 @@ export const authService = {
    * Register candidate
    */
   registerCandidate: async (candidateData) => {
-    return post('/auth/candidate/signup', candidateData);
+    return post('/candidates/auth/signup', candidateData);
   },
 
   /**
@@ -55,9 +40,16 @@ export const authService = {
    * Logout user
    */
   logout: async () => {
-    const response = await post('/auth/logout', {});
-    clearAuthToken();
-    return response;
+    try {
+      // Send no request body
+      const response = await post('/candidates/auth/logout', undefined);
+      clearAuthToken();
+      return response;
+    } catch (error) {
+      // Even if backend logout fails, clear local auth
+      clearAuthToken();
+      throw error;
+    }
   },
 
   /**
@@ -71,20 +63,27 @@ export const authService = {
    * Refresh token
    */
   refreshToken: async () => {
-    return post('/auth/refresh', {});
+    return post('/candidates/auth/refresh', {});
+  },
+
+  /**
+   * Get current user
+   */
+  getCurrentUser: async () => {
+    return get('/candidates/auth/me');
   },
 
   /**
    * Forgot password
    */
   forgotPassword: async (email) => {
-    return post('/auth/forgot-password', { email });
+    return post('/candidates/auth/forgot-password', { email });
   },
 
   /**
    * Reset password
    */
   resetPassword: async (token, newPassword) => {
-    return post('/auth/reset-password', { token, newPassword });
+    return post('/candidates/auth/reset-password', { token, newPassword });
   },
 };

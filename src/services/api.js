@@ -1,7 +1,10 @@
 /* Central API configuration and base axios instance with optimizations */
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
+// Vite uses import.meta.env instead of process.env
+// Environment variables must be prefixed with VITE_ to be exposed
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
+
 
 // Cache for GET requests
 const cache = new Map();
@@ -10,7 +13,7 @@ const pendingRequests = new Map();
 // Create axios instance with optimizations
 export const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 30000, // Increased timeout to 30 seconds
   headers: {
     'Content-Type': 'application/json',
   }
@@ -62,7 +65,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       // Handle token refresh or redirect to login
       localStorage.removeItem('token');
-      window.location.href = '/login';
+      window.location.href = '/auth/login';
     }
     return Promise.reject(error);
   }
@@ -78,7 +81,7 @@ const getCachedData = (key, fetcher, ttl = 300000) => {
       return Promise.resolve(data);
     }
   }
-  
+
   return fetcher().then(data => {
     cache.set(key, { data, timestamp: Date.now() });
     return data;
@@ -92,11 +95,11 @@ const deduplicateRequest = (key, requestFn) => {
   if (pendingRequests.has(key)) {
     return pendingRequests.get(key);
   }
-  
+
   const promise = requestFn().finally(() => {
     pendingRequests.delete(key);
   });
-  
+
   pendingRequests.set(key, promise);
   return promise;
 };
@@ -124,13 +127,13 @@ export const clearCache = (key) => {
  */
 export const get = async (endpoint, useCache = true, ttl = 300000) => {
   const cacheKey = `GET:${endpoint}`;
-  
+
   if (useCache) {
-    return getCachedData(cacheKey, () => 
+    return getCachedData(cacheKey, () =>
       deduplicateRequest(cacheKey, () => api.get(endpoint)), ttl
     );
   }
-  
+
   return deduplicateRequest(cacheKey, () => api.get(endpoint));
 };
 
@@ -139,7 +142,9 @@ export const get = async (endpoint, useCache = true, ttl = 300000) => {
  */
 export const post = async (endpoint, data) => {
   const cacheKey = `POST:${endpoint}`;
-  return deduplicateRequest(cacheKey, () => api.post(endpoint, data));
+  // Handle undefined data by not sending any body
+  const config = data === undefined ? {} : { data };
+  return deduplicateRequest(cacheKey, () => api.post(endpoint, data, config));
 };
 
 /**
@@ -152,7 +157,7 @@ export const put = async (endpoint, data) => {
       cache.delete(key);
     }
   }
-  
+
   const cacheKey = `PUT:${endpoint}`;
   return deduplicateRequest(cacheKey, () => api.put(endpoint, data));
 };
@@ -167,7 +172,7 @@ export const del = async (endpoint) => {
       cache.delete(key);
     }
   }
-  
+
   const cacheKey = `DELETE:${endpoint}`;
   return deduplicateRequest(cacheKey, () => api.delete(endpoint));
 };

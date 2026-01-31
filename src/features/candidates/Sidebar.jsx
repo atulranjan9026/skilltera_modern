@@ -1,26 +1,34 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { 
-  Search, 
-  BarChart3, 
-  User, 
-  Settings, 
-  LogOut, 
+import {
+  Search,
+  BarChart3,
+  User,
+  Settings,
+  LogOut,
   ChevronRight,
   Menu,
   X,
   ChevronLeft
 } from 'lucide-react';
+import { useAuthContext } from '../../store/context/AuthContext';
 
 /**
  * Sidebar Navigation - Left sidebar with icon-based navigation
  */
 export default function Sidebar() {
   const navigate = useNavigate();
+  const { user, logout } = useAuthContext();
 
-  const handleLogout = () => {
-    // In real app, clear auth context
-    navigate('/auth/login');
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/auth/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Still navigate to login even if logout API fails
+      navigate('/auth/login');
+    }
   };
 
   const navItems = [
@@ -91,11 +99,12 @@ export default function Sidebar() {
           {/* User Avatar */}
           <div className="flex flex-col items-center gap-1 px-2 py-3 rounded-lg bg-slate-50">
             <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-sm font-bold text-primary-600">
-              JD
+              {user?.name?.charAt(0).toUpperCase() || 'U'}
             </div>
             <div className="text-center">
-              <p className="text-xs font-medium text-slate-900">John Doe</p>
-              {/* <p className="text-xs text-slate-500">john@example.com</p> */}
+              <p className="text-xs font-medium text-slate-900 truncate max-w-[60px]">
+                {user?.name?.split(' ')[0] || 'User'}
+              </p>
             </div>
           </div>
 

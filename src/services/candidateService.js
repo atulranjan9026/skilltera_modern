@@ -77,4 +77,89 @@ export const candidateService = {
     // For file uploads, we need to use the raw axios instance
     return post(`/candidates/${candidateId}/resume`, formData);
   },
+  /**
+   * Get ranked jobs for candidate with pagination and filters
+   * @param {Object} options - Query options
+   * @param {number} options.page - Page number (default: 1)
+   * @param {number} options.limit - Items per page (default: 10, max: 50)
+   * @param {string} options.location - Filter by city
+   * @param {string} options.jobType - Filter by job type (full-time, part-time, contract, internship, freelance)
+   * @param {string} options.experienceLevel - Filter by experience level (entry, mid, senior, lead, executive)
+   * @param {number} options.minSalary - Minimum salary filter
+   * @param {number} options.maxSalary - Maximum salary filter
+   * @param {boolean} options.isRemote - Filter remote jobs
+   * @returns {Promise} Jobs with pagination metadata
+   */
+  getRankingJobs: async (options = {}) => {
+    // Build query string from options
+    const params = new URLSearchParams();
+
+    if (options.page) params.append('page', options.page);
+    if (options.limit) params.append('limit', options.limit);
+    if (options.location) params.append('location', options.location);
+    if (options.jobType) params.append('jobType', options.jobType);
+    if (options.experienceLevel) params.append('experienceLevel', options.experienceLevel);
+    if (options.minSalary) params.append('minSalary', options.minSalary);
+    if (options.maxSalary) params.append('maxSalary', options.maxSalary);
+    if (options.isRemote !== undefined) params.append('isRemote', options.isRemote);
+
+    const queryString = params.toString();
+    const endpoint = `/candidate/job/ranking${queryString ? `?${queryString}` : ''}`;
+
+    // Cache for 5 minutes (300000ms)
+    return get(endpoint, true, 300000);
+  },
+
+  /**
+   * Get job details by ID
+   * @param {string} jobId - Job ID
+   * @returns {Promise} Job details
+   */
+  getJobById: async (jobId) => {
+    return get(`/candidate/job/${jobId}`, true, 600000); // Cache for 10 minutes
+  },
+
+  /**
+   * Search jobs by text query
+   * @param {string} query - Search query
+   * @param {Object} options - Pagination options
+   * @param {number} options.page - Page number
+   * @param {number} options.limit - Items per page
+   * @returns {Promise} Search results with pagination
+   */
+  searchJobs: async (query, options = {}) => {
+    const params = new URLSearchParams({ q: query });
+
+    if (options.page) params.append('page', options.page);
+    if (options.limit) params.append('limit', options.limit);
+
+    const endpoint = `/candidate/job/search?${params.toString()}`;
+
+    // Cache for 2 minutes (120000ms)
+    return get(endpoint, true, 120000);
+  },
+
+  /**
+   * Get candidate's skills
+   * @returns {Promise} Candidate's skills
+   */
+  getAllActiveSkills: async (search) => {
+    let endpoint = '/allActiveSkills/skillList';
+    if (search) {
+      endpoint += `?search=${encodeURIComponent(search)}`;
+    }
+    // Don't cache search requests to ensure fresh results
+    return get(endpoint, false, 0);
+  },
+
+  /**
+   * Add a skill to candidate's profile
+   * @param {Object} skillData - Skill data {name, experienceYears, rating, category}
+   * @returns {Promise} Created skill
+   */
+  addSkill: async (skillData) => {
+    clearCache('GET:/candidates/profile/skills');
+    return post('/candidates/profile/skills', skillData);
+  },
+
 };

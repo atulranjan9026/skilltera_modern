@@ -15,14 +15,41 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // TODO: Implement token verification
-        const token = localStorage.getItem('authToken');
-        if (token) {
-          // Verify token with backend
-          // const userData = await authService.verifyToken(token);
-          // setUser(userData);
+        const token = localStorage.getItem('token');
+        const storedUser = localStorage.getItem('user');
+
+        if (token && storedUser) {
+          try {
+            // Restore user from localStorage
+            const parsedUser = JSON.parse(storedUser);
+            // console.log('Restoring user from storage:', parsedUser);
+            setUser(parsedUser);
+
+            // Verify token and get fresh user data
+            // console.log('Fetching fresh user data...');
+            const response = await authService.getCurrentUser();
+            // console.log('Fresh user response:', response);
+
+            if (response.data) {
+              // console.log('Updating user with fresh data:', response.data);
+              setUser(response.data);
+              localStorage.setItem('user', JSON.stringify(response.data));
+            }
+          } catch (e) {
+            console.error('Failed to refresh user data', e);
+            // Clear invalid session
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            setUser(null);
+          }
+        } else {
+          console.log('No stored session found');
         }
       } catch (err) {
+        console.error('Auth check failed:', err);
+        // Clear invalid session
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
         setError(err.message);
       } finally {
         setIsLoading(false);
@@ -37,12 +64,23 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const response = await authService.login(email, password);
-      // TODO: Store token and user data
-      // localStorage.setItem('authToken', response.token);
-      // setUser(response.user);
+
+      // Backend returns: { success, data: { candidate, accessToken }, message }
+      if (response.data) {
+        const { candidate, accessToken } = response.data;
+
+        // Store token (authService.login already stores it in localStorage)
+        // Store user data in state
+        setUser(candidate);
+
+        // Also store user in localStorage for persistence
+        localStorage.setItem('user', JSON.stringify(candidate));
+      }
+
       return response;
     } catch (err) {
-      setError(err.message);
+      const errorMessage = err.response?.data?.message || err.message || 'Login failed';
+      setError(errorMessage);
       throw err;
     } finally {
       setIsLoading(false);
@@ -52,10 +90,14 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       await authService.logout();
-      localStorage.removeItem('authToken');
-      setUser(null);
     } catch (err) {
+      console.error('Logout error:', err);
       setError(err.message);
+    } finally {
+      // Always clear local storage and state
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      setUser(null);
     }
   };
 
@@ -64,10 +106,12 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const response = await authService.registerCandidate(userData);
-      // TODO: Handle signup response
+      // Backend returns: { success, data: { candidate }, message }
+      // User needs to verify email before logging in
       return response;
     } catch (err) {
-      setError(err.message);
+      const errorMessage = err.response?.data?.message || err.message || 'Signup failed';
+      setError(errorMessage);
       throw err;
     } finally {
       setIsLoading(false);

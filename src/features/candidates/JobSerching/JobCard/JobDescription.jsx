@@ -1,7 +1,7 @@
 import React from 'react';
-import { 
-  X, MapPin, Briefcase, Clock, DollarSign, Building, Users, 
-  Calendar, Share2, Bookmark, ExternalLink, ChevronLeft 
+import {
+  X, MapPin, Briefcase, Clock, DollarSign, Building, Users,
+  Calendar, Share2, Bookmark, ExternalLink, ChevronLeft
 } from 'lucide-react';
 import { THEME_CLASSES } from '../../../../theme';
 import './job.css';
@@ -47,11 +47,10 @@ export default function JobDescription({ job, onClose, onApply, onSave, isSaved 
                   e.stopPropagation();
                   onSave(job.id);
                 }}
-                className={`p-2.5 rounded-lg transition-all duration-200 ${
-                  isSaved
-                    ? 'bg-primary-100 text-primary-600'
-                    : 'hover:bg-slate-100 text-slate-400'
-                }`}
+                className={`p-2.5 rounded-lg transition-all duration-200 ${isSaved
+                  ? 'bg-primary-100 text-primary-600'
+                  : 'hover:bg-slate-100 text-slate-400'
+                  }`}
                 title={isSaved ? 'Remove from saved' : 'Save job'}
               >
                 <Bookmark size={20} fill={isSaved ? 'currentColor' : 'none'} />
@@ -114,36 +113,58 @@ export default function JobDescription({ job, onClose, onApply, onSave, isSaved 
       <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100 hover:scrollbar-thumb-slate-400">
         <div className="p-6 space-y-6">
           {/* Job Description */}
+          {/* Required Skills */}
+          {job.skills && job.skills.length > 0 && (
+            <section>
+              <h3 className="text-lg font-bold text-slate-900 mb-3">Required Skills</h3>
+              <div className="flex flex-wrap gap-2">
+                {job.skills.map((skill, index) => (
+                  <div key={index} className="flex flex-col gap-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
+                    <span className="text-sm font-medium text-slate-800">{skill.name}</span>
+                    <div className="flex items-center gap-2">
+                      <div className="flex gap-0.5">
+                        {[...Array(5)].map((_, i) => (
+                          <div
+                            key={i}
+                            className={`w-1.5 h-1.5 rounded-full ${i < (skill.rating || 0) ? 'bg-primary-500' : 'bg-slate-200'}`}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-xs text-slate-500">{skill.experience ? `${skill.experience}y` : ''}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
           <section>
             <h3 className="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
               <Briefcase size={20} className="text-primary-600" />
               Job Description
             </h3>
-            <div className="prose prose-sm max-w-none text-slate-700 space-y-3">
-              <p>
-                {job.description || 
-                  `We are seeking a talented ${job.title} to join our dynamic team at ${job.company}. 
-                  This is an excellent opportunity for someone passionate about technology and innovation.`}
-              </p>
-              <p>
-                As a {job.title}, you will be responsible for developing and maintaining high-quality 
-                applications, collaborating with cross-functional teams, and contributing to the overall 
-                success of our projects.
-              </p>
-            </div>
+            <div
+              className="prose prose-sm max-w-none text-slate-700 job-description-content"
+              dangerouslySetInnerHTML={{
+                __html: job.description ||
+                  `<p>We are seeking a talented ${job.title} to join our dynamic team at ${job.company}. 
+                  This is an excellent opportunity for someone passionate about technology and innovation.</p>`
+              }}
+            />
           </section>
+
+
 
           {/* Key Responsibilities */}
           <section>
             <h3 className="text-lg font-bold text-slate-900 mb-3">Key Responsibilities</h3>
             <ul className="space-y-2 text-slate-700">
               {(job.responsibilities || [
-                'Design, develop, and maintain scalable web applications',
-                'Collaborate with product managers and designers to implement new features',
-                'Write clean, maintainable, and well-documented code',
-                'Participate in code reviews and provide constructive feedback',
-                'Debug and resolve technical issues in a timely manner',
-                'Stay updated with the latest industry trends and technologies'
+                // 'Design, develop, and maintain scalable web applications',
+                // 'Collaborate with product managers and designers to implement new features',
+                // 'Write clean, maintainable, and well-documented code',
+                // 'Participate in code reviews and provide constructive feedback',
+                // 'Debug and resolve technical issues in a timely manner',
+                // 'Stay updated with the latest industry trends and technologies'
               ]).map((item, index) => (
                 <li key={index} className="flex items-start gap-3">
                   <span className="text-primary-600 mt-1.5">•</span>
@@ -178,14 +199,14 @@ export default function JobDescription({ job, onClose, onApply, onSave, isSaved 
             <h3 className="text-lg font-bold text-slate-900 mb-3">Benefits & Perks</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {(job.benefits || [
-                'Competitive salary package',
-                'Health insurance coverage',
-                'Flexible work arrangements',
-                'Professional development opportunities',
-                'Paid time off and holidays',
-                'Modern office environment',
-                'Team building activities',
-                'Performance bonuses'
+                // 'Competitive salary package',
+                // 'Health insurance coverage',
+                // 'Flexible work arrangements',
+                // 'Professional development opportunities',
+                // 'Paid time off and holidays',
+                // 'Modern office environment',
+                // 'Team building activities',
+                // 'Performance bonuses'
               ]).map((benefit, index) => (
                 <div key={index} className="flex items-center gap-2 text-sm">
                   <div className="w-1.5 h-1.5 bg-primary-600 rounded-full"></div>
@@ -202,7 +223,7 @@ export default function JobDescription({ job, onClose, onApply, onSave, isSaved 
               About {job.company}
             </h3>
             <p className="text-slate-700 leading-relaxed">
-              {job.companyDescription || 
+              {job.companyDescription ||
                 `${job.company} is a leading technology company dedicated to innovation and excellence. 
                 We pride ourselves on creating a collaborative work environment where talented individuals 
                 can thrive and make a meaningful impact. Join our team and be part of something extraordinary.`}
@@ -222,7 +243,7 @@ export default function JobDescription({ job, onClose, onApply, onSave, isSaved 
       </div>
 
       {/* Sticky Footer */}
-      {/* <div className="sticky bottom-0 bg-white border-t border-slate-200 p-6">
+      <div className="sticky bottom-0 bg-white border-t border-slate-200 p-6">
         <div className="flex gap-3">
           <button
             onClick={() => onApply(job.id)}
@@ -235,16 +256,15 @@ export default function JobDescription({ job, onClose, onApply, onSave, isSaved 
               e.stopPropagation();
               onSave(job.id);
             }}
-            className={`px-6 py-3 rounded-lg font-medium text-sm transition-all duration-200 ${
-              isSaved
+            className={`px-6 py-3 rounded-lg font-medium text-sm transition-all duration-200 ${isSaved
                 ? 'bg-primary-100 text-primary-600 hover:bg-primary-200'
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-            }`}
+              }`}
           >
             {isSaved ? 'Saved' : 'Save Job'}
           </button>
         </div>
-      </div> */}
+      </div>
     </div>
   );
 }
