@@ -35,29 +35,8 @@ export const useProfileData = (user) => {
         });
     }, [user]);
 
-    // Fetch skills from API on mount
-    useEffect(() => {
-        const fetchSkills = async () => {
-            if (!user) return;
-
-            try {
-                setSkillsLoading(true);
-                const response = await candidateService.getAllActiveSkills();
-                const skills = response?.data?.skills || response?.skills || [];
-
-                setEditedData(prev => ({
-                    ...prev,
-                    skills: skills
-                }));
-            } catch (error) {
-                console.error('Error fetching skills:', error);
-            } finally {
-                setSkillsLoading(false);
-            }
-        };
-
-        fetchSkills();
-    }, [user]);
+    // Skills are now loaded on-demand via search in SkillsSection component
+    // No need to fetch all skills on mount
 
     const handleInputChange = (field, value) => {
         setEditedData(prev => ({

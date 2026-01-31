@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Plus, X, Loader, Search, Star, Trash2, Award } from 'lucide-react';
 import { candidateService } from '../../../../services/candidateService';
 import { THEME_CLASSES } from '../../../../theme';
@@ -18,15 +18,24 @@ export const SkillsSection = ({
     const [isSaving, setIsSaving] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
     const [successMsg, setSuccessMsg] = useState('');
+    const isInitialMount = useRef(true);
 
+    console.log('skills', skills);
     // Search skills API (debounced)
     useEffect(() => {
-        const searchSkills = async () => {
-            if (!searchTerm.trim() || searchTerm.length < 2) {
-                setSearchResults([]);
-                return;
-            }
+        // Skip on initial render
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            return;
+        }
 
+        // Skip if search term is invalid
+        if (!searchTerm.trim() || searchTerm.length < 2) {
+            setSearchResults([]);
+            return;
+        }
+
+        const searchSkills = async () => {
             setIsSearching(true);
             try {
                 // Use server-side search
@@ -180,15 +189,48 @@ export const SkillsSection = ({
                     </h3>
                 </div>
 
-                {/* Only show when NOT editing - just display count */}
-                {!isEditing && (
+                {/* Show skills when NOT editing */}
+                {/* {!isEditing || ( */}
                     <div className="mb-6">
-                        <p className="text-slate-600">
-                            You have <span className="font-bold text-primary-600">{skills?.length || 0}</span> skills added.
-                            {skills?.length === 0 && " Click 'Edit Profile' to add your first skill!"}
-                        </p>
+                        {skills && skills.length > 0 ? (
+                            <div className="space-y-4">
+                                <h4 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
+                                    Your Skills ({skills.length})
+                                </h4>
+                                <div className="flex flex-wrap gap-3">
+                                    {skills.map((skill, index) => {
+                                        const skillName = skill.skillName || skill.skill || skill.skillId?.name || skill.name || 'Unknown Skill';
+                                       
+                                        return (
+                                            <div
+                                                key={index}
+                                                className="px-4 py-2 bg-gradient-to-r from-primary-50 to-primary-100 border border-primary-200 text-primary-700 rounded-full font-medium flex items-center gap-2"
+                                            >
+                                                <span className="font-semibold">{skillName}</span>
+                                                {skill.experience > 0 && (
+                                                    <span className="text-xs bg-primary-200 px-2 py-0.5 rounded-full">
+                                                        {skill.experience}y
+                                                    </span>
+                                                )}
+                                                {skill.rating > 0 && (
+                                                    <span className="text-xs bg-primary-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+                                                        ⭐ {skill.rating}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="text-center py-8 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
+                                <p className="text-slate-500">
+                                    No skills added yet. Click 'Edit Profile' to add your first skill!
+                                </p>
+                            </div>
+                        )}
                     </div>
-                )}
+                {/* )} */}
 
                 {/* Error from parent */}
                 {skillError && (
