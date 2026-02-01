@@ -97,6 +97,7 @@ export const candidateService = {
     if (options.page) params.append('page', options.page);
     if (options.limit) params.append('limit', options.limit);
     if (options.location) params.append('location', options.location);
+    if (options.jobTitle) params.append('jobTitle', options.jobTitle);
     if (options.jobType) params.append('jobType', options.jobType);
     if (options.experienceLevel) params.append('experienceLevel', options.experienceLevel);
     if (options.minSalary) params.append('minSalary', options.minSalary);

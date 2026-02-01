@@ -32,9 +32,7 @@ export default function JobSearchPage() {
     fetchActiveJobs();
   }, [currentPage, searchQuery, filters]);
 
-  /**
-   * Transform backend job data to frontend format
-   */
+ 
   /**
    * Transform backend job data to frontend format
    */
@@ -46,12 +44,12 @@ export default function JobSearchPage() {
       logo: '🏢',
       location: [job.city, job.state, job.country].filter(Boolean).join(', ') || 'Location not specified',
       salary: 'Competitive',
-      jobType: job.jobType || 'Full-time',
-      experience: job.workExperience ? `${job.workExperience} years` : 'Not specified',
+      jobType: job.jobType === 'Fulltime' ? 'Full-time' : job.jobType || 'Full-time',
+      experience: job.workExperience !== undefined ? `${job.workExperience} years` : 'Not specified',
       postedTime: job.postedOn ? new Date(job.postedOn).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently',
       description: job.jobDescription || '',
       skills: job.skillDetails?.map(s => ({
-        name: s.name || s.skill || 'Unknown Skill',
+        name: s.skill || s.name || 'Unknown Skill',
         rating: 0,
         experience: 0
       })) || [],
@@ -95,21 +93,49 @@ export default function JobSearchPage() {
 
       // Job type filter
       if (filters.jobTypes && filters.jobTypes.length > 0) {
-        params.jobType = filters.jobTypes[0];
+        params.jobType = filters.jobTypes.join(',');
       }
 
-      // Experience level filter
-      // Backend uses 'experienceLevel' in query, but filters by 'workExperience' in aggregation
-      // We'll send experienceLevel if mapped
+      // Experience level filter - handle both string arrays and single values
       if (filters.experience && filters.experience.length > 0) {
-        const expYears = parseInt(filters.experience[0]) || 0;
-        if (expYears === 0) params.experienceLevel = 'entry';
-        else if (expYears <= 3) params.experienceLevel = 'mid';
-        else if (expYears <= 7) params.experienceLevel = 'senior';
-        else params.experienceLevel = 'lead';
+        // Map experience levels to backend format
+        const experienceLevels = filters.experience.map(exp => {
+          if (typeof exp === 'string') {
+            if (exp.toLowerCase().includes('entry')) return 'entry';
+            if (exp.toLowerCase().includes('mid')) return 'mid';
+            if (exp.toLowerCase().includes('senior')) return 'senior';
+            if (exp.toLowerCase().includes('lead')) return 'lead';
+            if (exp.toLowerCase().includes('director') || exp.toLowerCase().includes('executive')) return 'executive';
+          }
+          // Handle numeric years
+          const expYears = parseInt(exp) || 0;
+          if (expYears === 0) return 'entry';
+          else if (expYears <= 3) return 'mid';
+          else if (expYears <= 7) return 'senior';
+          else return 'lead';
+        });
+        params.experienceLevel = experienceLevels.join(',');
       }
 
-      // Salary and Remote filters are currently disabled in backend
+      // Salary range filter
+      if (filters.salaryRange) {
+        // Parse salary range like "$75k-100k" to min/max
+        const salaryMatch = filters.salaryRange.match(/\$(\d+)k-(\d+)k/);
+        if (salaryMatch) {
+          params.minSalary = parseInt(salaryMatch[1]) * 1000;
+          params.maxSalary = parseInt(salaryMatch[2]) * 1000;
+        } else if (filters.salaryRange.includes('+')) {
+          const salaryMatch = filters.salaryRange.match(/\$(\d+)k\+/);
+          if (salaryMatch) {
+            params.minSalary = parseInt(salaryMatch[1]) * 1000;
+          }
+        }
+      }
+
+      // Remote filter
+      if (filters.remote) {
+        params.isRemote = true;
+      }
 
       // Call the service method
       const response = await candidateService.getRankingJobs(params);
