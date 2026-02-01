@@ -49,9 +49,9 @@ export default function JobSearchPage() {
       postedTime: job.postedOn ? new Date(job.postedOn).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently',
       description: job.jobDescription || '',
       skills: job.skillDetails?.map(s => ({
-        name: s.skill || s.name || 'Unknown Skill',
-        rating: 0,
-        experience: 0
+        name: s.skill || 'Unknown Skill',
+        rating: s.rating || 0,
+        experience: s.requiredExperience || 0
       })) || [],
       // Match score fields from ranking algorithm
       matchScore: job.matchScore,

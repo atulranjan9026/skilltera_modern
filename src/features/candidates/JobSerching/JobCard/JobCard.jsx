@@ -6,6 +6,8 @@ import { THEME_CLASSES } from '../../../../theme';
  * JobCard Component - Displays a single job listing
  */
 export default function JobCard({ job, onViewDetails, isSaved, onSave, isActive }) {
+ console.log("job :", job);
+
   return (
     <div
       className={`${THEME_CLASSES.cards} p-5 transition-all duration-200 cursor-pointer max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100 hover:scrollbar-thumb-slate-400 ${isActive ? 'ring-2 ring-primary-500 bg-primary-50/50' : 'hover:shadow-lg'
