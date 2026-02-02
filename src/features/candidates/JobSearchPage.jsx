@@ -65,8 +65,7 @@ export default function JobSearchPage() {
       applicationDeadline: job.lastDate,
       openings: job.openings,
       applicationsCount: job.applicationsCount,
-      isFeatured: false, // Not in projection
-      // Keep original data for reference
+      isFeatured: job.isFeatured,
       _original: job
     }));
   };
@@ -76,29 +75,18 @@ export default function JobSearchPage() {
       setLoading(true);
       setError(null);
 
-      // Construct params for backend API
       const params = {
         page: currentPage,
         limit: jobsPerPage,
+        jobTitle: searchQuery.jobTitle || '',
+        location: searchQuery.location || '',
       };
 
-      // Location filter (maps to city regex in backend)
-      if (searchQuery.jobTitle) {
-        params.jobTitle = searchQuery.jobTitle;
-      }
-
-      if (searchQuery.location) {
-        params.location = searchQuery.location;
-      }
-
-      // Job type filter
       if (filters.jobTypes && filters.jobTypes.length > 0) {
-        params.jobType = filters.jobTypes.join(',');
+        params.jobTypes = filters.jobTypes;
       }
 
-      // Experience level filter - handle both string arrays and single values
       if (filters.experience && filters.experience.length > 0) {
-        // Map experience levels to backend format
         const experienceLevels = filters.experience.map(exp => {
           if (typeof exp === 'string') {
             if (exp.toLowerCase().includes('entry')) return 'entry';
@@ -107,19 +95,16 @@ export default function JobSearchPage() {
             if (exp.toLowerCase().includes('lead')) return 'lead';
             if (exp.toLowerCase().includes('director') || exp.toLowerCase().includes('executive')) return 'executive';
           }
-          // Handle numeric years
           const expYears = parseInt(exp) || 0;
           if (expYears === 0) return 'entry';
-          else if (expYears <= 3) return 'mid';
-          else if (expYears <= 7) return 'senior';
-          else return 'lead';
+          if (expYears <= 3) return 'mid';
+          if (expYears <= 7) return 'senior';
+          return 'lead';
         });
-        params.experienceLevel = experienceLevels.join(',');
+        params.experienceLevels = experienceLevels;
       }
 
-      // Salary range filter
       if (filters.salaryRange) {
-        // Parse salary range like "$75k-100k" to min/max
         const salaryMatch = filters.salaryRange.match(/\$(\d+)k-(\d+)k/);
         if (salaryMatch) {
           params.minSalary = parseInt(salaryMatch[1]) * 1000;
@@ -132,17 +117,18 @@ export default function JobSearchPage() {
         }
       }
 
-      // Remote filter
+      if (filters.datePosted) {
+        const dateMap = { '24h': 1, '3d': 3, '7d': 7, '14d': 14, '30d': 30 };
+        params.postedWithin = dateMap[filters.datePosted] || undefined;
+      }
+
       if (filters.remote) {
         params.isRemote = true;
       }
 
-      // Call the service method
       const response = await candidateService.getRankingJobs(params);
-      console.log('Backend response:', response);
 
-      // Handle standardized API response structure
-      if (response && response.success && response.data) {
+      if (response?.success && response.data) {
         const transformedJobs = transformJobData(response.data.jobs || []);
         setJobs(transformedJobs);
 
@@ -180,21 +166,23 @@ export default function JobSearchPage() {
   const currentJobs = jobs;
 
   const handleSearch = (query) => {
-    // Separate search query and filters
-    setSearchQuery({
+    // Update search query state immediately
+    const newSearchQuery = {
       jobTitle: query.jobTitle || '',
       location: query.location || ''
-    });
+    };
 
-    setFilters({
+    const newFilters = {
       jobTypes: query.jobType || [], // Map jobType (singular from SearchBar) to jobTypes (plural in state)
       experience: query.experience || [],
       salaryRange: query.salaryRange || '',
       datePosted: query.datePosted || '',
       remote: query.remote || false,
       companyType: query.companyType || []
-    });
+    };
 
+    setSearchQuery(newSearchQuery);
+    setFilters(newFilters);
     setCurrentPage(1); // Reset to first page on new search
   };
 

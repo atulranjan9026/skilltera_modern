@@ -5,6 +5,7 @@ import AdvancedFilterModal from './AdvancedFilterModal';
 import FilterChips from './FilterChips';
 import SearchInput from './SearchInput';
 import FilterButton from './FilterButton';
+import { candidateService } from '../../../../services/candidateService';
 
 /**
  * SearchBar Component - Unified Search with Advanced Filters
@@ -13,7 +14,11 @@ export default function SearchBar({ onSearch }) {
   const [jobTitle, setJobTitle] = React.useState('');
   const [location, setLocation] = React.useState('');
   const [showFilterModal, setShowFilterModal] = React.useState(false);
-  
+  const [jobSuggestions, setJobSuggestions] = React.useState({ titles: [], companies: [] });
+  const [locationSuggestions, setLocationSuggestions] = React.useState({ cities: [], states: [], countries: [] });
+  const [showJobSuggestions, setShowJobSuggestions] = React.useState(false);
+  const [showLocationSuggestions, setShowLocationSuggestions] = React.useState(false);
+
   // Advanced filter states
   const [filters, setFilters] = React.useState({
     jobType: [],
@@ -25,8 +30,62 @@ export default function SearchBar({ onSearch }) {
   });
 
   const handleSearch = () => {
-    onSearch({ jobTitle, location, ...filters });
+    // Split jobTitle input to extract company name if present
+    const searchTerms = jobTitle.trim();
+    let searchParams = { location, ...filters };
+    
+    if (searchTerms) {
+      // Check if the input contains company indicators or treat as job title
+      // For now, we'll send it as jobTitle and let the backend handle both
+      searchParams.jobTitle = searchTerms;
+    }
+    
+    onSearch(searchParams);
   };
+
+  React.useEffect(() => {
+    const trimmed = jobTitle.trim();
+    if (!trimmed) {
+      setJobSuggestions({ titles: [], companies: [] });
+      setShowJobSuggestions(false);
+      return;
+    }
+
+    const timeout = setTimeout(async () => {
+      try {
+        const response = await candidateService.getJobSuggestions(trimmed, 8);
+        console.log(response.data);
+        if (response?.success) {
+          setJobSuggestions(response.data || { titles: [], companies: [] });
+        }
+      } catch (err) {
+        setJobSuggestions({ titles: [], companies: [] });
+      }
+    }, 350);
+
+    return () => clearTimeout(timeout);
+  }, [jobTitle]);
+
+  React.useEffect(() => {
+    const trimmed = location.trim();
+    if (!trimmed) {
+      setLocationSuggestions({cities:[], states: [], countries: [] });
+      return;
+    }
+
+    const timeout = setTimeout(async () => {
+      try {
+        const response = await candidateService.getLocationSuggestions(trimmed, 8);
+        if (response?.success) {
+          setLocationSuggestions(response.data || { cities: [], states: [], countries: [] });
+        }
+      } catch (err) {
+        setLocationSuggestions({ cities: [], states: [], countries: [] });
+      }
+    }, 350);
+
+    return () => clearTimeout(timeout);
+  }, [location]);
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
@@ -36,7 +95,16 @@ export default function SearchBar({ onSearch }) {
 
   const handleApplyFilters = (newFilters) => {
     setFilters(newFilters);
-    onSearch({ jobTitle, location, ...newFilters });
+    
+    // Use the same search logic as handleSearch
+    const searchTerms = jobTitle.trim();
+    let searchParams = { location, ...newFilters };
+    
+    if (searchTerms) {
+      searchParams.jobTitle = searchTerms;
+    }
+    
+    onSearch(searchParams);
   };
 
   const removeFilter = (filterType, value = null) => {
@@ -51,7 +119,8 @@ export default function SearchBar({ onSearch }) {
       }
       return updated;
     });
-    // Trigger search with updated filters
+    
+    // Trigger search with updated filters using consistent logic
     setTimeout(() => {
       const updated = { ...filters };
       if (value) {
@@ -59,7 +128,15 @@ export default function SearchBar({ onSearch }) {
       } else {
         updated[filterType] = Array.isArray(filters[filterType]) ? [] : '';
       }
-      onSearch({ jobTitle, location, ...updated });
+      
+      const searchTerms = jobTitle.trim();
+      let searchParams = { location, ...updated };
+      
+      if (searchTerms) {
+        searchParams.jobTitle = searchTerms;
+      }
+      
+      onSearch(searchParams);
     }, 0);
   };
 
@@ -73,7 +150,16 @@ export default function SearchBar({ onSearch }) {
       remote: false,
     };
     setFilters(resetFilters);
-    onSearch({ jobTitle, location, ...resetFilters });
+    
+    // Use consistent search logic
+    const searchTerms = jobTitle.trim();
+    let searchParams = { location, ...resetFilters };
+    
+    if (searchTerms) {
+      searchParams.jobTitle = searchTerms;
+    }
+    
+    onSearch(searchParams);
   };
 
   const getActiveFilterCount = () => {
@@ -92,27 +178,159 @@ export default function SearchBar({ onSearch }) {
   return (
     <div className="space-y-3">
       {/* Main Search Bar */}
-      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
+      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-md border border-slate-200">
         <div className="flex flex-col md:flex-row items-center divide-y md:divide-y-0 md:divide-x divide-slate-100">
           {/* Job Title Input */}
-          <SearchInput
-            value={jobTitle}
-            onChange={(e) => setJobTitle(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Job title, keywords, or company"
-          />
+          <div className="relative flex-1 w-full">
+            <SearchInput
+              value={jobTitle}
+              onChange={(e) => {
+                setJobTitle(e.target.value);
+                setShowJobSuggestions(true);
+              }}
+              onKeyPress={handleKeyPress}
+              onFocus={() => setShowJobSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowJobSuggestions(false), 150)}
+              placeholder="Job title, keywords, or company"
+            />
+            {showJobSuggestions && (jobSuggestions.titles.length > 0 || jobSuggestions.companies.length > 0) && (
+              <div className="absolute z-20 mt-1 w-full rounded-lg border border-slate-200 bg-white shadow-lg">
+                {jobSuggestions.titles.length > 0 && (
+                  <div className="p-2">
+                    <p className="px-2 text-xs font-semibold text-slate-500">Job Titles</p>
+                    {jobSuggestions.titles.map((title) => (
+                      <button
+                        key={`title-${title}`}
+                        type="button"
+                        onMouseDown={() => {
+                          setJobTitle(title);
+                          setShowJobSuggestions(false);
+                          onSearch({
+                            location,
+                            ...filters,
+                            jobTitle: title
+                          });
+                        }}
+                        className="w-full text-left px-2 py-1.5 text-sm text-slate-700 hover:bg-slate-100 rounded"
+                      >
+                        {title}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {jobSuggestions.companies.length > 0 && (
+                  <div className="p-2 border-t border-slate-100">
+                    <p className="px-2 text-xs font-semibold text-slate-500">Companies</p>
+                    {jobSuggestions.companies.map((company) => (
+                      <button
+                        key={`company-${company}`}
+                        type="button"
+                        onMouseDown={() => {
+                          setJobTitle(company);
+                          setShowJobSuggestions(false);
+                          onSearch({
+                            location,
+                            ...filters,
+                            jobTitle: company
+                          });
+                        }}
+                        className="w-full text-left px-2 py-1.5 text-sm text-slate-700 hover:bg-slate-100 rounded"
+                      >
+                        {company}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* Location Input */}
-          <div className="flex-1 w-full flex items-center px-4 py-3">
+          <div className="relative flex-1 w-full flex items-center px-4 py-3">
             <MapPin size={20} className="text-slate-400 mr-3 flex-shrink-0" />
             <input
               type="text"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="City, state, or zip"
+              onFocus={() => setShowLocationSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowLocationSuggestions(false), 150)}
+              placeholder="State or country"
               className="w-full bg-transparent border-none focus:outline-none focus:ring-0 text-sm placeholder:text-slate-400"
             />
+            {showLocationSuggestions && ((locationSuggestions.cities?.length || 0) > 0 || (locationSuggestions.states?.length || 0) > 0 || (locationSuggestions.countries?.length || 0) > 0) && (
+              <div className="absolute left-0 right-0 top-full z-20 mt-1 rounded-lg border border-slate-200 bg-white shadow-lg">
+                {(locationSuggestions.cities?.length || 0) > 0 && (
+                  <div className="p-2">
+                    <p className="px-2 text-xs font-semibold text-slate-500">Cities</p>
+                    {(locationSuggestions.cities || []).map((city) => (
+                      <button
+                        key={`city-${city}`}
+                        type="button"
+                        onMouseDown={() => {
+                          setLocation(city);
+                          setShowLocationSuggestions(false);
+                          onSearch({
+                            jobTitle: jobTitle.trim() || undefined,
+                            ...filters,
+                            location: city
+                          });
+                        }}
+                        className="w-full text-left px-2 py-1.5 text-sm text-slate-700 hover:bg-slate-100 rounded"
+                      >
+                        {city}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {(locationSuggestions.states?.length || 0) > 0 && (
+                  <div className="p-2">
+                    <p className="px-2 text-xs font-semibold text-slate-500">States</p>
+                    {(locationSuggestions.states || []).map((state) => (
+                      <button
+                        key={`state-${state}`}
+                        type="button"
+                        onMouseDown={() => {
+                          setLocation(state);
+                          setShowLocationSuggestions(false);
+                          onSearch({
+                            jobTitle: jobTitle.trim() || undefined,
+                            ...filters,
+                            location: state
+                          });
+                        }}
+                        className="w-full text-left px-2 py-1.5 text-sm text-slate-700 hover:bg-slate-100 rounded"
+                      >
+                        {state}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {(locationSuggestions.countries?.length || 0) > 0 && (
+                  <div className="p-2 border-t border-slate-100">
+                    <p className="px-2 text-xs font-semibold text-slate-500">Countries</p>
+                    {(locationSuggestions.countries || []).map((country) => (
+                      <button
+                        key={`country-${country}`}
+                        type="button"
+                        onMouseDown={() => {
+                          setLocation(country);
+                          setShowLocationSuggestions(false);
+                          onSearch({
+                            jobTitle: jobTitle.trim() || undefined,
+                            ...filters,
+                            location: country
+                          });
+                        }}
+                        className="w-full text-left px-2 py-1.5 text-sm text-slate-700 hover:bg-slate-100 rounded"
+                      >
+                        {country}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Advanced Filter Button */}

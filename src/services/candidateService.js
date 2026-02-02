@@ -112,32 +112,23 @@ export const candidateService = {
   },
 
   /**
-   * Get job details by ID
-   * @param {string} jobId - Job ID
-   * @returns {Promise} Job details
+   * Get autocomplete suggestions for job title/company
    */
-  getJobById: async (jobId) => {
-    return get(`/candidate/job/${jobId}`, true, 600000); // Cache for 10 minutes
+  getJobSuggestions: async (query, limit = 8) => {
+    const params = new URLSearchParams({ q: query, limit });
+    const endpoint = `/candidate/job/suggestions?${params.toString()}`;
+
+    return get(endpoint, false, 0);
   },
 
   /**
-   * Search jobs by text query
-   * @param {string} query - Search query
-   * @param {Object} options - Pagination options
-   * @param {number} options.page - Page number
-   * @param {number} options.limit - Items per page
-   * @returns {Promise} Search results with pagination
+   * Get autocomplete suggestions for location
    */
-  searchJobs: async (query, options = {}) => {
-    const params = new URLSearchParams({ q: query });
+  getLocationSuggestions: async (query, limit = 8) => {
+    const params = new URLSearchParams({ q: query, limit });
+    const endpoint = `/candidate/job/location-suggestions?${params.toString()}`;
 
-    if (options.page) params.append('page', options.page);
-    if (options.limit) params.append('limit', options.limit);
-
-    const endpoint = `/candidate/job/search?${params.toString()}`;
-
-    // Cache for 2 minutes (120000ms)
-    return get(endpoint, true, 120000);
+    return get(endpoint, false, 0);
   },
 
   /**

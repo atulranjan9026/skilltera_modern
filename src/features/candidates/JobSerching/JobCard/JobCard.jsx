@@ -6,7 +6,6 @@ import { THEME_CLASSES } from '../../../../theme';
  * JobCard Component - Displays a single job listing
  */
 export default function JobCard({ job, onViewDetails, isSaved, onSave, isActive }) {
- console.log("job :", job);
 
   return (
     <div
