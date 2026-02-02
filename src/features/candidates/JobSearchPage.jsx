@@ -15,8 +15,8 @@ export default function JobSearchPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalJobs, setTotalJobs] = useState(0);
   const [filters, setFilters] = useState({
-    jobTypes: [],
-    experience: [],
+    jobType: [],
+    experienceLevel: [],
     salaryRange: '',
     datePosted: '',
     remote: false,
@@ -28,8 +28,7 @@ export default function JobSearchPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [jobsPerPage] = useState(9);
 
-  useEffect(() => {
-    fetchActiveJobs();
+  useEffect(() => {fetchActiveJobs();
   }, [currentPage, searchQuery, filters]);
 
  
@@ -82,12 +81,12 @@ export default function JobSearchPage() {
         location: searchQuery.location || '',
       };
 
-      if (filters.jobTypes && filters.jobTypes.length > 0) {
-        params.jobTypes = filters.jobTypes;
+      if (filters.jobType && filters.jobType.length > 0) {
+        params.jobType = Array.isArray(filters.jobType) ? filters.jobType[0] : filters.jobType;
       }
 
-      if (filters.experience && filters.experience.length > 0) {
-        const experienceLevels = filters.experience.map(exp => {
+      if (filters.experienceLevel && filters.experienceLevel.length > 0) {
+        const experienceLevels = filters.experienceLevel.map(exp => {
           if (typeof exp === 'string') {
             if (exp.toLowerCase().includes('entry')) return 'entry';
             if (exp.toLowerCase().includes('mid')) return 'mid';
@@ -101,7 +100,7 @@ export default function JobSearchPage() {
           if (expYears <= 7) return 'senior';
           return 'lead';
         });
-        params.experienceLevels = experienceLevels;
+        params.experienceLevel = experienceLevels;
       }
 
       if (filters.salaryRange) {
@@ -117,7 +116,7 @@ export default function JobSearchPage() {
         }
       }
 
-      if (filters.datePosted) {
+      if (filters.datePosted && filters.datePosted !== 'any') {
         const dateMap = { '24h': 1, '3d': 3, '7d': 7, '14d': 14, '30d': 30 };
         params.postedWithin = dateMap[filters.datePosted] || undefined;
       }
@@ -125,7 +124,6 @@ export default function JobSearchPage() {
       if (filters.remote) {
         params.isRemote = true;
       }
-
       const response = await candidateService.getRankingJobs(params);
 
       if (response?.success && response.data) {
@@ -173,8 +171,8 @@ export default function JobSearchPage() {
     };
 
     const newFilters = {
-      jobTypes: query.jobType || [], // Map jobType (singular from SearchBar) to jobTypes (plural in state)
-      experience: query.experience || [],
+      jobType: query.jobType || [],
+      experienceLevel: query.experience || [],
       salaryRange: query.salaryRange || '',
       datePosted: query.datePosted || '',
       remote: query.remote || false,
@@ -182,7 +180,7 @@ export default function JobSearchPage() {
     };
 
     setSearchQuery(newSearchQuery);
-    setFilters(newFilters);
+    setFilters({ ...newFilters });
     setCurrentPage(1); // Reset to first page on new search
   };
 
@@ -230,7 +228,7 @@ export default function JobSearchPage() {
       )}
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 min-h-screen">
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
@@ -250,75 +248,78 @@ export default function JobSearchPage() {
             </button>
           </div>
         ) : jobs.length > 0 ? (
-          <>
-            <JobListings
-              jobs={jobs}
-              savedJobs={savedJobs}
-              onSave={handleSaveJob}
-              onApply={handleApplyJob}
-            />
+          <div className="flex gap-8">
+            {/* Job Listings - Left Side */}
+            <div className="flex-1">
+              <JobListings
+                jobs={jobs}
+                savedJobs={savedJobs}
+                onSave={handleSaveJob}
+                onApply={handleApplyJob}
+              />
 
-            {/* Pagination Controls */}
-            {totalPages > 1 && (
-              <div className="mt-8 flex items-center justify-center gap-2">
-                {/* Previous Button */}
-                <button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${currentPage === 1
-                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                    : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-300'
-                    }`}
-                >
-                  Previous
-                </button>
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="mt-8 flex items-center justify-center gap-2">
+                  {/* Previous Button */}
+                  <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${currentPage === 1
+                      ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                      : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-300'
+                      }`}
+                  >
+                    Previous
+                  </button>
 
-                {/* Page Numbers */}
-                <div className="flex gap-1">
-                  {[...Array(totalPages)].map((_, index) => {
-                    const pageNumber = index + 1;
-                    // Show first page, last page, current page, and pages around current
-                    if (
-                      pageNumber === 1 ||
-                      pageNumber === totalPages ||
-                      (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
-                    ) {
-                      return (
-                        <button
-                          key={pageNumber}
-                          onClick={() => handlePageChange(pageNumber)}
-                          className={`w-10 h-10 rounded-lg font-medium text-sm transition-colors ${currentPage === pageNumber
-                            ? 'bg-primary-600 text-white'
-                            : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-300'
-                            }`}
-                        >
-                          {pageNumber}
-                        </button>
-                      );
-                    } else if (
-                      pageNumber === currentPage - 2 ||
-                      pageNumber === currentPage + 2
-                    ) {
-                      return <span key={pageNumber} className="px-2 text-slate-400">...</span>;
-                    }
-                    return null;
-                  })}
+                  {/* Page Numbers */}
+                  <div className="flex gap-1">
+                    {[...Array(totalPages)].map((_, index) => {
+                      const pageNumber = index + 1;
+                      // Show first page, last page, current page, and pages around current
+                      if (
+                        pageNumber === 1 ||
+                        pageNumber === totalPages ||
+                        (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
+                      ) {
+                        return (
+                          <button
+                            key={pageNumber}
+                            onClick={() => handlePageChange(pageNumber)}
+                            className={`w-10 h-10 rounded-lg font-medium text-sm transition-colors ${currentPage === pageNumber
+                              ? 'bg-primary-600 text-white'
+                              : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-300'
+                              }`}
+                          >
+                            {pageNumber}
+                          </button>
+                        );
+                      } else if (
+                        pageNumber === currentPage - 2 ||
+                        pageNumber === currentPage + 2
+                      ) {
+                        return <span key={pageNumber} className="px-2 text-slate-400">...</span>;
+                      }
+                      return null;
+                    })}
+                  </div>
+
+                  {/* Next Button */}
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${currentPage === totalPages
+                      ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                      : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-300'
+                      }`}
+                  >
+                    Next
+                  </button>
                 </div>
-
-                {/* Next Button */}
-                <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${currentPage === totalPages
-                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                    : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-300'
-                    }`}
-                >
-                  Next
-                </button>
-              </div>
-            )}
-          </>
+              )}
+            </div>
+          </div>
         ) : (
           <EmptyState
             title="No jobs found"

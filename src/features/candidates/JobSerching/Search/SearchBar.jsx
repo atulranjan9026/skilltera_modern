@@ -94,6 +94,7 @@ export default function SearchBar({ onSearch }) {
   };
 
   const handleApplyFilters = (newFilters) => {
+    console.log('SearchBar handleApplyFilters called with:', newFilters);
     setFilters(newFilters);
     
     // Use the same search logic as handleSearch

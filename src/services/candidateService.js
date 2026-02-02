@@ -103,6 +103,7 @@ export const candidateService = {
     if (options.minSalary) params.append('minSalary', options.minSalary);
     if (options.maxSalary) params.append('maxSalary', options.maxSalary);
     if (options.isRemote !== undefined) params.append('isRemote', options.isRemote);
+    if (options.postedWithin) params.append('postedWithin', options.postedWithin);
 
     const queryString = params.toString();
     const endpoint = `/candidate/job/ranking${queryString ? `?${queryString}` : ''}`;

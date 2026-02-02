@@ -59,14 +59,13 @@ const AdvancedFilterModal = ({ isOpen, onClose, filters, onApplyFilters }) => {
   const handleReset = () => setLocalFilters({
     jobType: [], salaryRange: '', experience: [], companyType: [], datePosted: '', remote: false
   });
-
   const handleApply = () => {
     onApplyFilters(localFilters);
     onClose();
   };
 
   const filterConfig = {
-    jobType: ['Full-time', 'Part-time', 'Contract', 'Internship', 'Freelance'],
+    jobType: ['Full Time','Part Time','Contract', 'Internship', 'Freelance'],
     experience: ['Entry Level', 'Mid Level', 'Senior Level', 'Lead', 'Director', 'Executive'],
     companyType: ['Startup', 'Small Business', 'Mid Market', 'Enterprise', 'Non-profit', 'Government']
   };
@@ -80,12 +79,13 @@ const AdvancedFilterModal = ({ isOpen, onClose, filters, onApplyFilters }) => {
     { value: '$200k+', label: '$200,000+' }
   ];
 
-  const dateOptions = [
+  const postedOn = [
     { value: '24h', label: 'Last 24 hours' },
     { value: '3d', label: 'Last 3 days' },
     { value: '7d', label: 'Last week' },
     { value: '14d', label: 'Last 2 weeks' },
-    { value: '30d', label: 'Last month' }
+    { value: '30d', label: 'Last month' },
+    // { value: 'any', label: 'Any time' }
   ];
 
   return (
@@ -165,7 +165,7 @@ const AdvancedFilterModal = ({ isOpen, onClose, filters, onApplyFilters }) => {
 
             {/* Date Posted */}
             <FilterSection icon={Clock} title="Date Posted">
-              {dateOptions.map(date => (
+              {postedOn.map(date => (
                 <RadioItem
                   key={date.value}
                   name="datePosted"
