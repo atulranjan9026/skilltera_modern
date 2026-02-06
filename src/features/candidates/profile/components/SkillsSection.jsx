@@ -57,8 +57,9 @@ export const SkillsSection = ({
                 // We still safeguard against duplicates or malformed data
                 const processedSkills = allSkills.map(s => ({
                     ...s,
-                    skill: s.name || s.skill || '', // Ensure skill exists (use name as primary)
-                    name: s.name || s.skill || '' // Ensure name exists
+                    _id: s._id,
+                    skill: s.skill || s.name || '', // MongoDB uses 'skill' field
+                    name: s.skill || s.name || '' // Ensure name exists for compatibility
                 })).filter(s => s.skill); // Filter out empty names
 
                 setSearchResults(processedSkills.slice(0, 5));
@@ -191,45 +192,54 @@ export const SkillsSection = ({
 
                 {/* Show skills when NOT editing */}
                 {/* {!isEditing || ( */}
-                    <div className="mb-6">
-                        {skills && skills.length > 0 ? (
-                            <div className="space-y-4">
-                                <h4 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
-                                    Your Skills ({skills.length})
-                                </h4>
-                                <div className="flex flex-wrap gap-3">
-                                    {skills.map((skill, index) => {
-                                        const skillName = skill.skillName || skill.skill || skill.skillId?.name || skill.name || 'Unknown Skill';
-                                       
-                                        return (
-                                            <div
-                                                key={index}
-                                                className="px-4 py-2 bg-gradient-to-r from-primary-50 to-primary-100 border border-primary-200 text-primary-700 rounded-full font-medium flex items-center gap-2"
-                                            >
-                                                <span className="font-semibold">{skillName}</span>
-                                                {skill.experience > 0 && (
-                                                    <span className="text-xs bg-primary-200 px-2 py-0.5 rounded-full">
-                                                        {skill.experience}y
-                                                    </span>
-                                                )}
-                                                {skill.rating > 0 && (
-                                                    <span className="text-xs bg-primary-200 px-2 py-0.5 rounded-full flex items-center gap-1">
-                                                        ⭐ {skill.rating}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
+                <div className="mb-6">
+                    {skills && skills.length > 0 ? (
+                        <div className="space-y-4">
+                            <h4 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
+                                Your Skills ({skills.length})
+                            </h4>
+                            <div className="flex flex-wrap gap-3">
+                                {skills.map((skill, index) => {
+                                    // Handle different skill name formats:
+                                    // 1. skillName (from transformed backend response)
+                                    // 2. skillId.name or skillId.skillName (from populated reference)
+                                    // 3. skill (direct field)
+                                    const skillName = skill.skillName ||
+                                        skill.skillId?.name ||
+                                        skill.skillId?.skillName ||
+                                        skill.skill ||
+                                        skill.name ||
+                                        'Unknown Skill';
+
+                                    return (
+                                        <div
+                                            key={index}
+                                            className="px-4 py-2 bg-gradient-to-r from-primary-50 to-primary-100 border border-primary-200 text-primary-700 rounded-full font-medium flex items-center gap-2"
+                                        >
+                                            <span className="font-semibold">{skillName}</span>
+                                            {skill.experience > 0 && (
+                                                <span className="text-xs bg-primary-200 px-2 py-0.5 rounded-full">
+                                                    {skill.experience}y
+                                                </span>
+                                            )}
+                                            {skill.rating > 0 && (
+                                                <span className="text-xs bg-primary-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+                                                    ⭐ {skill.rating}
+                                                </span>
+                                            )}
+                                        </div>
+                                    );
+                                })}
                             </div>
-                        ) : (
-                            <div className="text-center py-8 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
-                                <p className="text-slate-500">
-                                    No skills added yet. Click 'Edit Profile' to add your first skill!
-                                </p>
-                            </div>
-                        )}
-                    </div>
+                        </div>
+                    ) : (
+                        <div className="text-center py-8 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
+                            <p className="text-slate-500">
+                                No skills added yet. Click 'Edit Profile' to add your first skill!
+                            </p>
+                        </div>
+                    )}
+                </div>
                 {/* )} */}
 
                 {/* Error from parent */}

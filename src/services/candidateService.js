@@ -137,7 +137,7 @@ export const candidateService = {
    * @returns {Promise} Candidate's skills
    */
   getAllActiveSkills: async (search) => {
-    let endpoint = '/allActiveSkills/skillList';
+    let endpoint = '/candidate/skillList/allActiveSkills';
     if (search) {
       endpoint += `?search=${encodeURIComponent(search)}`;
     }
