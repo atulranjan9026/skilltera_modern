@@ -133,11 +133,12 @@ export const candidateService = {
   },
 
   /**
-   * Get candidate's skills
-   * @returns {Promise} Candidate's skills
+   * Get all active skills for search/autocomplete
+   * @param {string} search - Optional search term
+   * @returns {Promise} Active skills
    */
   getAllActiveSkills: async (search) => {
-    let endpoint = '/candidate/skillList/allActiveSkills';
+    let endpoint = '/candidate/skills/allActiveSkills';
     if (search) {
       endpoint += `?search=${encodeURIComponent(search)}`;
     }
@@ -147,12 +148,25 @@ export const candidateService = {
 
   /**
    * Add a skill to candidate's profile
-   * @param {Object} skillData - Skill data {name, experienceYears, rating, category}
-   * @returns {Promise} Created skill
+   * @param {Object} skillData - Skill data {skillId, experience, rating}
+   * @returns {Promise} Updated candidate with skills
    */
   addSkill: async (skillData) => {
-    clearCache('GET:/candidates/profile/skills');
-    return post('/candidates/profile/skills', skillData);
+    // Clear profile cache after adding skill
+    clearCache('GET:/candidates/profile');
+    return post('/candidate/skills/add', skillData);
+  },
+
+  /**
+   * Delete a skill from candidate's profile
+   * @param {string} skillEntryId - The ID of the skill entry in the skills array
+   * @returns {Promise} Updated candidate with skills
+   */
+  deleteSkill: async (skillEntryId) => {
+    // Clear profile cache after deleting skill
+    clearCache('GET:/candidates/profile');
+    return del(`/candidate/skills/${skillEntryId}`);
   },
 
 };
+

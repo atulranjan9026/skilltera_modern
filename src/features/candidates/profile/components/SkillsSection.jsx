@@ -144,13 +144,12 @@ export const SkillsSection = ({
                 return;
             }
 
-            // Add each skill through parent callback
+            // Add each skill using the new API format
             for (const skill of skillsToAdd) {
                 await onAddSkill({
-                    name: skill.skillName,
-                    experienceYears: skill.experience,
-                    rating: skill.rating,
-                    category: skill.category
+                    skillId: skill.skillId,
+                    experience: skill.experience,
+                    rating: skill.rating
                 });
             }
 
@@ -213,7 +212,7 @@ export const SkillsSection = ({
 
                                     return (
                                         <div
-                                            key={index}
+                                            key={skill.id || skill._id || index}
                                             className="px-4 py-2 bg-gradient-to-r from-primary-50 to-primary-100 border border-primary-200 text-primary-700 rounded-full font-medium flex items-center gap-2"
                                         >
                                             <span className="font-semibold">{skillName}</span>
@@ -226,6 +225,15 @@ export const SkillsSection = ({
                                                 <span className="text-xs bg-primary-200 px-2 py-0.5 rounded-full flex items-center gap-1">
                                                     ⭐ {skill.rating}
                                                 </span>
+                                            )}
+                                            {isEditing && (
+                                                <button
+                                                    onClick={() => handleRemoveExistingSkill(skill.id || skill._id)}
+                                                    className="ml-1 p-1 hover:bg-red-100 text-red-600 rounded-full transition-all"
+                                                    title="Remove skill"
+                                                >
+                                                    <X size={14} />
+                                                </button>
                                             )}
                                         </div>
                                     );

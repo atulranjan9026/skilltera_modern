@@ -143,25 +143,45 @@ export default function ProfileEditor() {
 
         {activeTab === 'skills' && (
           <SkillsSection
-  skills={editedData.skills}
-  isEditing={isEditing}
-  skillsLoading={skillsLoading}
-  skillError={skillError}
-  onAddSkill={(skill) => {
-    const updatedSkills = [...(editedData.skills || []), {
-      skillName: skill.name,
-      experience: skill.experienceYears,
-      rating: skill.rating,
-      category: skill.category || 'technical'
-    }];
-    handleInputChange('skills', updatedSkills);
-  }}
-  onRemoveSkill={(index) => {
-    const updatedSkills = editedData.skills.filter((_, i) => i !== index);
-    handleInputChange('skills', updatedSkills);
-  }}
-/>
-          
+            skills={editedData.skills}
+            isEditing={isEditing}
+            skillsLoading={skillsLoading}
+            skillError={skillError}
+            onAddSkill={async (skillData) => {
+              try {
+                // Call backend API to add skill
+                const { candidateService } = await import('../../services/candidateService');
+                const response = await candidateService.addSkill(skillData);
+
+                // Update local state with the response
+                if (response?.data?.skills) {
+                  handleInputChange('skills', response.data.skills);
+                }
+
+                return response;
+              } catch (error) {
+                console.error('Error adding skill:', error);
+                throw error;
+              }
+            }}
+            onRemoveSkill={async (skillEntryId) => {
+              try {
+                // Call backend API to delete skill
+                const { candidateService } = await import('../../services/candidateService');
+                const response = await candidateService.deleteSkill(skillEntryId);
+
+                // Update local state with the response
+                if (response?.data?.skills) {
+                  handleInputChange('skills', response.data.skills);
+                }
+
+                return response;
+              } catch (error) {
+                console.error('Error removing skill:', error);
+                throw error;
+              }
+            }}
+          />
         )}
 
         {activeTab === 'experience' && (
