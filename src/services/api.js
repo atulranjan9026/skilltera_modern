@@ -14,6 +14,7 @@ const pendingRequests = new Map();
 export const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 30000, // Increased timeout to 30 seconds
+  withCredentials: true, // Send cookies for cross-origin (refresh token)
   headers: {
     'Content-Type': 'application/json',
   }
@@ -49,11 +50,15 @@ const initializeAuth = () => {
 // Initialize auth on module load
 initializeAuth();
 
-// Request interceptor for authentication
+// Request interceptor for authentication and FormData
 api.interceptors.request.use(config => {
   const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+  }
+  // For FormData, remove Content-Type so browser sets multipart/form-data with boundary
+  if (config.data instanceof FormData) {
+    delete config.headers['Content-Type'];
   }
   return config;
 });

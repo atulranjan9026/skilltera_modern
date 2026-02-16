@@ -1,4 +1,4 @@
-import { get, post, put, del, clearCache } from './api';
+import { get, post, put, del, clearCache, api } from './api';
 
 /**
  * Candidate service - handles candidate-related API calls
@@ -61,22 +61,31 @@ export const candidateService = {
 
   /**
    * Get candidate's resume/CV (cached for 10 minutes)
+   * Uses profile route - user is identified by JWT
    */
-  getResume: async (candidateId) => {
-    return get(`/candidates/${candidateId}/resume`, true, 600000);
+  getResume: async () => {
+    return get('/candidates/profile/resume', true, 600000);
   },
 
   /**
    * Upload resume
+   * Uses profile route - user is identified by JWT
    */
-  uploadResume: async (candidateId, file) => {
+  uploadResume: async (file) => {
     const formData = new FormData();
     formData.append('resume', file);
-    // Clear resume cache after upload
-    clearCache(`GET:/candidates/${candidateId}/resume`);
-    // For file uploads, we need to use the raw axios instance
-    return post(`/candidates/${candidateId}/resume`, formData);
+    clearCache('GET:/candidates/profile/resume');
+    return api.post('/candidates/profile/resume', formData);
   },
+
+  /**
+   * Delete resume
+   */
+  deleteResume: async () => {
+    clearCache('GET:/candidates/profile/resume');
+    return del('/candidates/profile/resume');
+  },
+
   /**
    * Get ranked jobs for candidate with pagination and filters
    * @param {Object} options - Query options

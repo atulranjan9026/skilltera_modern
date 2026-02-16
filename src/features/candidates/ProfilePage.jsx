@@ -7,6 +7,7 @@ import { SkillsSection } from './profile/components/SkillsSection';
 import { ExperienceSection } from './profile/components/ExperienceSection';
 import { EducationSection } from './profile/components/EducationSection';
 import { PersonalInfoSection } from './profile/components/PersonalInfoSection';
+import { ResumeSection } from './profile/components/ResumeSection';
 
 export default function ProfileEditor() {
   const { user, isLoading } = useAuthContext();
@@ -58,14 +59,33 @@ export default function ProfileEditor() {
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: User },
+    { id: 'resume', label: 'Resume', icon: User },
     { id: 'skills', label: 'Skills', icon: User },
     { id: 'experience', label: 'Experience', icon: User },
     { id: 'education', label: 'Education', icon: User },
   ];
 
+  const needsResume = !user?.resume?.url;
+  const isGoogleUser = user?.authProvider === 'google';
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-12 px-4">
       <div className="max-w-6xl mx-auto">
+        {/* Complete profile banner for users without resume (especially Google sign-ups) */}
+        {needsResume && (
+          <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-center justify-between">
+            <p className="text-amber-800 text-sm font-medium">
+              {isGoogleUser ? 'Welcome! Add your resume to get better job matches.' : 'Complete your profile by adding your resume.'}
+            </p>
+            <button
+              onClick={() => setActiveTab('resume')}
+              className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 text-sm font-medium"
+            >
+              Add Resume
+            </button>
+          </div>
+        )}
+
         {/* Header */}
         <div className={`${THEME_CLASSES.cards} p-8 mb-8 shadow-xl`}>
           <div className="flex justify-between items-center">
@@ -133,6 +153,12 @@ export default function ProfileEditor() {
         </div>
 
         {/* Tab Content */}
+        {activeTab === 'resume' && (
+          <ResumeSection
+            resume={user?.resume}
+          />
+        )}
+
         {activeTab === 'overview' && (
           <PersonalInfoSection
             data={editedData}

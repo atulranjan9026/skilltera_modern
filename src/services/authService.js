@@ -23,6 +23,17 @@ export const authService = {
   },
 
   /**
+   * Login with Google credential
+   */
+  loginWithGoogle: async (credential) => {
+    const response = await post('/candidates/auth/google', { credential });
+    if (response.data?.accessToken) {
+      setAuthToken(response.data.accessToken);
+    }
+    return response;
+  },
+
+  /**
    * Register candidate
    */
   registerCandidate: async (candidateData) => {
