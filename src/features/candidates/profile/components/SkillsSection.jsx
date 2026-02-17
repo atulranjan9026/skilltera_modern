@@ -8,9 +8,7 @@ export const SkillsSection = ({
     skills = [],
     isEditing,
     onAddSkill,
-    onRemoveSkill,
-    skillsLoading,
-    skillError
+    onRemoveSkill
 }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
@@ -85,6 +83,7 @@ export const SkillsSection = ({
         // Add to temporary list
         setSkillsToAdd([...skillsToAdd, {
             skillId: skillId,
+            skillName: skillName,
             experience: 0,
             rating: 0
         }]);
@@ -227,13 +226,6 @@ export const SkillsSection = ({
                 </div>
                 {/* )} */}
 
-                {/* Error from parent */}
-                {skillError && (
-                    <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-                        {skillError}
-                    </div>
-                )}
-
                 {/* Add Skills Section - Only shown when editing */}
                 {isEditing && (
                     <div className="border-t border-slate-200 pt-8">
@@ -249,7 +241,7 @@ export const SkillsSection = ({
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     placeholder="Search a skill... (e.g., React, Python, AWS)"
                                     className={`${THEME_CLASSES.inputs} pl-11`}
-                                    disabled={skillsLoading}
+                                    disabled={isSaving}
                                 />
                                 {isSearching && (
                                     <Loader className="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary-500 animate-spin" size={20} />
@@ -308,7 +300,7 @@ export const SkillsSection = ({
                                     >
                                         <div className="flex justify-between items-start mb-4">
                                             <div>
-                                                <h6 className="font-bold text-lg text-primary-900">{skill.skill}</h6>
+                                                <h6 className="font-bold text-lg text-primary-900">{skill.skillName}</h6>
                                             </div>
                                             <button
                                                 onClick={() => handleRemoveItem(skill.skillId)}
@@ -373,10 +365,10 @@ export const SkillsSection = ({
                                 <div className="flex justify-center pt-4">
                                     <button
                                         onClick={saveSkills}
-                                        disabled={isSaving || skillsLoading}
+                                        disabled={isSaving}
                                         className={`${THEME_CLASSES.buttons.primary} px-8 py-3 font-bold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2`}
                                     >
-                                        {isSaving || skillsLoading ? (
+                                        {isSaving ? (
                                             <>
                                                 <Loader size={20} className="animate-spin" />
                                                 Saving Skills...

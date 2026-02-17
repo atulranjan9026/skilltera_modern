@@ -100,7 +100,10 @@ export const PersonalInfoSection = ({ data, isEditing, onChange }) => {
                             type="number"
                             step="0.1"
                             value={data.overallExperience || ''}
-                            onChange={(e) => onChange('overallExperience', parseFloat(e.target.value))}
+                            onChange={(e) => {
+                                const v = e.target.value;
+                                onChange('overallExperience', v === '' ? '' : parseFloat(v));
+                            }}
                             disabled={!isEditing}
                             className={THEME_CLASSES.inputs}
                         />
@@ -126,8 +129,11 @@ export const PersonalInfoSection = ({ data, isEditing, onChange }) => {
                         </label>
                         <input
                             type="number"
-                            value={data.noticePeriod || 0}
-                            onChange={(e) => onChange('noticePeriod', parseInt(e.target.value))}
+                            value={data.noticePeriod ?? ''}
+                            onChange={(e) => {
+                                const v = e.target.value;
+                                onChange('noticePeriod', v === '' ? '' : parseInt(v, 10));
+                            }}
                             disabled={!isEditing}
                             className={THEME_CLASSES.inputs}
                         />

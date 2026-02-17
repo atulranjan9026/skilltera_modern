@@ -9,6 +9,7 @@ import { ExperienceSection } from './profile/components/ExperienceSection';
 import { EducationSection } from './profile/components/EducationSection';
 import { PersonalInfoSection } from './profile/components/PersonalInfoSection';
 import { ResumeSection } from './profile/components/ResumeSection';
+import { candidateService } from '../../services/candidateService';
 
 export default function ProfileEditor() {
   const { user, isLoading } = useAuthContext();
@@ -20,19 +21,11 @@ export default function ProfileEditor() {
     editedData,
     handleInputChange,
     profileLoading,
-    skillsLoading,
-    skillError,
     newExperience,
     setNewExperience,
-    addExperience,
-    removeExperience,
     newEducation,
     setNewEducation,
-    addEducation,
-    removeEducation,
   } = useProfileData(user);
-
-  console.log('editedData', editedData);
 
   if (isLoading || profileLoading) {
     return (
@@ -49,41 +42,14 @@ export default function ProfileEditor() {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // Transform expectedSalary to object if it's a primitive value
       const payload = { ...editedData };
-      
-      if (payload.expectedSalary) {
-        if (typeof payload.expectedSalary !== 'object') {
-          // Handle empty string case explicitly
-          if (payload.expectedSalary.trim() === '') {
-            // Remove empty expectedSalary field
-            delete payload.expectedSalary;
-          } else {
-            const amount = parseInt(payload.expectedSalary.toString().replace(/[^0-9]/g, ''), 10);
-            if (!isNaN(amount) && amount > 0) {
-              payload.expectedSalary = {
-                min: amount,
-                currency: 'USD'
-              };
-            } else {
-              // Remove invalid expectedSalary
-              delete payload.expectedSalary;
-            }
-          }
-        }
-        // If it's already an object from backend, keep it as is
-      } else {
-        // Remove empty expectedSalary field
-        delete payload.expectedSalary;
-      }
-      
-      // Final safety check - ensure no empty string reaches backend
-      if (payload.expectedSalary === '' || payload.expectedSalary === '""') {
-        delete payload.expectedSalary;
-      }
+
+      // Avoid sending empty-string values (backend normalizes expectedSalary and strips unknown fields)
+      if (typeof payload.expectedSalary === 'string' && !payload.expectedSalary.trim()) delete payload.expectedSalary;
+      if (payload.overallExperience === '') delete payload.overallExperience;
+      if (payload.noticePeriod === '') delete payload.noticePeriod;
 
       // Save profile to backend
-      const { candidateService } = await import('../../services/candidateService');
       const response = await candidateService.updateProfile(payload);
 
       if (response?.success) {
@@ -110,7 +76,6 @@ export default function ProfileEditor() {
 
   const needsResume = !user?.resume?.url;
   const isGoogleUser = user?.authProvider === 'google';
-  console.log('user', user);
 
 
   return (
@@ -216,12 +181,9 @@ export default function ProfileEditor() {
           <SkillsSection
             skills={editedData.skills}
             isEditing={isEditing}
-            skillsLoading={skillsLoading}
-            skillError={skillError}
             onAddSkill={async (skillData) => {
               try {
                 // Call backend API to add skill
-                const { candidateService } = await import('../../services/candidateService');
                 const response = await candidateService.addSkill(skillData);
 
                 // Update local state with the response
@@ -238,13 +200,13 @@ export default function ProfileEditor() {
             onRemoveSkill={async (skillEntryId) => {
               try {
                 // Call backend API to delete skill
-                const { candidateService } = await import('../../services/candidateService');
                 const response = await candidateService.deleteSkill(skillEntryId);
 
-                // Update local state with the response
-                if (response?.data?.skills) {
-                  handleInputChange('skills', response.data.skills);
-                }
+                // Backend returns null data; update optimistically
+                handleInputChange(
+                  'skills',
+                  (editedData.skills || []).filter(s => (s.id || s._id) !== skillEntryId)
+                );
 
                 return response;
               } catch (error) {
@@ -283,7 +245,6 @@ export default function ProfileEditor() {
                   delete payload.endDate;
                 }
 
-                const { candidateService } = await import('../../services/candidateService');
                 const response = await candidateService.addExperience(payload);
 
                 if (response?.success && response?.data) {
@@ -309,7 +270,6 @@ export default function ProfileEditor() {
             }}
             onRemoveExperience={async (experienceId) => {
               try {
-                const { candidateService } = await import('../../services/candidateService');
                 const response = await candidateService.deleteExperience(experienceId);
 
                 if (response?.success) {
@@ -355,7 +315,6 @@ export default function ProfileEditor() {
                   delete payload.endDate;
                 }
 
-                const { candidateService } = await import('../../services/candidateService');
                 const response = await candidateService.addEducation(payload);
 
                 if (response?.success && response?.data) {
@@ -381,9 +340,7 @@ export default function ProfileEditor() {
             }}
             onRemoveEducation={async (educationId) => {
               try {
-                const { candidateService } = await import('../../services/candidateService');
                 const response = await candidateService.deleteEducation(educationId);
-                console.log("Education deleted successfully", response);
                 if (response?.success) {
                   // Update local state by removing education
                   handleInputChange('education', editedData.education.filter(edu => edu._id !== educationId));

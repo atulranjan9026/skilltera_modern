@@ -10,7 +10,6 @@ export const skillService = {
             endpoint += `?search=${encodeURIComponent(search)}`;
         }
         const response = await get(endpoint, false, 0);
-        console.log('response skills', response);
         return response?.data || [];
     },
 

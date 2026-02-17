@@ -99,11 +99,11 @@ export default React.memo(function Sidebar() {
           {/* User Avatar */}
           <div className="flex flex-col items-center gap-1 px-2 py-3 rounded-lg bg-slate-50">
             <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-sm font-bold text-primary-600">
-              {user?.fullname?.charAt(0).toUpperCase() || 'U'}
+              {user?.name?.charAt(0).toUpperCase() || 'U'}
             </div>
             <div className="text-center">
               <p className="text-xs font-medium text-slate-900 truncate max-w-[60px]">
-                {user?.fullname?.split(' ')[0] || 'User'}
+                {user?.name?.split(' ')[0] || 'User'}
               </p>
             </div>
           </div>

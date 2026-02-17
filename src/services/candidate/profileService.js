@@ -30,15 +30,6 @@ export const profileService = {
     },
 
     /**
-     * Get candidate's resume/CV (cached for 10 minutes)
-     */
-    getResume: async () => {
-        // This seems to be "viewResume" or similar? Using profile for now.
-        const response = await get('/candidates/profile', true, 300000);
-        return response.data?.resumeLink;
-    },
-
-    /**
      * Upload resume
      */
     uploadResume: async (file) => {
