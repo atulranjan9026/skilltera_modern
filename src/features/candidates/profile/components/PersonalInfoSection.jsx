@@ -112,7 +112,7 @@ export const PersonalInfoSection = ({ data, isEditing, onChange }) => {
                         </label>
                         <input
                             type="text"
-                            value={data.expectedSalary || ''}
+                            value={typeof data.expectedSalary === 'object' ? data.expectedSalary.min || '' : data.expectedSalary || ''}
                             onChange={(e) => onChange('expectedSalary', e.target.value)}
                             disabled={!isEditing}
                             placeholder="e.g., 80000"

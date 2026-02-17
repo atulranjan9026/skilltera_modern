@@ -32,6 +32,8 @@ export default function ProfileEditor() {
     removeEducation,
   } = useProfileData(user);
 
+  console.log('editedData', editedData);
+
   if (isLoading || profileLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
@@ -49,18 +51,35 @@ export default function ProfileEditor() {
     try {
       // Transform expectedSalary to object if it's a primitive value
       const payload = { ...editedData };
+      
       if (payload.expectedSalary) {
         if (typeof payload.expectedSalary !== 'object') {
-          const amount = parseInt(payload.expectedSalary.toString().replace(/[^0-9]/g, ''), 10);
-          if (!isNaN(amount)) {
-            payload.expectedSalary = {
-              min: amount,
-              currency: 'USD'
-            };
-          } else {
+          // Handle empty string case explicitly
+          if (payload.expectedSalary.trim() === '') {
+            // Remove empty expectedSalary field
             delete payload.expectedSalary;
+          } else {
+            const amount = parseInt(payload.expectedSalary.toString().replace(/[^0-9]/g, ''), 10);
+            if (!isNaN(amount) && amount > 0) {
+              payload.expectedSalary = {
+                min: amount,
+                currency: 'USD'
+              };
+            } else {
+              // Remove invalid expectedSalary
+              delete payload.expectedSalary;
+            }
           }
         }
+        // If it's already an object from backend, keep it as is
+      } else {
+        // Remove empty expectedSalary field
+        delete payload.expectedSalary;
+      }
+      
+      // Final safety check - ensure no empty string reaches backend
+      if (payload.expectedSalary === '' || payload.expectedSalary === '""') {
+        delete payload.expectedSalary;
       }
 
       // Save profile to backend
@@ -91,6 +110,8 @@ export default function ProfileEditor() {
 
   const needsResume = !user?.resume?.url;
   const isGoogleUser = user?.authProvider === 'google';
+  console.log('user', user);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-12 px-4">
@@ -115,7 +136,7 @@ export default function ProfileEditor() {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-4xl font-bold text-slate-900 mb-2">
-                {editedData.fullname || 'Your Profile'}
+                {editedData?.name }
               </h1>
               <p className="text-slate-600">{editedData.email}</p>
             </div>

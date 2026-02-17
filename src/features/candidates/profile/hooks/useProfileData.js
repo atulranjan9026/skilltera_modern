@@ -32,16 +32,17 @@ export const useProfileData = (user) => {
                 if (response?.success && response?.data) {
                     const profile = response.data;
                     setEditedData({
-                        fullname: profile.fullname || user?.fullname,
+                        name: profile.name || user?.name,
                         email: profile.email || user?.email,
                         phone: profile.phone || user?.phone,
                         currentCity: profile.currentCity || user?.currentCity,
                         country: profile.country || user?.country,
+                        avatar: profile.avatar || user?.avatar,
                         currentCompany: profile.currentCompany || user?.currentCompany,
                         overallExperience: profile.overallExperience || user?.overallExperience,
                         experienceSummary: profile.experienceSummary || user?.experienceSummary,
                         linkedInUrl: profile.linkedInUrl || user?.linkedInUrl,
-                        expectedSalary: profile.expectedSalary?.amount || user?.expectedSalary?.amount || '',
+                        expectedSalary: profile.expectedSalary || user?.expectedSalary || '',
                         noticePeriod: profile.noticePeriod || user?.noticePeriod,
                         skills: profile.skills?.map(skill => ({
                             ...skill,
@@ -56,7 +57,7 @@ export const useProfileData = (user) => {
                 } else {
                     // Fallback to user context if API fails
                     setEditedData({
-                        fullname: user?.fullname,
+                        name: user?.name,
                         email: user?.email,
                         phone: user?.phone,
                         currentCity: user?.currentCity,
@@ -65,21 +66,22 @@ export const useProfileData = (user) => {
                         overallExperience: user?.overallExperience,
                         experienceSummary: user?.experienceSummary,
                         linkedInUrl: user?.linkedInUrl,
-                        expectedSalary: user?.expectedSalary?.amount || '',
+                        expectedSalary: user?.expectedSalary || '',
                         noticePeriod: user?.noticePeriod,
                         skills: user?.skills?.map(skill => ({
                             ...skill,
                             skillName: skill.skillId?.name || skill.skillName || 'Unknown Skill'
                         })) || [],
                         experiences: user?.experiences || [],
-                        education: user?.education || []
+                        education: user?.education || [],
+                        avatar:  user?.avatar || [],
                     });
                 }
             } catch (error) {
                 console.error('Error loading profile:', error);
                 // Fallback to user context on error
                 setEditedData({
-                    fullname: user?.fullname,
+                    name: user?.name,
                     email: user?.email,
                     phone: user?.phone,
                     currentCity: user?.currentCity,
@@ -88,14 +90,15 @@ export const useProfileData = (user) => {
                     overallExperience: user?.overallExperience,
                     experienceSummary: user?.experienceSummary,
                     linkedInUrl: user?.linkedInUrl,
-                    expectedSalary: user?.expectedSalary?.amount || '',
+                    expectedSalary: user?.expectedSalary || '',
                     noticePeriod: user?.noticePeriod,
                     skills: user?.skills?.map(skill => ({
                         ...skill,
                         skillName: skill.skillId?.name || skill.skillName || 'Unknown Skill'
                     })) || [],
                     experiences: user?.experiences || [],
-                    education: user?.education || []
+                    education: user?.education || [],
+                    avatar:  user?.avatar || [],
                 });
             } finally {
                 setProfileLoading(false);

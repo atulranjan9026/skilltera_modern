@@ -20,7 +20,6 @@ export const SkillsSection = ({
     const [errorMsg, setErrorMsg] = useState('');
     const isInitialMount = useRef(true);
 
-    console.log('skills', skills);
     // Search skills API (debounced)
     useEffect(() => {
         // Skip on initial render
@@ -63,7 +62,7 @@ export const SkillsSection = ({
 
         const debounceTimer = setTimeout(searchSkills, 300);
         return () => clearTimeout(debounceTimer);
-    }, [searchTerm, removeEventListener]);
+    }, [searchTerm]);
 
     // Add skill to temporary list
     const handleSelectSkill = (skill) => {
@@ -203,7 +202,10 @@ export const SkillsSection = ({
                                             )}
                                             {isEditing && (
                                                 <button
-                                                    onClick={() => handleRemoveExistingSkill(skill.id)}
+                                                    onClick={() => {
+                                                        const skillId = skill.id || skill._id;
+                                                        handleRemoveExistingSkill(skillId);
+                                                    }}
                                                     className="ml-1 p-1 hover:bg-red-100 text-red-600 rounded-full transition-all"
                                                     title="Remove skill"
                                                 >
@@ -391,11 +393,6 @@ export const SkillsSection = ({
                         {errorMsg && (
                             <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 font-semibold text-center">
                                 {errorMsg}
-                            </div>
-                        )}
-                        {successMsg && (
-                            <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 font-semibold text-center">
-                                {successMsg}
                             </div>
                         )}
                     </div>
