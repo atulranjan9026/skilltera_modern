@@ -18,3 +18,44 @@
   }
 }
 
+/* Sonner Toast Custom Styles */
+:root {
+    --sonner-toast-bg: white;
+    --sonner-toast-border: #e5e7eb;
+    --sonner-toast-text: #111827;
+}
+
+[data-theme='dark'] {
+    --sonner-toast-bg: #1f2937;
+    --sonner-toast-border: #4b5563;
+    --sonner-toast-text: #f3f4f6;
+}
+
+/* Custom toast styling */
+[data-sonner-toast] {
+    font-family: inherit;
+}
+
+[data-sonner-toast][data-type='success'] {
+    background-color: #dcfce7;
+    border-color: #86efac;
+    color: #166534;
+}
+
+[data-sonner-toast][data-type='error'] {
+    background-color: #fee2e2;
+    border-color: #fca5a5;
+    color: #991b1b;
+}
+
+[data-sonner-toast][data-type='warning'] {
+    background-color: #fef3c7;
+    border-color: #fcd34d;
+    color: #92400e;
+}
+
+[data-sonner-toast][data-type='info'] {
+    background-color: #dbeafe;
+    border-color: #93c5fd;
+    color: #1e40af;
+}

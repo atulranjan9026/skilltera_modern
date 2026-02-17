@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Edit3, Save, X, Loader, User } from 'lucide-react';
 import { useAuthContext } from '../../store/context/AuthContext';
 import { THEME_CLASSES } from '../../theme';
+import { toast } from '../../utils/toast';
 import { useProfileData } from './profile/hooks/useProfileData';
 import { SkillsSection } from './profile/components/SkillsSection';
 import { ExperienceSection } from './profile/components/ExperienceSection';
@@ -17,6 +18,7 @@ export default function ProfileEditor() {
   const {
     editedData,
     handleInputChange,
+    profileLoading,
     skillsLoading,
     skillError,
     newExperience,
@@ -29,7 +31,7 @@ export default function ProfileEditor() {
     removeEducation,
   } = useProfileData(user);
 
-  if (isLoading) {
+  if (isLoading || profileLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <Loader className="w-8 h-8 text-primary-500 animate-spin" />
@@ -44,13 +46,35 @@ export default function ProfileEditor() {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // TODO: Implement save to backend
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulated API call
-      setIsEditing(false);
-      alert('Profile saved successfully!');
+      // Transform expectedSalary to object if it's a primitive value
+      const payload = { ...editedData };
+      if (payload.expectedSalary) {
+        if (typeof payload.expectedSalary !== 'object') {
+          const amount = parseInt(payload.expectedSalary.toString().replace(/[^0-9]/g, ''), 10);
+          if (!isNaN(amount)) {
+            payload.expectedSalary = {
+              min: amount,
+              currency: 'USD'
+            };
+          } else {
+            delete payload.expectedSalary;
+          }
+        }
+      }
+
+      // Save profile to backend
+      const { candidateService } = await import('../../services/candidateService');
+      const response = await candidateService.updateProfile(payload);
+
+      if (response?.success) {
+        setIsEditing(false);
+        toast.success('Profile saved successfully!');
+      } else {
+        throw new Error(response?.message || 'Failed to save profile');
+      }
     } catch (error) {
       console.error('Error saving profile:', error);
-      alert('Failed to save profile. Please try again.');
+      toast.error(error.response?.data?.message || error.message || 'Failed to save profile. Please try again.');
     } finally {
       setIsSaving(false);
     }
@@ -190,8 +214,69 @@ export default function ProfileEditor() {
             isEditing={isEditing}
             newExperience={newExperience}
             setNewExperience={setNewExperience}
-            onAddExperience={addExperience}
-            onRemoveExperience={removeExperience}
+            onAddExperience={async (experienceData) => {
+              try {
+                // Validate required fields
+                if (!experienceData.position || !experienceData.company || !experienceData.startDate) {
+                  toast.error('Please fill in all required fields (Position, Company, and Start Date)');
+                  return;
+                }
+
+                // Validate endDate if not currently working
+                if (!experienceData.isCurrentlyWorking && !experienceData.endDate) {
+                  toast.error('Please provide an End Date or check "Currently working here"');
+                  return;
+                }
+
+                // Sanitize payload
+                const payload = { ...experienceData };
+
+                // Remove endDate if currently working or if it's empty
+                if (payload.isCurrentlyWorking || !payload.endDate) {
+                  delete payload.endDate;
+                }
+
+                const { candidateService } = await import('../../services/candidateService');
+                const response = await candidateService.addExperience(payload);
+
+                if (response?.success && response?.data) {
+                  // Update local state with the new experience
+                  handleInputChange('experiences', [...(editedData.experiences || []), response.data]);
+                  setNewExperience({
+                    company: '',
+                    position: '',
+                    employmentType: 'full-time',
+                    startDate: '',
+                    endDate: '',
+                    isCurrentlyWorking: false,
+                    description: ''
+                  });
+                }
+
+                return response;
+              } catch (error) {
+                console.error('Error adding experience:', error);
+                toast.error(error.message || 'Failed to add experience. Please try again.');
+                throw error;
+              }
+            }}
+            onRemoveExperience={async (experienceId) => {
+              try {
+                const { candidateService } = await import('../../services/candidateService');
+                const response = await candidateService.deleteExperience(experienceId);
+
+                if (response?.success) {
+                  // Update local state by removing the experience
+                  handleInputChange('experiences', editedData.experiences.filter(exp => exp._id !== experienceId));
+                }
+
+                return response;
+              } catch (error) {
+                console.error('Error removing experience:', error);
+                toast.error('Failed to remove experience. Please try again.');
+                throw error;
+              }
+            }}
           />
         )}
 
@@ -201,8 +286,69 @@ export default function ProfileEditor() {
             isEditing={isEditing}
             newEducation={newEducation}
             setNewEducation={setNewEducation}
-            onAddEducation={addEducation}
-            onRemoveEducation={removeEducation}
+            onAddEducation={async (educationData) => {
+              try {
+                // Validate required fields
+                if (!educationData.degree || !educationData.institution || !educationData.startDate || !educationData.fieldOfStudy) {
+                  toast.error('Please fill in all required fields (Degree, Institution, Field of Study, and Start Date)');
+                  return;
+                }
+
+                // Validate endDate if not currently studying
+                if (!educationData.isCurrentlyStudying && !educationData.endDate) {
+                  toast.error('Please provide an End Date or check "Currently studying here"');
+                  return;
+                }
+
+                // Sanitize payload
+                const payload = { ...educationData };
+
+                // Remove endDate if currently studying or if it's empty
+                if (payload.isCurrentlyStudying || !payload.endDate) {
+                  delete payload.endDate;
+                }
+
+                const { candidateService } = await import('../../services/candidateService');
+                const response = await candidateService.addEducation(payload);
+
+                if (response?.success && response?.data) {
+                  // Update local state with new education
+                  handleInputChange('education', [...(editedData.education || []), response.data]);
+                  setNewEducation({
+                    institution: '',
+                    degree: '',
+                    fieldOfStudy: '',
+                    startDate: '',
+                    endDate: '',
+                    isCurrentlyStudying: false,
+                    description: ''
+                  });
+                }
+
+                return response;
+              } catch (error) {
+                console.error('Error adding education:', error);
+                toast.error(error.message || 'Failed to add education. Please try again.');
+                throw error;
+              }
+            }}
+            onRemoveEducation={async (educationId) => {
+              try {
+                const { candidateService } = await import('../../services/candidateService');
+                const response = await candidateService.deleteEducation(educationId);
+                console.log("Education deleted successfully", response);
+                if (response?.success) {
+                  // Update local state by removing education
+                  handleInputChange('education', editedData.education.filter(edu => edu._id !== educationId));
+                }
+
+                return response;
+              } catch (error) {
+                console.error('Error removing education:', error);
+                toast.error('Failed to remove education. Please try again.');
+                throw error;
+              }
+            }}
           />
         )}
       </div>

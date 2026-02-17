@@ -16,7 +16,7 @@ import { useAuthContext } from '../../store/context/AuthContext';
 /**
  * Sidebar Navigation - Left sidebar with icon-based navigation
  */
-export default function Sidebar() {
+export default React.memo(function Sidebar() {
   const navigate = useNavigate();
   const { user, logout } = useAuthContext();
 
@@ -121,3 +121,4 @@ export default function Sidebar() {
     </>
   );
 }
+)

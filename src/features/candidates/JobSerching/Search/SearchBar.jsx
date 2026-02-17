@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { MapPin } from 'lucide-react';
 import { THEME_CLASSES } from '../../../../theme';
-import AdvancedFilterModal from './AdvancedFilterModal';
+
 import FilterChips from './FilterChips';
 import SearchInput from './SearchInput';
 import FilterButton from './FilterButton';
 import { candidateService } from '../../../../services/candidateService';
+
+const AdvancedFilterModal = lazy(() => import("./AdvancedFilterModal"));
+
 
 /**
  * SearchBar Component - Unified Search with Advanced Filters
@@ -33,13 +36,13 @@ export default function SearchBar({ onSearch }) {
     // Split jobTitle input to extract company name if present
     const searchTerms = jobTitle.trim();
     let searchParams = { location, ...filters };
-    
+
     if (searchTerms) {
       // Check if the input contains company indicators or treat as job title
       // For now, we'll send it as jobTitle and let the backend handle both
       searchParams.jobTitle = searchTerms;
     }
-    
+
     onSearch(searchParams);
   };
 
@@ -69,7 +72,7 @@ export default function SearchBar({ onSearch }) {
   React.useEffect(() => {
     const trimmed = location.trim();
     if (!trimmed) {
-      setLocationSuggestions({cities:[], states: [], countries: [] });
+      setLocationSuggestions({ cities: [], states: [], countries: [] });
       return;
     }
 
@@ -96,15 +99,15 @@ export default function SearchBar({ onSearch }) {
   const handleApplyFilters = (newFilters) => {
     console.log('SearchBar handleApplyFilters called with:', newFilters);
     setFilters(newFilters);
-    
+
     // Use the same search logic as handleSearch
     const searchTerms = jobTitle.trim();
     let searchParams = { location, ...newFilters };
-    
+
     if (searchTerms) {
       searchParams.jobTitle = searchTerms;
     }
-    
+
     onSearch(searchParams);
   };
 
@@ -120,7 +123,7 @@ export default function SearchBar({ onSearch }) {
       }
       return updated;
     });
-    
+
     // Trigger search with updated filters using consistent logic
     setTimeout(() => {
       const updated = { ...filters };
@@ -129,14 +132,14 @@ export default function SearchBar({ onSearch }) {
       } else {
         updated[filterType] = Array.isArray(filters[filterType]) ? [] : '';
       }
-      
+
       const searchTerms = jobTitle.trim();
       let searchParams = { location, ...updated };
-      
+
       if (searchTerms) {
         searchParams.jobTitle = searchTerms;
       }
-      
+
       onSearch(searchParams);
     }, 0);
   };
@@ -151,15 +154,15 @@ export default function SearchBar({ onSearch }) {
       remote: false,
     };
     setFilters(resetFilters);
-    
+
     // Use consistent search logic
     const searchTerms = jobTitle.trim();
     let searchParams = { location, ...resetFilters };
-    
+
     if (searchTerms) {
       searchParams.jobTitle = searchTerms;
     }
-    
+
     onSearch(searchParams);
   };
 
@@ -340,7 +343,7 @@ export default function SearchBar({ onSearch }) {
               activeFilterCount={activeFilterCount}
               onClick={() => setShowFilterModal(true)}
             />
-            
+
             <button
               onClick={handleSearch}
               className={`${THEME_CLASSES.buttons.primary} px-8 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 shadow-sm`}
@@ -359,12 +362,14 @@ export default function SearchBar({ onSearch }) {
       />
 
       {/* Advanced Filter Modal */}
-      <AdvancedFilterModal
-        isOpen={showFilterModal}
-        onClose={() => setShowFilterModal(false)}
-        filters={filters}
-        onApplyFilters={handleApplyFilters}
-      />
+      <Suspense fallback={null}>
+        <AdvancedFilterModal
+          isOpen={showFilterModal}
+          onClose={() => setShowFilterModal(false)}
+          filters={filters}
+          onApplyFilters={handleApplyFilters}
+        />
+      </Suspense>
     </div>
   );
 }

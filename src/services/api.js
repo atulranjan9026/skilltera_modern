@@ -163,6 +163,21 @@ export const put = async (endpoint, data) => {
 };
 
 /**
+ * Optimized PATCH request with cache invalidation
+ */
+export const patch = async (endpoint, data) => {
+  // Clear related cache entries
+  for (const [key] of cache) {
+    if (key.includes(endpoint.split('/')[1])) {
+      cache.delete(key);
+    }
+  }
+
+  const cacheKey = `PATCH:${endpoint}`;
+  return deduplicateRequest(cacheKey, () => api.patch(endpoint, data));
+};
+
+/**
  * Optimized DELETE request with cache cleanup
  */
 export const del = async (endpoint) => {
@@ -242,4 +257,4 @@ export const legacyApi = {
 
 // Export both new optimized methods and legacy for migration
 export { api as axiosInstance };
-export default { get, post, put, delete: del, batchRequests, clearCache, legacyApi };
+export default { get, post, put, patch, delete: del, batchRequests, clearCache, legacyApi };

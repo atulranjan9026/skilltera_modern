@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import JobCard from './JobCard';
-import JobDescription from './JobDescription';
-
+const JobDescription = lazy(() => import('./JobDescription'));
+import { Loader } from 'lucide-react';
 /**
  * JobListings Component - Manages split-view layout
  */
@@ -19,18 +19,16 @@ export default function JobListings({ jobs, savedJobs, onSave, onApply }) {
   return (
     <div className="flex gap-6">
       {/* Left Side - Job Cards List */}
-      <div 
-        className={`transition-all duration-500 ease-in-out  ${
-          selectedJob 
-            ? 'w-full lg:w-2/5 xl:w-1/3 h-[calc(150vh-30px)]' 
-            : 'w-full '
-        }`}
+      <div
+        className={`transition-all duration-500 ease-in-out  ${selectedJob
+          ? 'w-full lg:w-2/5 xl:w-1/3 h-[calc(150vh-30px)]'
+          : 'w-full '
+          }`}
       >
-        <div className={`${
-          selectedJob 
-            ? 'h-full overflow-y-auto pr-2 space-y-4 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100 p-2'
-            : 'h-full overflow-y-auto pr-2 grid md:grid-cols-2 lg:grid-cols-3 gap-6 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100 p-2'
-        }`}>
+        <div className={`${selectedJob
+          ? 'h-full overflow-y-auto pr-2 space-y-4 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100 p-2'
+          : 'h-full overflow-y-auto pr-2 grid md:grid-cols-2 lg:grid-cols-3 gap-6 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100 p-2'
+          }`}>
           {jobs.map((job) => (
             <JobCard
               key={job.id}
@@ -46,7 +44,7 @@ export default function JobListings({ jobs, savedJobs, onSave, onApply }) {
 
       {/* Right Side - Job Details Panel */}
       {selectedJob && (
-        <div 
+        <div
           className={`
             fixed lg:relative inset-0 lg:inset-auto
             w-full lg:w-3/5 xl:w-2/3
@@ -57,13 +55,19 @@ export default function JobListings({ jobs, savedJobs, onSave, onApply }) {
           `}
         >
           <div className="h-full overflow-hidden border-l border-slate-200 rounded-lg shadow-xl h-[calc(150vh-40px)]">
-            <JobDescription
-              job={selectedJob}
-              onClose={handleCloseDetails}
-              onApply={onApply}
-              onSave={onSave}
-              isSaved={savedJobs.includes(selectedJob.id)}
-            />
+            <Suspense
+              fallback={
+                <Loader className="w-8 h-8 text-primary-500 animate-spin" />
+              }
+            >
+              <JobDescription
+                job={selectedJob}
+                onClose={handleCloseDetails}
+                onApply={onApply}
+                onSave={onSave}
+                isSaved={savedJobs.includes(selectedJob.id)}
+              />
+            </Suspense>
           </div>
         </div>
       )}

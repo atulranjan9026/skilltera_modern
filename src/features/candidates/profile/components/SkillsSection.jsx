@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Plus, X, Loader, Search, Star, Trash2, Award } from 'lucide-react';
 import { candidateService } from '../../../../services/candidateService';
 import { THEME_CLASSES } from '../../../../theme';
+import { toast } from '../../../../utils/toast';
 
 export const SkillsSection = ({
     skills = [],
@@ -17,7 +18,6 @@ export const SkillsSection = ({
     const [skillsToAdd, setSkillsToAdd] = useState([]);
     const [isSaving, setIsSaving] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
-    const [successMsg, setSuccessMsg] = useState('');
     const isInitialMount = useRef(true);
 
     console.log('skills', skills);
@@ -40,18 +40,8 @@ export const SkillsSection = ({
             try {
                 // Use server-side search
                 const response = await candidateService.getAllActiveSkills(searchTerm);
-
-                // Extract skills array from response
-                let allSkills = [];
-                if (response?.data?.data?.skills) {
-                    allSkills = response.data.data.skills;
-                } else if (response?.data?.skills) {
-                    allSkills = response.data.skills;
-                } else if (response?.data) {
-                    allSkills = Array.isArray(response.data) ? response.data : [];
-                } else if (Array.isArray(response)) {
-                    allSkills = response;
-                }
+                // response is now the array of skills directly
+                const allSkills = Array.isArray(response) ? response : [];
 
                 // Map skills to consistent format and filter if needed (though server should have filtered)
                 // We still safeguard against duplicates or malformed data
@@ -73,7 +63,7 @@ export const SkillsSection = ({
 
         const debounceTimer = setTimeout(searchSkills, 300);
         return () => clearTimeout(debounceTimer);
-    }, [searchTerm]);
+    }, [searchTerm, removeEventListener]);
 
     // Add skill to temporary list
     const handleSelectSkill = (skill) => {
@@ -89,17 +79,13 @@ export const SkillsSection = ({
         const alreadyInToAdd = skillsToAdd.some(s => s.skillId === skillId);
 
         if (alreadyInCurrent || alreadyInToAdd) {
-            setErrorMsg(`${skillName} is already added!`);
-            setTimeout(() => setErrorMsg(''), 3000);
+            toast.error(`${skillName} is already added!`);
             return;
         }
 
         // Add to temporary list
         setSkillsToAdd([...skillsToAdd, {
             skillId: skillId,
-            skill: skillName,
-            skillName: skillName,
-            category: skill.category || 'technical',
             experience: 0,
             rating: 0
         }]);
@@ -133,13 +119,12 @@ export const SkillsSection = ({
     const saveSkills = async () => {
         setIsSaving(true);
         setErrorMsg('');
-        setSuccessMsg('');
 
         try {
             // Validate that all skills have experience and rating
             const invalid = skillsToAdd.filter(s => !s.experience || !s.rating);
             if (invalid.length > 0) {
-                setErrorMsg('Please add experience and rating for all skills');
+                toast.error('Please add experience and rating for all skills');
                 setIsSaving(false);
                 return;
             }
@@ -148,6 +133,7 @@ export const SkillsSection = ({
             for (const skill of skillsToAdd) {
                 await onAddSkill({
                     skillId: skill.skillId,
+                    skillName: skill.skillName || skill.skill,
                     experience: skill.experience,
                     rating: skill.rating
                 });
@@ -155,11 +141,10 @@ export const SkillsSection = ({
 
             // Clear temporary list
             setSkillsToAdd([]);
-            setSuccessMsg('Skills added successfully! ✅');
-            setTimeout(() => setSuccessMsg(''), 3000);
+            toast.success('Skills added successfully! ✅');
         } catch (error) {
             console.error('Error saving skills:', error);
-            setErrorMsg('Failed to save skills. Please try again.');
+            toast.error('Failed to save skills. Please try again.');
         } finally {
             setIsSaving(false);
         }
@@ -169,11 +154,10 @@ export const SkillsSection = ({
     const handleRemoveExistingSkill = async (index) => {
         try {
             await onRemoveSkill(index);
-            setSuccessMsg('Skill removed successfully!');
-            setTimeout(() => setSuccessMsg(''), 3000);
+            toast.success('Skill removed successfully!');
         } catch (error) {
             console.error('Error removing skill:', error);
-            setErrorMsg('Failed to remove skill.');
+            toast.error('Failed to remove skill.');
         }
     };
 
@@ -199,16 +183,7 @@ export const SkillsSection = ({
                             </h4>
                             <div className="flex flex-wrap gap-3">
                                 {skills.map((skill, index) => {
-                                    // Handle different skill name formats:
-                                    // 1. skillName (from transformed backend response)
-                                    // 2. skillId.name or skillId.skillName (from populated reference)
-                                    // 3. skill (direct field)
-                                    const skillName = skill.skillName ||
-                                        skill.skillId?.name ||
-                                        skill.skillId?.skillName ||
-                                        skill.skill ||
-                                        skill.name ||
-                                        'Unknown Skill';
+                                    const skillName = skill?.skillName;
 
                                     return (
                                         <div
@@ -228,7 +203,7 @@ export const SkillsSection = ({
                                             )}
                                             {isEditing && (
                                                 <button
-                                                    onClick={() => handleRemoveExistingSkill(skill.id || skill._id)}
+                                                    onClick={() => handleRemoveExistingSkill(skill.id)}
                                                     className="ml-1 p-1 hover:bg-red-100 text-red-600 rounded-full transition-all"
                                                     title="Remove skill"
                                                 >
@@ -284,21 +259,18 @@ export const SkillsSection = ({
                                 <div className="mt-2">
                                     {searchResults.length > 0 ? (
                                         <div className="bg-white border border-slate-200 rounded-xl shadow-lg max-h-64 overflow-y-auto">
-                                            {searchResults.map((skill) => {
-                                                const skillName = skill.skill || skill.name;
+                                            {searchResults.map((skills) => {
+                                                const skillName = skills.skill;
                                                 return (
                                                     <button
-                                                        key={skill._id}
-                                                        onClick={() => handleSelectSkill(skill)}
+                                                        key={skills._id}
+                                                        onClick={() => handleSelectSkill(skills)}
                                                         className="w-full text-left px-4 py-3 hover:bg-primary-50 transition-colors border-b border-slate-100 last:border-b-0 flex justify-between items-center group"
                                                     >
                                                         <div>
                                                             <div className="font-semibold text-slate-900 group-hover:text-primary-600">
                                                                 {skillName}
                                                             </div>
-                                                            {skill.category && (
-                                                                <div className="text-xs text-slate-500 mt-0.5">{skill.category}</div>
-                                                            )}
                                                         </div>
                                                         <Plus size={18} className="text-slate-400 group-hover:text-primary-600" />
                                                     </button>
@@ -335,9 +307,6 @@ export const SkillsSection = ({
                                         <div className="flex justify-between items-start mb-4">
                                             <div>
                                                 <h6 className="font-bold text-lg text-primary-900">{skill.skill}</h6>
-                                                <span className="text-xs text-primary-600 bg-primary-200 px-2 py-1 rounded-full mt-1 inline-block">
-                                                    {skill.category}
-                                                </span>
                                             </div>
                                             <button
                                                 onClick={() => handleRemoveItem(skill.skillId)}

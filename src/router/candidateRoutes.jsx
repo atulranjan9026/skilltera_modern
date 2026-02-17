@@ -17,15 +17,15 @@ const jobRoutes = {
       element: <LandingPage />,
     },
     {
-      path: 'jobs-search',
+      path: '/jobs-search',
       element: <JobSearchPage />,
     },
     {
-      path: 'dashboard',
+      path: '/dashboard',
       element: <UserDashboard />,
     },
     {
-      path: 'profile',
+      path: '/profile',
       element: <ProfilePage />,
     },
   ],
