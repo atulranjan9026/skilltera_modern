@@ -87,6 +87,40 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const loginWithGoogle = async (credential) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await authService.loginWithGoogle(credential);
+
+      if (response.data) {
+        const { candidate } = response.data;
+        setUser(candidate);
+        localStorage.setItem('user', JSON.stringify(candidate));
+      }
+
+      return response;
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || err.message || 'Google sign-in failed';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const refreshUser = async () => {
+    try {
+      const response = await authService.getCurrentUser();
+      if (response.data) {
+        setUser(response.data);
+        localStorage.setItem('user', JSON.stringify(response.data));
+      }
+    } catch (err) {
+      console.error('Failed to refresh user', err);
+    }
+  };
+
   const logout = async () => {
     try {
       await authService.logout();
@@ -123,8 +157,10 @@ export const AuthProvider = ({ children }) => {
     isLoading,
     error,
     login,
+    loginWithGoogle,
     logout,
     signup,
+    refreshUser,
     isAuthenticated: !!user,
   };
 

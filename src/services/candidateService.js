@@ -1,3 +1,5 @@
+import { get, post, put, del, clearCache, api } from './api';
+
 /**
  * Candidate service - handles candidate-related API calls
  * Refactored to use modular services

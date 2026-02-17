@@ -1,4 +1,5 @@
 import React from 'react';
+import { GoogleLogin } from '@react-oauth/google';
 import { Button } from '@/components/ui/Button';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -6,7 +7,7 @@ import { useAuthContext } from '../../../store/context/AuthContext';
 
 export default function Login() {
     const navigate = useNavigate();
-    const { login, isLoading, error: authError } = useAuthContext();
+    const { login, loginWithGoogle, isLoading, error: authError } = useAuthContext();
     const {
         register,
         handleSubmit,
@@ -115,6 +116,54 @@ export default function Login() {
                 >
                     {isLoading ? 'Signing In...' : 'Sign In'}
                 </Button>
+
+                {/* Divider */}
+                <div className="relative my-3">
+                    <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-slate-200" />
+                    </div>
+                    <div className="relative flex justify-center text-xs">
+                        <span className="bg-white px-2 text-slate-500">or continue with</span>
+                    </div>
+                </div>
+
+                {/* Google Sign In */}
+                <div className="flex justify-center">
+                    <GoogleLogin
+                        onSuccess={async (credentialResponse) => {
+                            const credential = credentialResponse?.credential;
+                            if (!credential) {
+                                setFormError('root', { type: 'manual', message: 'Google sign-in did not return a credential.' });
+                                return;
+                            }
+                            try {
+                                await loginWithGoogle(credential);
+                                navigate('/profile');
+                            } catch (error) {
+                                const errData = error.response?.data;
+                                const errMsg = errData?.message || error.message || 'Google sign-in failed.';
+                                const errDetails = errData?.errors?.map((e) => `${e.field}: ${e.message}`).join('; ');
+                                console.error('Google login error:', errData || error);
+                                setFormError('root', {
+                                    type: 'manual',
+                                    message: errDetails ? `${errMsg} (${errDetails})` : errMsg,
+                                });
+                            }
+                        }}
+                        onError={() => {
+                            setFormError('root', {
+                                type: 'manual',
+                                message: 'Google sign-in was cancelled or failed.',
+                            });
+                        }}
+                        useOneTap={false}
+                        theme="outline"
+                        size="large"
+                        text="continue_with"
+                        shape="rectangular"
+                        width="320"
+                    />
+                </div>
 
                 {/* Sign Up Link */}
                 <p className="text-center text-xs text-slate-500">

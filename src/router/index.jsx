@@ -9,22 +9,25 @@ import jobRoutes from './candidateRoutes';
 // Import pages
 import NotFound from '../pages/NotFound';
 
-export const router = createBrowserRouter([
-  {
-    path: '/',
-    errorElement: <NotFound />,
-    children: [
-      {
-        index: true,
-        element: <Navigate to="/jobs-search" replace />,
-      },
-      authRoutes,
-      jobRoutes,
-      // companyRoutes,
-      {
-        path: '*',
-        element: <NotFound />,
-      },
-    ],
-  },
-]);
+export const router = createBrowserRouter(
+  [
+    {
+      path: '/',
+      errorElement: <NotFound />,
+      children: [
+        {
+          index: true,
+          element: <Navigate to="/jobs-search" replace />,
+        },
+        authRoutes,
+        jobRoutes,
+        // companyRoutes,
+        {
+          path: '*',
+          element: <NotFound />,
+        },
+      ],
+    },
+  ],
+  { future: { v7_startTransition: true } }
+);

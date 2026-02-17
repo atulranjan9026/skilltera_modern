@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
+import { GoogleLogin } from '@react-oauth/google';
 import { Button } from '@/components/ui/Button';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { FaCloudUploadAlt, FaInfoCircle } from 'react-icons/fa';
+import { useAuthContext } from '../../../store/context/AuthContext';
 // import axios from 'axios';
 // import Swal from 'sweetalert2';
 // import ReCAPTCHA from 'react-google-recaptcha';
 
 export default function CandidateSignup() {
     const navigate = useNavigate();
+    const { loginWithGoogle } = useAuthContext();
     const {
         register,
         handleSubmit,
@@ -17,7 +20,6 @@ export default function CandidateSignup() {
     } = useForm();
 
     const [errorMessage, setErrorMessage] = useState('');
-    const [isVerified, setIsVerified] = useState(false);
     const [resumeFile, setResumeFile] = useState(null);
     const [resumeName, setResumeName] = useState('');
     const [isDragging, setIsDragging] = useState(false);
@@ -115,6 +117,46 @@ export default function CandidateSignup() {
             <div className="text-center">
                 <h2 className="text-xl font-bold text-slate-900">Join Skilltera</h2>
                 <p className="text-xs text-slate-500 mt-0.5">Create your account and land your dream job</p>
+            </div>
+
+            {/* Google Sign Up - shown first for quick signup */}
+            <div className="flex justify-center mb-3">
+                <GoogleLogin
+                    onSuccess={async (credentialResponse) => {
+                        const credential = credentialResponse?.credential;
+                        if (!credential) {
+                            setErrorMessage('Google sign-up did not return a credential.');
+                            return;
+                        }
+                        try {
+                            await loginWithGoogle(credential);
+                            navigate('/profile');
+                        } catch (error) {
+                            const errData = error.response?.data;
+                            const errMsg = errData?.message || error.message || 'Google sign-up failed.';
+                            const errDetails = errData?.errors?.map((e) => `${e.field}: ${e.message}`).join('; ');
+                            setErrorMessage(errDetails ? `${errMsg} (${errDetails})` : errMsg);
+                        }
+                    }}
+                    onError={() => {
+                        setErrorMessage('Google sign-up was cancelled or failed.');
+                    }}
+                    useOneTap={false}
+                    theme="outline"
+                    size="large"
+                    text="signup_with"
+                    shape="rectangular"
+                    width="320"
+                />
+            </div>
+
+            <div className="relative my-3">
+                <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-slate-200" />
+                </div>
+                <div className="relative flex justify-center text-xs">
+                    <span className="bg-white px-2 text-slate-500">or sign up with email</span>
+                </div>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
@@ -269,7 +311,7 @@ export default function CandidateSignup() {
                     type="submit"
                     className="w-full mt-2"
                     size="sm"
-                    disabled={!isVerified || isLoading}
+                    disabled={isLoading}
                 >
                     {isLoading ? 'Creating Account...' : 'Create My Account'}
                 </Button>
