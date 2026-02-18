@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { candidateService } from '../../../../services/candidateService';
 
-export const useProfileData = (user) => {
+export const useProfileData = () => {
     const [editedData, setEditedData] = useState({});
     const [newExperience, setNewExperience] = useState({
         position: '',
@@ -26,11 +26,9 @@ export const useProfileData = (user) => {
         skills: '',
     });
     const [profileLoading, setProfileLoading] = useState(false);
-    // Load profile data from backend
+
     useEffect(() => {
         const loadProfile = async () => {
-            if (!user) return;
-
             setProfileLoading(true);
             try {
                 const response = await candidateService.getProfile();
@@ -38,42 +36,37 @@ export const useProfileData = (user) => {
                 if (response?.success && response?.data) {
                     const profile = response.data;
                     setEditedData({
-                        name: profile.name || user?.name,
-                        email: profile.email || user?.email,
-                        phone: profile.phone || user?.phone,
-                        currentCity: profile.currentCity || user?.currentCity,
-                        country: profile.country || user?.country,
-                        avatar: profile.avatar || user?.avatar,
-                        linkedInUrl: profile.linkedInUrl || user?.linkedInUrl,
-                        currentCompany: profile.currentCompany || profile.currentRole || user?.currentCompany,
-                        overallExperience: profile.overallExperience ?? user?.overallExperience ?? user?.experience ?? '',
-                        experienceSummary: profile.experienceSummary || user?.experienceSummary,
-                        expectedSalary: profile.expectedSalary || user?.expectedSalary || '',
-                        noticePeriod: profile.noticePeriod || user?.noticePeriod,
+                        name: profile.name,
+                        email: profile.email,
+                        phone: profile.phone,
+                        currentCity: profile.currentCity,
+                        country: profile.country,
+                        avatar: profile.avatar,
+                        linkedInUrl: profile.linkedInUrl,
+                        currentCompany: profile.currentCompany || profile.currentRole,
+                        overallExperience: profile.overallExperience ?? '',
+                        experienceSummary: profile.experienceSummary,
+                        expectedSalary: profile.expectedSalary || '',
+                        noticePeriod: profile.noticePeriod,
                         skills: profile.skills?.map(skill => ({
                             ...skill,
                             skillName: skill.skillId?.name || skill.skillName || skill.name || 'Unknown Skill'
-                        })) || user?.skills?.map(skill => ({
-                            ...skill,
-                            skillName: skill.skillId?.name || skill.skillName || 'Unknown Skill'
                         })) || [],
-                        experiences: profile.experiences || user?.experiences || [],
-                        education: profile.education || user?.education || [],
-                        certificates: profile.certificates || user?.certificates || [],
+                        experiences: profile.experiences || [],
+                        education: profile.education || [],
+                        certificates: profile.certificates || [],
+                        resume: profile.resume
                     });
-                } 
+                }
             } catch (error) {
-                
+
             } finally {
                 setProfileLoading(false);
             }
         };
 
         loadProfile();
-    }, [user]);
-
-    // Skills are now loaded on-demand via search in SkillsSection component
-    // No need to fetch all skills on mount
+    }, []);
 
     const handleInputChange = (field, value) => {
         setEditedData(prev => ({

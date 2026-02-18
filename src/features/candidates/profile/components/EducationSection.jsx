@@ -1,22 +1,31 @@
-import React from 'react';
-import { Plus, Trash2, Award, Edit, X } from 'lucide-react';
+import React, { useState } from 'react';
+import { Plus, Trash2, Award, Edit, X, Edit3 } from 'lucide-react';
 import { THEME_CLASSES } from '../../../../theme';
 
 export const EducationSection = ({
     education,
-    isEditing,
     newEducation,
     setNewEducation,
     onAddEducation,
     onRemoveEducation,
     onEditEducation
 }) => {
+    const [isEditingSection, setIsEditingSection] = useState(false);
     return (
         <div className={`${THEME_CLASSES.cards} p-8 shadow-lg`}>
-            <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-                <Award size={20} />
-                Education ({education?.length || 0})
-            </h3>
+            <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                    <Award size={20} />
+                    Education ({education?.length || 0})
+                </h3>
+                <button
+                    onClick={() => setIsEditingSection(!isEditingSection)}
+                    className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 flex items-center gap-2 text-sm font-medium"
+                >
+                    <Edit3 size={16} />
+                    {isEditingSection ? 'Done' : 'Edit'}
+                </button>
+            </div>
 
             {/* Education List */}
             <div className="space-y-4 mb-6">
@@ -35,7 +44,7 @@ export const EducationSection = ({
                                     <p className="text-sm text-slate-600 mt-1">Field: {edu.fieldOfStudy}</p>
                                 )}
                             </div>
-                            {isEditing && (
+                            {isEditingSection && (
                                 <div className="flex gap-2">
                                     <button
                                         onClick={() => onEditEducation(edu)}
@@ -60,7 +69,7 @@ export const EducationSection = ({
             </div>
 
             {/* Add/Edit Education Form */}
-            {isEditing && (
+            {isEditingSection && (
                 <div className="p-6 bg-slate-50 rounded-xl border-2 border-dashed border-slate-300">
                     <h4 className="font-semibold text-slate-900 mb-4">
                         {newEducation._id ? 'Edit Education' : 'Add Education'}

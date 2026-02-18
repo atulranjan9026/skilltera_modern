@@ -41,7 +41,45 @@ export const PersonalInfoSection = ({ data, isEditing, onChange }) => {
         <div className="space-y-6">
             {/* Contact Information */}
             <div className={`${THEME_CLASSES.cards} p-8 shadow-lg`}>
-                <h3 className="text-xl font-bold text-slate-900 mb-6">Contact Information</h3>
+                <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-bold text-slate-900">Contact Information</h3>
+                    {!isEditingSection ? (
+                        <button
+                            onClick={() => setIsEditingSection(true)}
+                            className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 flex items-center gap-2 text-sm font-medium"
+                        >
+                            <Edit3 size={16} />
+                            Edit
+                        </button>
+                    ) : (
+                        <div className="flex gap-2">
+                            <button
+                                onClick={handleCancel}
+                                className="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 flex items-center gap-2 text-sm font-medium"
+                            >
+                                <X size={16} />
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSave}
+                                disabled={isSaving}
+                                className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 flex items-center gap-2 text-sm font-medium disabled:opacity-50"
+                            >
+                                {isSaving ? (
+                                    <>
+                                        <Loader size={16} className="animate-spin" />
+                                        Saving...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Save size={16} />
+                                        Save
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    )}
+                </div>
                 <div className="grid md:grid-cols-2 gap-6">
                     <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
@@ -50,9 +88,9 @@ export const PersonalInfoSection = ({ data, isEditing, onChange }) => {
                         </label>
                         <input
                             type="email"
-                            value={data.email || ''}
-                            onChange={(e) => onChange('email', e.target.value)}
-                            disabled={!isEditing}
+                            value={editedData.email || ''}
+                            onChange={(e) => handleSectionChange('email', e.target.value)}
+                            disabled={!isEditingSection}
                             className={THEME_CLASSES.inputs}
                         />
                     </div>
@@ -63,9 +101,9 @@ export const PersonalInfoSection = ({ data, isEditing, onChange }) => {
                         </label>
                         <input
                             type="tel"
-                            value={data.phone || ''}
-                            onChange={(e) => onChange('phone', e.target.value)}
-                            disabled={!isEditing}
+                            value={editedData.phone || ''}
+                            onChange={(e) => handleSectionChange('phone', e.target.value)}
+                            disabled={!isEditingSection}
                             className={THEME_CLASSES.inputs}
                         />
                     </div>
@@ -76,9 +114,9 @@ export const PersonalInfoSection = ({ data, isEditing, onChange }) => {
                         </label>
                         <input
                             type="text"
-                            value={data.currentCity || ''}
-                            onChange={(e) => onChange('currentCity', e.target.value)}
-                            disabled={!isEditing}
+                            value={editedData.currentCity || ''}
+                            onChange={(e) => handleSectionChange('currentCity', e.target.value)}
+                            disabled={!isEditingSection}
                             className={THEME_CLASSES.inputs}
                         />
                     </div>
@@ -89,9 +127,9 @@ export const PersonalInfoSection = ({ data, isEditing, onChange }) => {
                         </label>
                         <input
                             type="text"
-                            value={data.country || ''}
-                            onChange={(e) => onChange('country', e.target.value)}
-                            disabled={!isEditing}
+                            value={editedData.country || ''}
+                            onChange={(e) => handleSectionChange('country', e.target.value)}
+                            disabled={!isEditingSection}
                             className={THEME_CLASSES.inputs}
                         />
                     </div>
@@ -102,9 +140,9 @@ export const PersonalInfoSection = ({ data, isEditing, onChange }) => {
                         </label>
                         <input
                             type="url"
-                            value={data.linkedInUrl || ''}
-                            onChange={(e) => onChange('linkedInUrl', e.target.value)}
-                            disabled={!isEditing}
+                            value={editedData.linkedInUrl || ''}
+                            onChange={(e) => handleSectionChange('linkedInUrl', e.target.value)}
+                            disabled={!isEditingSection}
                             className={THEME_CLASSES.inputs}
                         />
                     </div>
@@ -122,9 +160,9 @@ export const PersonalInfoSection = ({ data, isEditing, onChange }) => {
                         </label>
                         <input
                             type="text"
-                            value={data.currentCompany || ''}
-                            onChange={(e) => onChange('currentCompany', e.target.value)}
-                            disabled={!isEditing}
+                            value={editedData.currentCompany || ''}
+                            onChange={(e) => handleSectionChange('currentCompany', e.target.value)}
+                            disabled={!isEditingSection}
                             className={THEME_CLASSES.inputs}
                         />
                     </div>
@@ -133,12 +171,12 @@ export const PersonalInfoSection = ({ data, isEditing, onChange }) => {
                         <input
                             type="number"
                             step="0.1"
-                            value={data.overallExperience || ''}
+                            value={editedData.overallExperience || ''}
                             onChange={(e) => {
                                 const v = e.target.value;
-                                onChange('overallExperience', v === '' ? '' : parseFloat(v));
+                                handleSectionChange('overallExperience', v === '' ? '' : parseFloat(v));
                             }}
-                            disabled={!isEditing}
+                            disabled={!isEditingSection}
                             className={THEME_CLASSES.inputs}
                         />
                     </div>
@@ -149,9 +187,9 @@ export const PersonalInfoSection = ({ data, isEditing, onChange }) => {
                         </label>
                         <input
                             type="text"
-                            value={typeof data.expectedSalary === 'object' ? data.expectedSalary.min || '' : data.expectedSalary || ''}
-                            onChange={(e) => onChange('expectedSalary', e.target.value)}
-                            disabled={!isEditing}
+                            value={typeof editedData.expectedSalary === 'object' ? editedData.expectedSalary.min || '' : editedData.expectedSalary || ''}
+                            onChange={(e) => handleSectionChange('expectedSalary', e.target.value)}
+                            disabled={!isEditingSection}
                             placeholder="e.g., 80000"
                             className={THEME_CLASSES.inputs}
                         />
@@ -163,12 +201,13 @@ export const PersonalInfoSection = ({ data, isEditing, onChange }) => {
                         </label>
                         <input
                             type="number"
-                            value={data.noticePeriod ?? ''}
+                            min="0"
+                            value={editedData.noticePeriod || ''}
                             onChange={(e) => {
                                 const v = e.target.value;
-                                onChange('noticePeriod', v === '' ? '' : parseInt(v, 10));
+                                handleSectionChange('noticePeriod', v === '' ? '' : parseInt(v, 10));
                             }}
-                            disabled={!isEditing}
+                            disabled={!isEditingSection}
                             className={THEME_CLASSES.inputs}
                         />
                     </div>
@@ -176,9 +215,9 @@ export const PersonalInfoSection = ({ data, isEditing, onChange }) => {
                 <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-2">Experience Summary</label>
                     <textarea
-                        value={data.experienceSummary || ''}
-                        onChange={(e) => onChange('experienceSummary', e.target.value)}
-                        disabled={!isEditing}
+                        value={editedData.experienceSummary || ''}
+                        onChange={(e) => handleSectionChange('experienceSummary', e.target.value)}
+                        disabled={!isEditingSection}
                         rows={4}
                         className={THEME_CLASSES.inputs}
                     />

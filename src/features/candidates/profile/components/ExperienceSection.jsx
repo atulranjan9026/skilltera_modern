@@ -1,16 +1,16 @@
-import React from 'react';
-import { Plus, Trash2, Briefcase, Edit, X } from 'lucide-react';
+import React, { useState } from 'react';
+import { Plus, Trash2, Briefcase, Edit, X, Edit3 } from 'lucide-react';
 import { THEME_CLASSES } from '../../../../theme';
 
 export const ExperienceSection = ({
     experiences,
-    isEditing,
     newExperience,
     setNewExperience,
     onAddExperience,
     onRemoveExperience,
     onEditExperience
 }) => {
+    const [isEditingSection, setIsEditingSection] = useState(false);
     // Helper function to format dates
     const formatDate = (dateString) => {
         if (!dateString) return '';
@@ -39,10 +39,19 @@ export const ExperienceSection = ({
 
     return (
         <div className={`${THEME_CLASSES.cards} p-8 shadow-lg`}>
-            <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-                <Briefcase size={20} />
-                Work Experience ({experiences?.length || 0})
-            </h3>
+            <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                    <Briefcase size={20} />
+                    Work Experience ({experiences?.length || 0})
+                </h3>
+                <button
+                    onClick={() => setIsEditingSection(!isEditingSection)}
+                    className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 flex items-center gap-2 text-sm font-medium"
+                >
+                    <Edit3 size={16} />
+                    {isEditingSection ? 'Done' : 'Edit'}
+                </button>
+            </div>
 
             {/* Experience List */}
             <div className="space-y-4 mb-6">
@@ -57,7 +66,7 @@ export const ExperienceSection = ({
                                     {exp.employmentType && ` • ${exp.employmentType}`}
                                 </p>
                             </div>
-                            {isEditing && (
+                            {isEditingSection && (
                                 <div className="flex gap-2">
                                     <button
                                         onClick={() => onEditExperience(exp)}
@@ -83,7 +92,7 @@ export const ExperienceSection = ({
             </div>
 
             {/* Add/Edit Experience Form */}
-            {isEditing && (
+            {isEditingSection && (
                 <div className="p-6 bg-slate-50 rounded-xl border-2 border-dashed border-slate-300">
                     <h4 className="font-semibold text-slate-900 mb-4">
                         {newExperience._id ? 'Edit Work Experience' : 'Add Work Experience'}

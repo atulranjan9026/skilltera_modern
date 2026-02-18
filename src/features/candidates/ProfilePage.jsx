@@ -14,7 +14,6 @@ import { CertificatesSection } from './profile/components/CertificatesSection';
 
 export default function ProfileEditor() {
   const { user, isLoading } = useAuthContext();
-  const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -30,6 +29,7 @@ export default function ProfileEditor() {
     setNewCertificate,
     setEditedData
   } = useProfileData(user);
+  console.log(editedData);
 
   const handleResumeUpdate = async () => {
     try {
@@ -53,7 +53,7 @@ export default function ProfileEditor() {
     );
   }
 
-  if (!user) {
+  if (!editedData) {
     return <div className="text-center p-8">Please log in to view your profile.</div>;
   }
 
@@ -71,7 +71,6 @@ export default function ProfileEditor() {
       const response = await candidateService.updateProfile(payload);
 
       if (response?.success) {
-        setIsEditing(false);
         toast.success('Profile saved successfully!');
       } else {
         throw new Error(response?.message || 'Failed to save profile');
@@ -93,15 +92,16 @@ export default function ProfileEditor() {
     { id: 'certificates', label: 'Certificates', icon: User },
   ];
 
-  const needsResume = !user?.resume?.url;
-  const isGoogleUser = user?.authProvider === 'google';
-
+  // const needsResume = editedData?.resume?.url;
+  // const isGoogleUser = editedData?.authProvider === 'google';
+  // console.log(needsResume);
+  // console.log(isGoogleUser);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-12 px-4">
       <div className="max-w-6xl mx-auto">
         {/* Complete profile banner for users without resume (especially Google sign-ups) */}
-        {needsResume && (
+        {/* {needsResume && (
           <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-center justify-between">
             <p className="text-amber-800 text-sm font-medium">
               {isGoogleUser ? 'Welcome! Add your resume to get better job matches.' : 'Complete your profile by adding your resume.'}
@@ -113,7 +113,7 @@ export default function ProfileEditor() {
               Add Resume
             </button>
           </div>
-        )}
+        )} */}
 
         {/* Header */}
         <div className={`${THEME_CLASSES.cards} p-8 mb-8 shadow-xl`}>
@@ -154,7 +154,6 @@ export default function ProfileEditor() {
         {activeTab === 'overview' && (
           <PersonalInfoSection
             data={editedData}
-            isEditing={isEditing}
             onChange={handleInputChange}
           />
         )}
@@ -162,7 +161,6 @@ export default function ProfileEditor() {
         {activeTab === 'skills' && (
           <SkillsSection
             skills={editedData.skills}
-            isEditing={isEditing}
             onAddSkill={async (skillData) => {
               try {
                 // Call backend API to add skill
@@ -202,7 +200,6 @@ export default function ProfileEditor() {
         {activeTab === 'experience' && (
           <ExperienceSection
             experiences={editedData.experiences}
-            isEditing={isEditing}
             newExperience={newExperience}
             setNewExperience={setNewExperience}
             onEditExperience={(exp) => {
@@ -304,7 +301,6 @@ export default function ProfileEditor() {
         {activeTab === 'education' && (
           <EducationSection
             education={editedData.education}
-            isEditing={isEditing}
             newEducation={newEducation}
             setNewEducation={setNewEducation}
             onEditEducation={(edu) => {
@@ -503,7 +499,6 @@ export default function ProfileEditor() {
               }
             }}
             certificates={editedData.certificates || []}
-            isEditing={isEditing}
           />
         )}
       </div>

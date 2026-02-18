@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, X, Loader, Search, Star, Trash2, Award } from 'lucide-react';
+import { Plus, X, Loader, Search, Star, Trash2, Award, Edit3 } from 'lucide-react';
 import { candidateService } from '../../../../services/candidateService';
 import { THEME_CLASSES } from '../../../../theme';
 import { toast } from '../../../../utils/toast';
 
 export const SkillsSection = ({
     skills = [],
-    isEditing,
     onAddSkill,
     onRemoveSkill,
     skillsLoading,
     skillError
 }) => {
+    const [isEditingSection, setIsEditingSection] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
@@ -171,6 +171,13 @@ export const SkillsSection = ({
                         <Award size={24} className="text-primary-600" />
                         Skills ({skills?.length || 0})
                     </h3>
+                    <button
+                        onClick={() => setIsEditingSection(!isEditingSection)}
+                        className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 flex items-center gap-2 text-sm font-medium"
+                    >
+                        <Edit3 size={16} />
+                        {isEditingSection ? 'Done' : 'Edit'}
+                    </button>
                 </div>
 
                 {/* Show skills when NOT editing */}
@@ -201,7 +208,7 @@ export const SkillsSection = ({
                                                     ⭐ {skill.rating}
                                                 </span>
                                             )}
-                                            {isEditing && (
+                                            {isEditingSection && (
                                                 <button
                                                     onClick={() => handleRemoveExistingSkill(skill.id)}
                                                     className="ml-1 p-1 hover:bg-red-100 text-red-600 rounded-full transition-all"
@@ -233,7 +240,7 @@ export const SkillsSection = ({
                 )}
 
                 {/* Add Skills Section - Only shown when editing */}
-                {isEditing && (
+                {isEditingSection && (
                     <div className="border-t border-slate-200 pt-8">
                         <h4 className="text-lg font-bold text-slate-900 mb-4">Search & Add Skills</h4>
 
