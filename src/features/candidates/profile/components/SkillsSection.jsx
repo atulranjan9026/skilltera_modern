@@ -70,8 +70,7 @@ export const SkillsSection = ({
         // Check if already exists in current skills or skills to add
         const alreadyInCurrent = skills.some(s =>
             s.skillId === skillId ||
-            (s.skillId?._id === skillId) ||
-            (s.skillName === skillName)
+            (s.skillId?._id === skillId) 
         );
         const alreadyInToAdd = skillsToAdd.some(s => s.skillId === skillId);
 
@@ -83,7 +82,6 @@ export const SkillsSection = ({
         // Add to temporary list
         setSkillsToAdd([...skillsToAdd, {
             skillId: skillId,
-            skillName: skillName,
             experience: 0,
             rating: 0
         }]);
@@ -131,7 +129,6 @@ export const SkillsSection = ({
             for (const skill of skillsToAdd) {
                 await onAddSkill({
                     skillId: skill.skillId,
-                    skillName: skill.skillName || skill.skill,
                     experience: skill.experience,
                     rating: skill.rating
                 });

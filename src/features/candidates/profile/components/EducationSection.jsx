@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Trash2, Award } from 'lucide-react';
+import { Plus, Trash2, Award, Edit, X } from 'lucide-react';
 import { THEME_CLASSES } from '../../../../theme';
 
 export const EducationSection = ({
@@ -8,7 +8,8 @@ export const EducationSection = ({
     newEducation,
     setNewEducation,
     onAddEducation,
-    onRemoveEducation
+    onRemoveEducation,
+    onEditEducation
 }) => {
     return (
         <div className={`${THEME_CLASSES.cards} p-8 shadow-lg`}>
@@ -35,24 +36,35 @@ export const EducationSection = ({
                                 )}
                             </div>
                             {isEditing && (
-                                <button
-                                    onClick={() => onRemoveEducation(edu._id)}
-                                    className="p-2 hover:bg-red-100 text-red-600 rounded-lg transition-all"
-                                    disabled={!edu._id}
-                                    title={!edu._id ? 'Cannot delete: No ID found' : 'Delete education'}
-                                >
-                                    <Trash2 size={18} />
-                                </button>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => onEditEducation(edu)}
+                                        className="p-2 hover:bg-blue-100 text-blue-600 rounded-lg transition-all"
+                                        title="Edit education"
+                                    >
+                                        <Edit size={18} />
+                                    </button>
+                                    <button
+                                        onClick={() => onRemoveEducation(edu._id)}
+                                        className="p-2 hover:bg-red-100 text-red-600 rounded-lg transition-all"
+                                        disabled={!edu._id}
+                                        title={!edu._id ? 'Cannot delete: No ID found' : 'Delete education'}
+                                    >
+                                        <Trash2 size={18} />
+                                    </button>
+                                </div>
                             )}
                         </div>
                     </div>
                 ))}
             </div>
 
-            {/* Add Education Form */}
+            {/* Add/Edit Education Form */}
             {isEditing && (
                 <div className="p-6 bg-slate-50 rounded-xl border-2 border-dashed border-slate-300">
-                    <h4 className="font-semibold text-slate-900 mb-4">Add Education</h4>
+                    <h4 className="font-semibold text-slate-900 mb-4">
+                        {newEducation._id ? 'Edit Education' : 'Add Education'}
+                    </h4>
                     <div className="grid md:grid-cols-2 gap-4 mb-4">
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-2">Degree</label>
@@ -131,13 +143,26 @@ export const EducationSection = ({
                             />
                         </div>
                     </div>
-                    <button
-                        onClick={() => onAddEducation(newEducation)}
-                        className={`${THEME_CLASSES.buttons.primary} px-6 py-2 rounded-lg font-semibold transition-all flex items-center gap-2`}
-                    >
-                        <Plus size={18} />
-                        Add Education
-                    </button>
+                    <div className="flex gap-3">
+                        <button
+                            onClick={() => onAddEducation(newEducation)}
+                            className={`${THEME_CLASSES.buttons.primary} px-6 py-2 rounded-lg font-semibold transition-all flex items-center gap-2`}
+                        >
+                            {newEducation._id ? <Edit size={18} /> : <Plus size={18} />}
+                            {newEducation._id ? 'Update Education' : 'Add Education'}
+                        </button>
+                        {newEducation._id && (
+                            <button
+                                onClick={() => setNewEducation({
+                                    degree: '', institution: '', startDate: '', endDate: '', fieldOfStudy: '', isCurrentlyStudying: false, description: ''
+                                })}
+                                className="px-6 py-2 bg-slate-200 text-slate-700 rounded-lg font-semibold hover:bg-slate-300 transition-all flex items-center gap-2"
+                            >
+                                <X size={18} />
+                                Cancel
+                            </button>
+                        )}
+                    </div>
                 </div>
             )}
         </div>

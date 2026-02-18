@@ -15,8 +15,17 @@ export const useProfileData = (user) => {
     const [newEducation, setNewEducation] = useState({
         degree: '', institution: '', startDate: '', endDate: '', fieldOfStudy: '', isCurrentlyStudying: false, description: ''
     });
+    const [newCertificate, setNewCertificate] = useState({
+        name: '',
+        issuingOrganization: '',
+        issueDate: '',
+        expiryDate: '',
+        credentialId: '',
+        credentialUrl: '',
+        description: '',
+        skills: '',
+    });
     const [profileLoading, setProfileLoading] = useState(false);
-
     // Load profile data from backend
     useEffect(() => {
         const loadProfile = async () => {
@@ -49,54 +58,12 @@ export const useProfileData = (user) => {
                             skillName: skill.skillId?.name || skill.skillName || 'Unknown Skill'
                         })) || [],
                         experiences: profile.experiences || user?.experiences || [],
-                        education: profile.education || user?.education || []
+                        education: profile.education || user?.education || [],
+                        certificates: profile.certificates || user?.certificates || [],
                     });
-                } else {
-                    // Fallback to user context if API fails
-                    setEditedData({
-                        name: user?.name,
-                        email: user?.email,
-                        phone: user?.phone,
-                        currentCity: user?.currentCity,
-                        country: user?.country,
-                        avatar:  user?.avatar || [],
-                        linkedInUrl: user?.linkedInUrl,
-                        currentCompany: user?.currentCompany,
-                        overallExperience: user?.overallExperience ?? user?.experience ?? '',
-                        experienceSummary: user?.experienceSummary,
-                        expectedSalary: user?.expectedSalary || '',
-                        noticePeriod: user?.noticePeriod,
-                        skills: user?.skills?.map(skill => ({
-                            ...skill,
-                            skillName: skill.skillId?.name || skill.skillName || 'Unknown Skill'
-                        })) || [],
-                        experiences: user?.experiences || [],
-                        education: user?.education || [],
-                    });
-                }
+                } 
             } catch (error) {
-                console.error('Error loading profile:', error);
-                // Fallback to user context on error
-                setEditedData({
-                    name: user?.name,
-                    email: user?.email,
-                    phone: user?.phone,
-                    currentCity: user?.currentCity,
-                    country: user?.country,
-                    avatar:  user?.avatar || [],
-                    linkedInUrl: user?.linkedInUrl,
-                    currentCompany: user?.currentCompany,
-                    overallExperience: user?.overallExperience ?? user?.experience ?? '',
-                    experienceSummary: user?.experienceSummary,
-                    expectedSalary: user?.expectedSalary || '',
-                    noticePeriod: user?.noticePeriod,
-                    skills: user?.skills?.map(skill => ({
-                        ...skill,
-                        skillName: skill.skillId?.name || skill.skillName || 'Unknown Skill'
-                    })) || [],
-                    experiences: user?.experiences || [],
-                    education: user?.education || [],
-                });
+                
             } finally {
                 setProfileLoading(false);
             }
@@ -124,5 +91,7 @@ export const useProfileData = (user) => {
         setNewExperience,
         newEducation,
         setNewEducation,
+        newCertificate,
+        setNewCertificate,
     };
 };

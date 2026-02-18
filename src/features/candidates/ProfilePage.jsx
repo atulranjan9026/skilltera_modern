@@ -10,6 +10,7 @@ import { EducationSection } from './profile/components/EducationSection';
 import { PersonalInfoSection } from './profile/components/PersonalInfoSection';
 import { ResumeSection } from './profile/components/ResumeSection';
 import { candidateService } from '../../services/candidateService';
+import { CertificatesSection } from './profile/components/CertificatesSection';
 
 export default function ProfileEditor() {
   const { user, isLoading } = useAuthContext();
@@ -25,7 +26,11 @@ export default function ProfileEditor() {
     setNewExperience,
     newEducation,
     setNewEducation,
+    newCertificate,
+    setNewCertificate,
   } = useProfileData(user);
+
+  console.log(editedData);
 
   if (isLoading || profileLoading) {
     return (
@@ -72,6 +77,7 @@ export default function ProfileEditor() {
     { id: 'skills', label: 'Skills', icon: User },
     { id: 'experience', label: 'Experience', icon: User },
     { id: 'education', label: 'Education', icon: User },
+    { id: 'certificates', label: 'Certificates', icon: User },
   ];
 
   const needsResume = !user?.resume?.url;
@@ -101,7 +107,7 @@ export default function ProfileEditor() {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-4xl font-bold text-slate-900 mb-2">
-                {editedData?.name }
+                {editedData?.name}
               </h1>
               <p className="text-slate-600">{editedData.email}</p>
             </div>
@@ -165,7 +171,7 @@ export default function ProfileEditor() {
         {/* Tab Content */}
         {activeTab === 'resume' && (
           <ResumeSection
-            resume={user?.resume}
+            resume={editedData?.resume}
           />
         )}
 
@@ -223,6 +229,20 @@ export default function ProfileEditor() {
             isEditing={isEditing}
             newExperience={newExperience}
             setNewExperience={setNewExperience}
+            onEditExperience={(exp) => {
+              setNewExperience({
+                _id: exp._id,
+                position: exp.position,
+                company: exp.company,
+                employmentType: exp.employmentType || 'full-time',
+                startDate: exp.startDate ? new Date(exp.startDate).toISOString().split('T')[0] : '',
+                endDate: exp.endDate ? new Date(exp.endDate).toISOString().split('T')[0] : '',
+                isCurrentlyWorking: exp.isCurrentlyWorking,
+                description: exp.description || ''
+              });
+              // Scroll to form
+              window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            }}
             onAddExperience={async (experienceData) => {
               try {
                 // Validate required fields
@@ -245,11 +265,29 @@ export default function ProfileEditor() {
                   delete payload.endDate;
                 }
 
-                const response = await candidateService.addExperience(payload);
+                let response;
+                if (payload._id) {
+                  // Update existing experience
+                  response = await candidateService.updateExperience(payload._id, payload);
+                  if (response?.success && response?.data) {
+                    // Update local state by replacing the updated experience
+                    const updatedExperiences = editedData.experiences.map(exp =>
+                      exp._id === payload._id ? response.data : exp
+                    );
+                    handleInputChange('experiences', updatedExperiences);
+                    toast.success('Experience updated successfully');
+                  }
+                } else {
+                  // Add new experience
+                  response = await candidateService.addExperience(payload);
+                  if (response?.success && response?.data) {
+                    // Update local state with the new experience
+                    handleInputChange('experiences', [...(editedData.experiences || []), response.data]);
+                    toast.success('Experience added successfully');
+                  }
+                }
 
-                if (response?.success && response?.data) {
-                  // Update local state with the new experience
-                  handleInputChange('experiences', [...(editedData.experiences || []), response.data]);
+                if (response?.success) {
                   setNewExperience({
                     company: '',
                     position: '',
@@ -263,8 +301,8 @@ export default function ProfileEditor() {
 
                 return response;
               } catch (error) {
-                console.error('Error adding experience:', error);
-                toast.error(error.message || 'Failed to add experience. Please try again.');
+                console.error('Error saving experience:', error);
+                toast.error(error.message || 'Failed to save experience. Please try again.');
                 throw error;
               }
             }}
@@ -293,6 +331,20 @@ export default function ProfileEditor() {
             isEditing={isEditing}
             newEducation={newEducation}
             setNewEducation={setNewEducation}
+            onEditEducation={(edu) => {
+              setNewEducation({
+                _id: edu._id,
+                degree: edu.degree,
+                institution: edu.institution,
+                fieldOfStudy: edu.fieldOfStudy,
+                startDate: edu.startDate ? new Date(edu.startDate).toISOString().split('T')[0] : '',
+                endDate: edu.endDate ? new Date(edu.endDate).toISOString().split('T')[0] : '',
+                isCurrentlyStudying: edu.isCurrentlyStudying,
+                description: edu.description || ''
+              });
+              // Scroll to form
+              window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            }}
             onAddEducation={async (educationData) => {
               try {
                 // Validate required fields
@@ -315,11 +367,29 @@ export default function ProfileEditor() {
                   delete payload.endDate;
                 }
 
-                const response = await candidateService.addEducation(payload);
+                let response;
+                if (payload._id) {
+                  // Update existing education
+                  response = await candidateService.updateEducation(payload._id, payload);
+                  if (response?.success && response?.data) {
+                    // Update local state by replacing the updated item
+                    const updatedEducation = editedData.education.map(edu =>
+                      edu._id === payload._id ? response.data : edu
+                    );
+                    handleInputChange('education', updatedEducation);
+                    toast.success('Education updated successfully');
+                  }
+                } else {
+                  // Add new education
+                  response = await candidateService.addEducation(payload);
+                  if (response?.success && response?.data) {
+                    // Update local state with new education
+                    handleInputChange('education', [...(editedData.education || []), response.data]);
+                    toast.success('Education added successfully');
+                  }
+                }
 
-                if (response?.success && response?.data) {
-                  // Update local state with new education
-                  handleInputChange('education', [...(editedData.education || []), response.data]);
+                if (response?.success) {
                   setNewEducation({
                     institution: '',
                     degree: '',
@@ -333,8 +403,8 @@ export default function ProfileEditor() {
 
                 return response;
               } catch (error) {
-                console.error('Error adding education:', error);
-                toast.error(error.message || 'Failed to add education. Please try again.');
+                console.error('Error saving education:', error);
+                toast.error(error.message || 'Failed to save education. Please try again.');
                 throw error;
               }
             }}
@@ -353,6 +423,111 @@ export default function ProfileEditor() {
                 throw error;
               }
             }}
+          />
+        )}
+
+        {activeTab === 'certificates' && (
+          <CertificatesSection
+            newCertificate={newCertificate}
+            setNewCertificate={setNewCertificate}
+            onEditCertificate={(cert) => {
+              setNewCertificate({
+                _id: cert._id,
+                name: cert.name,
+                issuingOrganization: cert.issuingOrganization,
+                issueDate: cert.issueDate ? new Date(cert.issueDate).toISOString().split('T')[0] : '',
+                expiryDate: cert.expiryDate ? new Date(cert.expiryDate).toISOString().split('T')[0] : '',
+                credentialId: cert.credentialId || '',
+                credentialUrl: cert.credentialUrl || '',
+                description: cert.description || '',
+                skills: Array.isArray(cert.skills) ? cert.skills.join(', ') : (cert.skills || '')
+              });
+              // Scroll to form
+              window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            }}
+            onAddCertificate={async (certificateData) => {
+              try {
+                // Validate required fields
+                if (!certificateData.name || !certificateData.issuingOrganization || !certificateData.issueDate) {
+                  toast.error('Please fill in all required fields (Name, Issuing Organization, Issue Date)');
+                  return;
+                }
+
+                // Sanitize payload
+                const payload = { ...certificateData };
+                if (!payload.expiryDate) delete payload.expiryDate;
+                if (typeof payload.credentialUrl === 'string' && !payload.credentialUrl.trim()) delete payload.credentialUrl;
+                if (typeof payload.credentialId === 'string' && !payload.credentialId.trim()) delete payload.credentialId;
+                if (typeof payload.description === 'string' && !payload.description.trim()) delete payload.description;
+
+                // Skills: allow comma-separated string
+                if (typeof payload.skills === 'string') {
+                  const skillsArray = payload.skills
+                    .split(',')
+                    .map(s => s.trim())
+                    .filter(Boolean);
+                  if (skillsArray.length > 0) payload.skills = skillsArray;
+                  else delete payload.skills;
+                }
+
+                let response;
+                if (payload._id) {
+                  // Update existing certificate
+                  response = await candidateService.updateCertificate(payload._id, payload);
+                  if (response?.success && response?.data) {
+                    const updatedCertificates = editedData.certificates.map(cert =>
+                      cert._id === payload._id ? response.data : cert
+                    );
+                    handleInputChange('certificates', updatedCertificates);
+                    toast.success('Certificate updated successfully');
+                  }
+                } else {
+                  // Add new certificate
+                  response = await candidateService.addCertificate(payload);
+                  if (response?.success && response?.data) {
+                    handleInputChange('certificates', [...(editedData.certificates || []), response.data]);
+                    toast.success('Certificate added successfully');
+                  }
+                }
+
+                if (response?.success) {
+                  setNewCertificate({
+                    name: '',
+                    issuingOrganization: '',
+                    issueDate: '',
+                    expiryDate: '',
+                    credentialId: '',
+                    credentialUrl: '',
+                    description: '',
+                    skills: '',
+                  });
+                }
+
+                return response;
+              } catch (error) {
+                console.error('Error saving certificate:', error);
+                toast.error(error.message || 'Failed to save certificate. Please try again.');
+                throw error;
+              }
+            }}
+            onRemoveCertificate={async (certificateId) => {
+              try {
+                const response = await candidateService.deleteCertificate(certificateId);
+                if (response?.success) {
+                  handleInputChange(
+                    'certificates',
+                    (editedData.certificates || []).filter(cert => cert._id !== certificateId)
+                  );
+                }
+                return response;
+              } catch (error) {
+                console.error('Error removing certificate:', error);
+                toast.error('Failed to remove certificate. Please try again.');
+                throw error;
+              }
+            }}
+            certificates={editedData.certificates || []}
+            isEditing={isEditing}
           />
         )}
       </div>

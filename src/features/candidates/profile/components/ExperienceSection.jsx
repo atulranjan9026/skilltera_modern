@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Trash2, Briefcase } from 'lucide-react';
+import { Plus, Trash2, Briefcase, Edit, X } from 'lucide-react';
 import { THEME_CLASSES } from '../../../../theme';
 
 export const ExperienceSection = ({
@@ -8,7 +8,8 @@ export const ExperienceSection = ({
     newExperience,
     setNewExperience,
     onAddExperience,
-    onRemoveExperience
+    onRemoveExperience,
+    onEditExperience
 }) => {
     // Helper function to format dates
     const formatDate = (dateString) => {
@@ -22,6 +23,18 @@ export const ExperienceSection = ({
         const start = formatDate(exp.startDate);
         const end = exp.isCurrentlyWorking ? 'Present' : formatDate(exp.endDate);
         return `${start} - ${end}`;
+    };
+
+    const handleCancelEdit = () => {
+        setNewExperience({
+            position: '',
+            company: '',
+            employmentType: 'full-time',
+            startDate: '',
+            endDate: '',
+            isCurrentlyWorking: false,
+            description: ''
+        });
     };
 
     return (
@@ -45,14 +58,23 @@ export const ExperienceSection = ({
                                 </p>
                             </div>
                             {isEditing && (
-                                <button
-                                    onClick={() => onRemoveExperience(exp._id)}
-                                    className="p-2 hover:bg-red-100 text-red-600 rounded-lg transition-all"
-                                    disabled={!exp._id}
-                                    title={!exp._id ? 'Cannot delete: No ID found' : 'Delete experience'}
-                                >
-                                    <Trash2 size={18} />
-                                </button>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => onEditExperience(exp)}
+                                        className="p-2 hover:bg-blue-100 text-blue-600 rounded-lg transition-all"
+                                        title="Edit experience"
+                                    >
+                                        <Edit size={18} />
+                                    </button>
+                                    <button
+                                        onClick={() => onRemoveExperience(exp._id)}
+                                        className="p-2 hover:bg-red-100 text-red-600 rounded-lg transition-all"
+                                        disabled={!exp._id}
+                                        title={!exp._id ? 'Cannot delete: No ID found' : 'Delete experience'}
+                                    >
+                                        <Trash2 size={18} />
+                                    </button>
+                                </div>
                             )}
                         </div>
                         <p className="text-slate-600">{exp.description}</p>
@@ -60,10 +82,12 @@ export const ExperienceSection = ({
                 ))}
             </div>
 
-            {/* Add Experience Form */}
+            {/* Add/Edit Experience Form */}
             {isEditing && (
                 <div className="p-6 bg-slate-50 rounded-xl border-2 border-dashed border-slate-300">
-                    <h4 className="font-semibold text-slate-900 mb-4">Add Work Experience</h4>
+                    <h4 className="font-semibold text-slate-900 mb-4">
+                        {newExperience._id ? 'Edit Work Experience' : 'Add Work Experience'}
+                    </h4>
                     <div className="grid md:grid-cols-2 gap-4 mb-4">
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-2">Position *</label>
@@ -146,13 +170,24 @@ export const ExperienceSection = ({
                             />
                         </div>
                     </div>
-                    <button
-                        onClick={() => onAddExperience(newExperience)}
-                        className={`${THEME_CLASSES.buttons.primary} px-6 py-2 rounded-lg font-semibold transition-all flex items-center gap-2`}
-                    >
-                        <Plus size={18} />
-                        Add Experience
-                    </button>
+                    <div className="flex gap-3">
+                        <button
+                            onClick={() => onAddExperience(newExperience)}
+                            className={`${THEME_CLASSES.buttons.primary} px-6 py-2 rounded-lg font-semibold transition-all flex items-center gap-2`}
+                        >
+                            {newExperience._id ? <Edit size={18} /> : <Plus size={18} />}
+                            {newExperience._id ? 'Update Experience' : 'Add Experience'}
+                        </button>
+                        {newExperience._id && (
+                            <button
+                                onClick={handleCancelEdit}
+                                className="px-6 py-2 bg-slate-200 text-slate-700 rounded-lg font-semibold hover:bg-slate-300 transition-all flex items-center gap-2"
+                            >
+                                <X size={18} />
+                                Cancel
+                            </button>
+                        )}
+                    </div>
                 </div>
             )}
         </div>
