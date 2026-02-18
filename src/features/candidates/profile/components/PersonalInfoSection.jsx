@@ -1,8 +1,42 @@
-import React from 'react';
-import { Mail, Phone, MapPin, Linkedin, Building2, DollarSign, Clock } from 'lucide-react';
+import React, { useState } from 'react';
+import { Mail, Phone, MapPin, Linkedin, Building2, DollarSign, Clock, Edit3, Save, X, Loader } from 'lucide-react';
 import { THEME_CLASSES } from '../../../../theme';
+import { toast } from 'sonner';
+import { candidateService } from '../../../../services/candidateService';
 
 export const PersonalInfoSection = ({ data, isEditing, onChange }) => {
+    const [isEditingSection, setIsEditingSection] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [editedData, setEditedData] = useState(data);
+
+    const handleSave = async () => {
+        setIsSaving(true);
+        try {
+            await candidateService.updateProfile(editedData);
+            toast.success('Personal information updated successfully!');
+            setIsEditingSection(false);
+            // Update parent state
+            Object.keys(editedData).forEach(key => {
+                onChange(key, editedData[key]);
+            });
+        } catch (error) {
+            toast.error(error.message || 'Failed to update personal information');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleCancel = () => {
+        setEditedData(data);
+        setIsEditingSection(false);
+    };
+
+    const handleSectionChange = (field, value) => {
+        setEditedData(prev => ({
+            ...prev,
+            [field]: value
+        }));
+    };
     return (
         <div className="space-y-6">
             {/* Contact Information */}

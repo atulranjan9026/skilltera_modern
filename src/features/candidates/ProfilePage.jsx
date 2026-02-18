@@ -28,9 +28,22 @@ export default function ProfileEditor() {
     setNewEducation,
     newCertificate,
     setNewCertificate,
+    setEditedData
   } = useProfileData(user);
 
-  console.log(editedData);
+  const handleResumeUpdate = async () => {
+    try {
+      const response = await candidateService.getProfile();
+      if (response?.success && response?.data) {
+        setEditedData(prev => ({
+          ...prev,
+          resume: response.data.resume
+        }));
+      }
+    } catch (error) {
+      console.error('Failed to refresh resume data:', error);
+    }
+  };
 
   if (isLoading || profileLoading) {
     return (
@@ -111,44 +124,6 @@ export default function ProfileEditor() {
               </h1>
               <p className="text-slate-600">{editedData.email}</p>
             </div>
-            <div className="flex gap-3">
-              {!isEditing ? (
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className={`${THEME_CLASSES.buttons.primary} px-6 py-3 rounded-lg font-semibold transition-all flex items-center gap-2`}
-                >
-                  <Edit3 size={18} />
-                  Edit Profile
-                </button>
-              ) : (
-                <>
-                  <button
-                    onClick={() => setIsEditing(false)}
-                    className="px-6 py-3 bg-slate-200 text-slate-700 rounded-lg font-semibold hover:bg-slate-300 transition-all flex items-center gap-2"
-                  >
-                    <X size={18} />
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSave}
-                    disabled={isSaving}
-                    className={`${THEME_CLASSES.buttons.primary} px-6 py-3 rounded-lg font-semibold transition-all flex items-center gap-2 disabled:opacity-50`}
-                  >
-                    {isSaving ? (
-                      <>
-                        <Loader size={18} className="animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <Save size={18} />
-                        Save Changes
-                      </>
-                    )}
-                  </button>
-                </>
-              )}
-            </div>
           </div>
         </div>
 
@@ -172,6 +147,7 @@ export default function ProfileEditor() {
         {activeTab === 'resume' && (
           <ResumeSection
             resume={editedData?.resume}
+            onResumeUpdate={handleResumeUpdate}
           />
         )}
 

@@ -3,6 +3,7 @@ import { FileText, Upload, Loader, ExternalLink, Trash2 } from 'lucide-react';
 import { THEME_CLASSES } from '../../../../theme';
 import { candidateService } from '../../../../services/candidateService';
 import { useAuthContext } from '../../../../store/context/AuthContext';
+import { toast } from 'sonner';
 
 export const ResumeSection = ({ resume, onResumeUpdate }) => {
     const { refreshUser } = useAuthContext();
@@ -11,18 +12,18 @@ export const ResumeSection = ({ resume, onResumeUpdate }) => {
     const [isDeleting, setIsDeleting] = useState(false);
 
     const hasResume = resume?.url;
-
+    
     const handleFileChange = async (e) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
         const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
         if (!validTypes.includes(file.type)) {
-            setUploadError('Please upload a PDF or Word document.');
+            toast.error('Please upload a PDF or Word document.');
             return;
         }
         if (file.size > 2 * 1024 * 1024) {
-            setUploadError('File size must be less than 2MB.');
+            toast.error('File size must be less than 2MB.');
             return;
         }
 
@@ -32,8 +33,10 @@ export const ResumeSection = ({ resume, onResumeUpdate }) => {
             await candidateService.uploadResume(file);
             await refreshUser();
             onResumeUpdate?.();
+            toast.success('Resume uploaded successfully!');
         } catch (error) {
             setUploadError(error.response?.data?.message || 'Failed to upload resume.');
+            toast.error(error.response?.data?.message || 'Failed to upload resume.');
         } finally {
             setIsUploading(false);
             e.target.value = '';
@@ -41,18 +44,30 @@ export const ResumeSection = ({ resume, onResumeUpdate }) => {
     };
 
     const handleDelete = async () => {
-        if (!confirm('Are you sure you want to delete your resume?')) return;
-        setIsDeleting(true);
-        setUploadError(null);
-        try {
-            await candidateService.deleteResume();
-            await refreshUser();
-            onResumeUpdate?.();
-        } catch (error) {
-            setUploadError(error.response?.data?.message || 'Failed to delete resume.');
-        } finally {
-            setIsDeleting(false);
-        }
+        toast('Are you sure you want to delete your resume?', {
+            action: {
+                label: 'Delete',
+                onClick: async () => {
+                    setIsDeleting(true);
+                    setUploadError(null);
+                    try {
+                        await candidateService.deleteResume();
+                        await refreshUser();
+                        onResumeUpdate?.();
+                        toast.success('Resume deleted successfully!');
+                    } catch (error) {
+                        setUploadError(error.response?.data?.message || 'Failed to delete resume.');
+                        toast.error(error.response?.data?.message || 'Failed to delete resume.');
+                    } finally {
+                        setIsDeleting(false);
+                    }
+                }
+            },
+            cancel: {
+                label: 'Cancel',
+                onClick: () => {}
+            }
+        });
     };
 
     return (

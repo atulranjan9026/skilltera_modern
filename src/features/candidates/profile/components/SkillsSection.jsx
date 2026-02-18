@@ -8,7 +8,9 @@ export const SkillsSection = ({
     skills = [],
     isEditing,
     onAddSkill,
-    onRemoveSkill
+    onRemoveSkill,
+    skillsLoading,
+    skillError
 }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
@@ -18,6 +20,7 @@ export const SkillsSection = ({
     const [errorMsg, setErrorMsg] = useState('');
     const isInitialMount = useRef(true);
 
+    console.log('skills', skills);
     // Search skills API (debounced)
     useEffect(() => {
         // Skip on initial render
@@ -70,7 +73,8 @@ export const SkillsSection = ({
         // Check if already exists in current skills or skills to add
         const alreadyInCurrent = skills.some(s =>
             s.skillId === skillId ||
-            (s.skillId?._id === skillId) 
+            (s.skillId?._id === skillId) ||
+            (s.skillName === skillName)
         );
         const alreadyInToAdd = skillsToAdd.some(s => s.skillId === skillId);
 
@@ -129,6 +133,7 @@ export const SkillsSection = ({
             for (const skill of skillsToAdd) {
                 await onAddSkill({
                     skillId: skill.skillId,
+                    skillName: skill.skillName || skill.skill,
                     experience: skill.experience,
                     rating: skill.rating
                 });
@@ -198,10 +203,7 @@ export const SkillsSection = ({
                                             )}
                                             {isEditing && (
                                                 <button
-                                                    onClick={() => {
-                                                        const skillId = skill.id || skill._id;
-                                                        handleRemoveExistingSkill(skillId);
-                                                    }}
+                                                    onClick={() => handleRemoveExistingSkill(skill.id)}
                                                     className="ml-1 p-1 hover:bg-red-100 text-red-600 rounded-full transition-all"
                                                     title="Remove skill"
                                                 >
@@ -223,6 +225,13 @@ export const SkillsSection = ({
                 </div>
                 {/* )} */}
 
+                {/* Error from parent */}
+                {skillError && (
+                    <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                        {skillError}
+                    </div>
+                )}
+
                 {/* Add Skills Section - Only shown when editing */}
                 {isEditing && (
                     <div className="border-t border-slate-200 pt-8">
@@ -238,7 +247,7 @@ export const SkillsSection = ({
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     placeholder="Search a skill... (e.g., React, Python, AWS)"
                                     className={`${THEME_CLASSES.inputs} pl-11`}
-                                    disabled={isSaving}
+                                    disabled={skillsLoading}
                                 />
                                 {isSearching && (
                                     <Loader className="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary-500 animate-spin" size={20} />
@@ -297,7 +306,7 @@ export const SkillsSection = ({
                                     >
                                         <div className="flex justify-between items-start mb-4">
                                             <div>
-                                                <h6 className="font-bold text-lg text-primary-900">{skill.skillName}</h6>
+                                                <h6 className="font-bold text-lg text-primary-900">{skill.skill}</h6>
                                             </div>
                                             <button
                                                 onClick={() => handleRemoveItem(skill.skillId)}
@@ -362,10 +371,10 @@ export const SkillsSection = ({
                                 <div className="flex justify-center pt-4">
                                     <button
                                         onClick={saveSkills}
-                                        disabled={isSaving}
+                                        disabled={isSaving || skillsLoading}
                                         className={`${THEME_CLASSES.buttons.primary} px-8 py-3 font-bold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2`}
                                     >
-                                        {isSaving ? (
+                                        {isSaving || skillsLoading ? (
                                             <>
                                                 <Loader size={20} className="animate-spin" />
                                                 Saving Skills...
