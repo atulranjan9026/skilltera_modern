@@ -57,7 +57,6 @@ export default function SearchBar({ onSearch }) {
     const timeout = setTimeout(async () => {
       try {
         const response = await candidateService.getJobSuggestions(trimmed, 8);
-        console.log(response.data);
         if (response?.success) {
           setJobSuggestions(response.data || { titles: [], companies: [] });
         }
@@ -96,8 +95,7 @@ export default function SearchBar({ onSearch }) {
     }
   };
 
-  const handleApplyFilters = (newFilters) => {
-    console.log('SearchBar handleApplyFilters called with:', newFilters);
+    const handleApplyFilters = (newFilters) => {
     setFilters(newFilters);
 
     // Use the same search logic as handleSearch

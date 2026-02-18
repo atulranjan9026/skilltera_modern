@@ -29,7 +29,6 @@ export default function ProfileEditor() {
     setNewCertificate,
     setEditedData
   } = useProfileData(user);
-  console.log(editedData);
 
   const handleResumeUpdate = async () => {
     try {

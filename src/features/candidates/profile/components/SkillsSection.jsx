@@ -20,7 +20,6 @@ export const SkillsSection = ({
     const [errorMsg, setErrorMsg] = useState('');
     const isInitialMount = useRef(true);
 
-    console.log('skills', skills);
     // Search skills API (debounced)
     useEffect(() => {
         // Skip on initial render
