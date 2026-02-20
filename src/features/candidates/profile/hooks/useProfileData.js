@@ -27,6 +27,8 @@ export const useProfileData = () => {
     });
     const [profileLoading, setProfileLoading] = useState(false);
 
+    console.log('editedData', editedData);
+
     useEffect(() => {
         const loadProfile = async () => {
             setProfileLoading(true);
@@ -35,6 +37,7 @@ export const useProfileData = () => {
 
                 if (response?.success && response?.data) {
                     const profile = response.data;
+                    console.log('profile', profile);
                     setEditedData({
                         name: profile.name,
                         email: profile.email,
@@ -55,11 +58,12 @@ export const useProfileData = () => {
                         experiences: profile.experiences || [],
                         education: profile.education || [],
                         certificates: profile.certificates || [],
-                        resume: profile.resume
+                        resume: profile.resume || null,
+                        profileStrength: profile.profileStrength || 0,
                     });
                 }
             } catch (error) {
-
+                console.error('Error loading profile:', error);
             } finally {
                 setProfileLoading(false);
             }

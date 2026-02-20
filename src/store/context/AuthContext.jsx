@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  console.log('AuthContext mounted', user);
+  // console.log('AuthContext mounted', user);
 
   // Check if user is logged in on mount
   useEffect(() => {
@@ -180,3 +180,5 @@ export const useAuthContext = () => {
   }
   return context;
 };
+
+
