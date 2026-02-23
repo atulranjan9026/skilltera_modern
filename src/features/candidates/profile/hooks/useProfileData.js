@@ -27,7 +27,7 @@ export const useProfileData = () => {
     });
     const [profileLoading, setProfileLoading] = useState(false);
 
-    console.log('editedData', editedData);
+    // console.log('editedData', editedData);
 
     useEffect(() => {
         const loadProfile = async () => {

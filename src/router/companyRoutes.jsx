@@ -1,4 +1,5 @@
 import { Navigate } from 'react-router-dom';
+import CompanyLogin from '../features/company/CompanyAuth/CompanyLogin';
 
 /**
  * Company/Client-specific routes
@@ -8,6 +9,16 @@ const companyRoutes = {
   path: 'company',
   // element: <CompanyDashboardLayout />, // Uncomment when layout is created
   children: [
+    // Company Login
+    {
+      path: 'login',
+      element: <CompanyLogin />,
+    },
+    // Refer Candidate
+    {
+      path: 'refer',
+      element: <div>Refer Candidate (Coming Soon)</div>,
+    },
     {
       index: true,
       element: <Navigate to="dashboard" replace />,

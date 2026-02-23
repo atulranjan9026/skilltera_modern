@@ -4,7 +4,9 @@ import Login from '../features/candidates/CondidatesAuth.js/CandidateLogin';
 import CandidateSignup from '../features/candidates/CondidatesAuth.js/CandidateSignup';
 
 /**
- * Authentication routes - shared for all users
+ * Authentication routes - rendered in AuthLayout WITH navbar
+ * Users can see Company Login, Refer Candidate links from navbar
+ * AuthLayout includes both navbar and left-side branding panel
  */
 const authRoutes = {
   path: 'auth',

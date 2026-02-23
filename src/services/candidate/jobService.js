@@ -56,7 +56,7 @@ export const jobService = {
         if (options.postedWithin) params.append('postedWithin', options.postedWithin);
 
         const queryString = params.toString();
-        const endpoint = `/candidate/job/ranking${queryString ? `?${queryString}` : ''}`;
+        const endpoint = `/candidates/job/ranking${queryString ? `?${queryString}` : ''}`;
         return get(endpoint, true, 300000);
     },
 
@@ -65,7 +65,7 @@ export const jobService = {
      */
     getJobSuggestions: async (query, limit = 8) => {
         const params = new URLSearchParams({ q: query, limit });
-        return get(`/candidate/job/suggestions?${params.toString()}`, false, 0);
+        return get(`/candidates/job/suggestions?${params.toString()}`, false, 0);
     },
 
     /**
@@ -73,6 +73,6 @@ export const jobService = {
      */
     getLocationSuggestions: async (query, limit = 8) => {
         const params = new URLSearchParams({ q: query, limit });
-        return get(`/candidate/job/location-suggestions?${params.toString()}`, false, 0);
+        return get(`/candidates/job/location-suggestions?${params.toString()}`, false, 0);
     }
 };

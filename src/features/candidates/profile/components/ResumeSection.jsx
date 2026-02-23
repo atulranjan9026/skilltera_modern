@@ -44,30 +44,20 @@ export const ResumeSection = ({ resume, onResumeUpdate }) => {
     };
 
     const handleDelete = async () => {
-        toast('Are you sure you want to delete your resume?', {
-            action: {
-                label: 'Delete',
-                onClick: async () => {
-                    setIsDeleting(true);
-                    setUploadError(null);
-                    try {
-                        await candidateService.deleteResume();
-                        await refreshUser();
-                        onResumeUpdate?.();
-                        toast.success('Resume deleted successfully!');
-                    } catch (error) {
-                        setUploadError(error.response?.data?.message || 'Failed to delete resume.');
-                        toast.error(error.response?.data?.message || 'Failed to delete resume.');
-                    } finally {
-                        setIsDeleting(false);
-                    }
-                }
-            },
-            cancel: {
-                label: 'Cancel',
-                onClick: () => {}
-            }
-        });
+        if (!confirm('Are you sure you want to delete your resume?')) return;
+        setIsDeleting(true);
+        setUploadError(null);
+        try {
+            await candidateService.deleteResume();
+            await refreshUser();
+            onResumeUpdate?.();
+            toast.success('Resume deleted successfully!');
+        } catch (error) {
+            setUploadError(error.response?.data?.message || 'Failed to delete resume.');
+            toast.error(error.response?.data?.message || 'Failed to delete resume.');
+        } finally {
+            setIsDeleting(false);
+        }
     };
 
     return (

@@ -3,11 +3,14 @@ import SearchBar from './JobSerching/Search/SearchBar';
 import JobListings from './JobSerching/JobCard/JobListings';
 import EmptyState from '../../components/common/EmptyState';
 import { candidateService } from '../../services/candidateService';
+import { useAuthContext } from '../../store/context/AuthContext';
+import { toast } from '../../utils/toast';
 
 /**
  * Job Search Page - Browse and filter jobs
  */
 export default function JobSearchPage() {
+  const { user } = useAuthContext();
   const [jobs, setJobs] = useState([]);
   const [savedJobs, setSavedJobs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,8 +31,21 @@ export default function JobSearchPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [jobsPerPage] = useState(9);
 
-  useEffect(() => {fetchActiveJobs();
+  useEffect(() => {
+    fetchActiveJobs();
+    fetchSavedJobs();
   }, [currentPage, searchQuery, filters]);
+
+  const fetchSavedJobs = async () => {
+    try {
+      const response = await candidateService.getSavedJobs(user._id);
+      if (response?.success) {
+        setSavedJobs(response.data?.jobs?.map(job => job._id || job.id) || []);
+      }
+    } catch (error) {
+      console.error('Error fetching saved jobs:', error);
+    }
+  };
 
  
   /**
@@ -184,15 +200,45 @@ export default function JobSearchPage() {
     setCurrentPage(1); // Reset to first page on new search
   };
 
-  const handleSaveJob = (jobId) => {
-    setSavedJobs((prev) =>
-      prev.includes(jobId) ? prev.filter((id) => id !== jobId) : [...prev, jobId]
-    );
+  const handleSaveJob = async (jobId) => {
+    try {
+      if (savedJobs.includes(jobId)) {
+        // Unsave the job
+        await candidateService.unsaveJob(user._id, jobId);
+        setSavedJobs((prev) => prev.filter((id) => id !== jobId));
+        toast.success('Job removed from saved list');
+      } else {
+        // Save the job
+        await candidateService.saveJob(user._id, jobId);
+        setSavedJobs((prev) => [...prev, jobId]);
+        toast.success('Job saved successfully');
+      }
+    } catch (error) {
+      console.error('Error saving job:', error);
+      toast.error(error.response?.data?.message || 'Failed to save job');
+    }
   };
 
-  const handleApplyJob = (jobId) => {
-    alert(`Applied for job ID: ${jobId}`);
-    // In real app, this would call an API
+  const handleApplyJob = async (jobId) => {
+    if (!user?._id) {
+      toast.error('Please log in to apply for jobs');
+      return;
+    }
+
+    try {
+      const applicationData = {}; // Backend uses jobId from URL params
+
+      const response = await candidateService.applyForJob(user._id, jobId, applicationData);
+      
+      if (response?.success) {
+        toast.success('Job application submitted successfully!');
+      } else {
+        throw new Error(response?.message || 'Failed to apply for job');
+      }
+    } catch (error) {
+      console.error('Error applying for job:', error);
+      toast.error(error.response?.data?.message || error.message || 'Failed to apply for job. Please try again.');
+    }
   };
 
   const handleFilterChange = (newFilters) => {
