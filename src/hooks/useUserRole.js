@@ -1,27 +1,24 @@
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
+import { useAuthContext } from '../store/context/AuthContext';
 
 /**
- * Hook to determine user role (candidate, company, admin)
- * Returns the user's role and methods to check role
+ * Hook to determine user role from auth context.
+ * Returns the user's role and boolean helpers.
  */
 export const useUserRole = () => {
-  const [role, setRole] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, isLoading } = useAuthContext();
 
-  useEffect(() => {
-    // TODO: Fetch user role from auth service or localStorage
-    setIsLoading(false);
-  }, []);
-
-  const isCandidate = role === 'candidate';
-  const isCompany = role === 'company';
-  const isAdmin = role === 'admin';
+  const role = useMemo(() => {
+    if (!user) return null;
+    return user.role || 'candidate'; // Default to candidate
+  }, [user]);
 
   return {
     role,
     isLoading,
-    isCandidate,
-    isCompany,
-    isAdmin,
+    isCandidate: role === 'candidate',
+    isCompany: role === 'company',
+    isAdmin: role === 'admin',
+    isAuthenticated: !!user,
   };
 };

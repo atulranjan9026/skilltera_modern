@@ -1,7 +1,7 @@
 import { Navigate } from 'react-router-dom';
 import AuthLayout from '../layouts/AuthLayout';
-import Login from '../features/candidates/CondidatesAuth.js/CandidateLogin';
-import CandidateSignup from '../features/candidates/CondidatesAuth.js/CandidateSignup';
+import Login from '../features/candidates/CandidatesAuth/CandidateLogin';
+import CandidateSignup from '../features/candidates/CandidatesAuth/CandidateSignup';
 
 /**
  * Authentication routes - rendered in AuthLayout WITH navbar

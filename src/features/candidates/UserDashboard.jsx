@@ -521,7 +521,7 @@ export default function UserDashboard() {
     ? Math.round((allAppsCount / (savedJobs.length + allAppsCount)) * 100)
     : 0;
 
-  // Client-side search (stacked on top of server status filter)
+  // Client-side search
   const q = debouncedSearch.toLowerCase();
   const filteredSaved = savedJobs.filter(
     (j) => (j.title ?? '').toLowerCase().includes(q) || (j.company ?? '').toLowerCase().includes(q)
@@ -555,227 +555,219 @@ export default function UserDashboard() {
   }
 
   return (
-    <>
-      <style>{`
-        @keyframes shimmer      { to { transform: translateX(200%); } }
-        @keyframes fadeSlideUp  { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
-        @keyframes fadeIn       { from { opacity:0; } to { opacity:1; } }
-      `}</style>
+    <div className="min-h-screen bg-slate-50">
+      <div className="container mx-auto px-4 sm:px-6 py-10 max-w-[75rem]">
 
-      <div className="min-h-screen bg-[#f8f9fb]">
-        <div className="container mx-auto px-4 sm:px-6 py-10 max-w-[75rem]">
+        {/* ── Header ──────────────────────────────────────────────────── */}
+        <div className="mb-9" style={{ opacity: 0, animation: 'fadeSlideUp 0.5s ease 0ms forwards' }}>
+          <p className="text-[11px] font-bold text-primary-500 uppercase tracking-[0.14em] mb-1.5">Dashboard</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 leading-tight">
+            Hey, {user.fullname || user.name || 'there'} 👋
+          </h1>
+          <p className="text-slate-400 text-sm mt-1">Track your applications and saved jobs</p>
+        </div>
 
-          {/* ── Header ──────────────────────────────────────────────────── */}
-          <div className="mb-9" style={{ opacity: 0, animation: 'fadeSlideUp 0.5s ease 0ms forwards' }}>
-            <p className="text-[11px] font-bold text-primary-500 uppercase tracking-[0.14em] mb-1.5">Dashboard</p>
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 leading-tight">
-              Hey, {user.fullname || user.name || 'there'} 👋
-            </h1>
-            <p className="text-slate-400 text-sm mt-1">Track your applications and saved jobs</p>
-          </div>
-
-          {/* ── Stats ───────────────────────────────────────────────────── */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
-            <StatCard
-              value={isSavedLoading ? '—' : savedJobs.length}
-              label="Saved Jobs"
-              sub="Ready to apply"
-              delay={80}
-            />
-            <StatCard
-              value={isAppsLoading ? '—' : allAppsCount}
-              label="Applications"
-              sub={isAppsLoading ? '' : `${activeJobsCount} in progress`}
-              delay={160}
-            />
-            <div
-              className="col-span-2 sm:col-span-1 bg-white rounded-2xl border border-slate-100 p-5 shadow-sm"
-              style={{ opacity: 0, animation: 'fadeSlideUp 0.5s ease 240ms forwards' }}
-            >
-              <p className="text-3xl font-bold text-primary-600 mb-0.5 tabular-nums">{applyRate}%</p>
-              <p className="text-sm font-semibold text-slate-700">Apply Rate</p>
-              <div className="mt-3 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-primary-400 to-primary-600 rounded-full"
-                  style={{ width: `${applyRate}%`, transition: 'width 1s cubic-bezier(0.25,1,0.5,1)' }}
-                />
-              </div>
+        {/* ── Stats ───────────────────────────────────────────────────── */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
+          <StatCard
+            value={isSavedLoading ? '—' : savedJobs.length}
+            label="Saved Jobs"
+            sub="Ready to apply"
+            delay={80}
+          />
+          <StatCard
+            value={isAppsLoading ? '—' : allAppsCount}
+            label="Applications"
+            sub={isAppsLoading ? '' : `${activeJobsCount} in progress`}
+            delay={160}
+          />
+          <div
+            className="col-span-2 sm:col-span-1 bg-white rounded-2xl border border-slate-100 p-5 shadow-sm"
+            style={{ opacity: 0, animation: 'fadeSlideUp 0.5s ease 240ms forwards' }}
+          >
+            <p className="text-3xl font-bold text-primary-600 mb-0.5 tabular-nums">{applyRate}%</p>
+            <p className="text-sm font-semibold text-slate-700">Apply Rate</p>
+            <div className="mt-3 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-primary-400 to-primary-600 rounded-full"
+                style={{ width: `${applyRate}%`, transition: 'width 1s cubic-bezier(0.25,1,0.5,1)' }}
+              />
             </div>
           </div>
-
-          {/* ── Tabs ────────────────────────────────────────────────────── */}
-          <div
-            className="flex gap-1 bg-slate-100 rounded-xl p-1 mb-5"
-            style={{ opacity: 0, animation: 'fadeSlideUp 0.5s ease 300ms forwards' }}
-          >
-            {[
-              { key: 'saved',   label: 'Saved',       count: savedJobs.length, loading: isSavedLoading, icon: Bookmark },
-              { key: 'applied', label: 'Applications', count: allAppsCount,     loading: allAppsLoading, icon: CheckCircle },
-            ].map(({ key, label, count, loading, icon: Icon }) => (
-              <button
-                key={key}
-                onClick={() => {
-                  setActiveTab(key);
-                  if (key === 'saved') setStatusFilter('all');
-                  setSearchQuery('');
-                }}
-                className={`
-                  flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg
-                  text-sm font-semibold transition-all duration-200 select-none
-                  ${activeTab === key
-                    ? 'bg-white text-primary-600 shadow-sm border border-slate-200'
-                    : 'text-slate-500 hover:text-slate-700'}
-                `}
-              >
-                <Icon size={14} />
-                {label}
-                <span className={`text-[11px] px-1.5 py-0.5 rounded-md font-bold tabular-nums ${
-                  activeTab === key ? 'bg-primary-50 text-primary-600' : 'bg-slate-200 text-slate-400'
-                }`}>
-                  {loading ? '…' : count}
-                </span>
-              </button>
-            ))}
-          </div>
-
-          {/* ── Search ──────────────────────────────────────────────────── */}
-          <div
-            className="relative mb-4"
-            style={{ opacity: 0, animation: 'fadeSlideUp 0.5s ease 360ms forwards' }}
-          >
-            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={activeTab === 'saved' ? 'Search saved jobs…' : 'Search applications…'}
-              className="w-full pl-10 pr-9 py-2.5 bg-white border border-slate-200 rounded-xl
-                text-sm text-slate-800 placeholder-slate-400 shadow-sm
-                focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-300
-                transition-shadow"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500 transition-colors"
-                aria-label="Clear search"
-              >
-                <XCircle size={15} />
-              </button>
-            )}
-          </div>
-
-          {/* ── Status chips ─────────────────────────────────────────────── */}
-          {activeTab === 'applied' && !allAppsLoading && Object.keys(statusCounts).length > 0 && (
-            <StatusFilterChips
-              activeFilter={statusFilter}
-              onChange={(key) => { setStatusFilter(key); setSearchQuery(''); }}
-              counts={statusCounts}
-            />
-          )}
-
-          {/* ── Content ─────────────────────────────────────────────────── */}
-          {activeTab === 'saved' ? (
-            <>
-              {savedError && !isSavedLoading && (
-                <ErrorBlock message={savedError} onRetry={refetchSaved} />
-              )}
-              {isSavedLoading ? (
-                <SkeletonList count={4} />
-              ) : paginatedSaved.length > 0 ? (
-                <>
-                  <div className="space-y-3">
-                    {paginatedSaved.map((job, i) => (
-                      <JobCard 
-                        key={job.id} 
-                        job={job} 
-                        isApplied={false} 
-                        index={i}
-                        onJobClick={(jobId) => {
-                          navigate(`/job/${jobId}`);
-                        }}
-                      />
-                    ))}
-                  </div>
-                  <Pagination
-                    page={savedPage} totalPages={savedTotalPages}
-                    onPrev={() => setSavedPage((p) => Math.max(1, p - 1))}
-                    onNext={() => setSavedPage((p) => Math.min(savedTotalPages, p + 1))}
-                  />
-                </>
-              ) : (
-                <EmptyState
-                  icon={Bookmark}
-                  title={debouncedSearch ? 'No results found' : 'No saved jobs yet'}
-                  body={debouncedSearch ? 'Try a different search term.' : 'Browse jobs and bookmark them to revisit here.'}
-                  action={debouncedSearch && (
-                    <button onClick={() => setSearchQuery('')}
-                      className="text-xs font-bold text-primary-600 hover:underline">
-                      Clear search
-                    </button>
-                  )}
-                />
-              )}
-            </>
-          ) : (
-            <>
-              {(allAppsError || filteredError) && !isAppsLoading && (
-                <ErrorBlock
-                  message={allAppsError || filteredError}
-                  onRetry={() => { refetchAll(); refetchFiltered(); }}
-                />
-              )}
-              {isAppsLoading ? (
-                <SkeletonList count={4} />
-              ) : paginatedApps.length > 0 ? (
-                <>
-                  <div className="space-y-3">
-                    {paginatedApps.map((job, i) => (
-                      <JobCard 
-                        key={job.id} 
-                        job={job} 
-                        isApplied={true} 
-                        index={i}
-                        onJobClick={(jobId) => {
-                          navigate(`/job/${jobId}`);
-                        }}
-                      />
-                    ))}
-                  </div>
-                  <Pagination
-                    page={appsPage} totalPages={appsTotalPages}
-                    onPrev={() => setAppsPage((p) => Math.max(1, p - 1))}
-                    onNext={() => setAppsPage((p) => Math.min(appsTotalPages, p + 1))}
-                  />
-                </>
-              ) : (
-                <EmptyState
-                  icon={statusFilter !== 'all' ? getStatusConfig(statusFilter).icon : Briefcase}
-                  title={
-                    debouncedSearch ? 'No results found' :
-                    statusFilter !== 'all' ? `No "${getStatusConfig(statusFilter).label}" applications` :
-                    'No applications yet'
-                  }
-                  body={
-                    debouncedSearch ? 'Try a different search term.' :
-                    statusFilter !== 'all' ? 'Try a different status filter above.' :
-                    'Apply to jobs and track your progress here.'
-                  }
-                  action={(debouncedSearch || statusFilter !== 'all') && (
-                    <button
-                      onClick={() => { setSearchQuery(''); setStatusFilter('all'); }}
-                      className="text-xs font-bold text-primary-600 hover:underline"
-                    >
-                      Clear filters
-                    </button>
-                  )}
-                />
-              )}
-            </>
-          )}
-
         </div>
+
+        {/* ── Tabs ────────────────────────────────────────────────────── */}
+        <div
+          className="flex gap-1 bg-slate-100 rounded-xl p-1 mb-5"
+          style={{ opacity: 0, animation: 'fadeSlideUp 0.5s ease 300ms forwards' }}
+        >
+          {[
+            { key: 'saved',   label: 'Saved',       count: savedJobs.length, loading: isSavedLoading, icon: Bookmark },
+            { key: 'applied', label: 'Applications', count: allAppsCount,     loading: allAppsLoading, icon: CheckCircle },
+          ].map(({ key, label, count, loading, icon: Icon }) => (
+            <button
+              key={key}
+              onClick={() => {
+                setActiveTab(key);
+                if (key === 'saved') setStatusFilter('all');
+                setSearchQuery('');
+              }}
+              className={`
+                flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg
+                text-sm font-semibold transition-all duration-200 select-none
+                ${activeTab === key
+                  ? 'bg-white text-primary-600 shadow-sm border border-slate-200'
+                  : 'text-slate-500 hover:text-slate-700'}
+              `}
+            >
+              <Icon size={14} />
+              {label}
+              <span className={`text-[11px] px-1.5 py-0.5 rounded-md font-bold tabular-nums ${
+                activeTab === key ? 'bg-primary-50 text-primary-600' : 'bg-slate-200 text-slate-400'
+              }`}>
+                {loading ? '…' : count}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {/* ── Search ──────────────────────────────────────────────────── */}
+        <div
+          className="relative mb-4"
+          style={{ opacity: 0, animation: 'fadeSlideUp 0.5s ease 360ms forwards' }}
+        >
+          <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={activeTab === 'saved' ? 'Search saved jobs…' : 'Search applications…'}
+            className="w-full pl-10 pr-9 py-2.5 bg-white border border-slate-200 rounded-xl
+              text-sm text-slate-800 placeholder-slate-400 shadow-sm
+              focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-300
+              transition-shadow"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500 transition-colors"
+              aria-label="Clear search"
+            >
+              <XCircle size={15} />
+            </button>
+          )}
+        </div>
+
+        {/* ── Status chips ─────────────────────────────────────────────── */}
+        {activeTab === 'applied' && !allAppsLoading && Object.keys(statusCounts).length > 0 && (
+          <StatusFilterChips
+            activeFilter={statusFilter}
+            onChange={(key) => { setStatusFilter(key); setSearchQuery(''); }}
+            counts={statusCounts}
+          />
+        )}
+
+        {/* ── Content ─────────────────────────────────────────────────── */}
+        {activeTab === 'saved' ? (
+          <>
+            {savedError && !isSavedLoading && (
+              <ErrorBlock message={savedError} onRetry={refetchSaved} />
+            )}
+            {isSavedLoading ? (
+              <SkeletonList count={4} />
+            ) : paginatedSaved.length > 0 ? (
+              <>
+                <div className="space-y-3">
+                  {paginatedSaved.map((job, i) => (
+                    <JobCard 
+                      key={job.id} 
+                      job={job} 
+                      isApplied={false} 
+                      index={i}
+                      onJobClick={(jobId) => {
+                        navigate(`/job/${jobId}`);
+                      }}
+                    />
+                  ))}
+                </div>
+                <Pagination
+                  page={savedPage} totalPages={savedTotalPages}
+                  onPrev={() => setSavedPage((p) => Math.max(1, p - 1))}
+                  onNext={() => setSavedPage((p) => Math.min(savedTotalPages, p + 1))}
+                />
+              </>
+            ) : (
+              <EmptyState
+                icon={Bookmark}
+                title={debouncedSearch ? 'No results found' : 'No saved jobs yet'}
+                body={debouncedSearch ? 'Try a different search term.' : 'Browse jobs and bookmark them to revisit here.'}
+                action={debouncedSearch && (
+                  <button onClick={() => setSearchQuery('')}
+                    className="text-xs font-bold text-primary-600 hover:underline">
+                    Clear search
+                  </button>
+                )}
+              />
+            )}
+          </>
+        ) : (
+          <>
+            {(allAppsError || filteredError) && !isAppsLoading && (
+              <ErrorBlock
+                message={allAppsError || filteredError}
+                onRetry={() => { refetchAll(); refetchFiltered(); }}
+              />
+            )}
+            {isAppsLoading ? (
+              <SkeletonList count={4} />
+            ) : paginatedApps.length > 0 ? (
+              <>
+                <div className="space-y-3">
+                  {paginatedApps.map((job, i) => (
+                    <JobCard 
+                      key={job.id} 
+                      job={job} 
+                      isApplied={true} 
+                      index={i}
+                      onJobClick={(jobId) => {
+                        navigate(`/job/${jobId}`);
+                      }}
+                    />
+                  ))}
+                </div>
+                <Pagination
+                  page={appsPage} totalPages={appsTotalPages}
+                  onPrev={() => setAppsPage((p) => Math.max(1, p - 1))}
+                  onNext={() => setAppsPage((p) => Math.min(appsTotalPages, p + 1))}
+                />
+              </>
+            ) : (
+              <EmptyState
+                icon={statusFilter !== 'all' ? getStatusConfig(statusFilter).icon : Briefcase}
+                title={
+                  debouncedSearch ? 'No results found' :
+                  statusFilter !== 'all' ? `No "${getStatusConfig(statusFilter).label}" applications` :
+                  'No applications yet'
+                }
+                body={
+                  debouncedSearch ? 'Try a different search term.' :
+                  statusFilter !== 'all' ? 'Try a different status filter above.' :
+                  'Apply to jobs and track your progress here.'
+                }
+                action={(debouncedSearch || statusFilter !== 'all') && (
+                  <button
+                    onClick={() => { setSearchQuery(''); setStatusFilter('all'); }}
+                    className="text-xs font-bold text-primary-600 hover:underline"
+                  >
+                    Clear filters
+                  </button>
+                )}
+              />
+            )}
+          </>
+        )}
+
       </div>
-    </>
+    </div>
   );
 }

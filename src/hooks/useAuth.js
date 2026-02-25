@@ -1,32 +1,9 @@
-import { useState, useContext } from 'react';
+import { useAuthContext } from '../store/context/AuthContext';
 
-// This hook can be used with AuthContext
+/**
+ * Convenience hook that re-exports AuthContext.
+ * Provides auth state + actions in a single import.
+ */
 export const useAuth = () => {
-  // TODO: Replace with actual AuthContext when implemented
-  const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const login = (credentials) => {
-    setIsLoading(true);
-    // TODO: Implement actual login logic
-    setIsLoading(false);
-  };
-
-  const logout = () => {
-    setUser(null);
-  };
-
-  const signup = (userData) => {
-    setIsLoading(true);
-    // TODO: Implement actual signup logic
-    setIsLoading(false);
-  };
-
-  return {
-    user,
-    isLoading,
-    login,
-    logout,
-    signup,
-  };
+  return useAuthContext();
 };

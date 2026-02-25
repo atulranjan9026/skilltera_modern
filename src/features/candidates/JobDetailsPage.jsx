@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useAuthContext } from '../../store/context/AuthContext';
 import { candidateService } from '../../services/candidateService';
+import Button from '@/components/ui/Button';
 
 export default function JobDetailsPage() {
   const { jobId } = useParams();
@@ -91,7 +92,7 @@ export default function JobDetailsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
           <Loader size={32} className="animate-spin text-primary-600 mx-auto mb-3" />
           <p className="text-slate-600">Loading job details...</p>
@@ -102,17 +103,14 @@ export default function JobDetailsPage() {
 
   if (error || !job) {
     return (
-      <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="bg-white rounded-2xl border border-red-100 p-8 max-w-md text-center shadow-sm">
           <AlertCircle size={32} className="text-red-500 mx-auto mb-3" />
           <h2 className="text-lg font-semibold text-slate-900 mb-2">Job Not Found</h2>
           <p className="text-slate-600 text-sm mb-4">{error}</p>
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
-          >
+          <Button variant="primary" size="sm" onClick={() => navigate('/dashboard')}>
             Back to Dashboard
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -127,7 +125,7 @@ export default function JobDetailsPage() {
   const location = [job.city, job.state, job.country].filter(Boolean).join(', ');
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb] py-8">
+    <div className="min-h-screen bg-slate-50 py-8">
       <div className="container mx-auto px-4 sm:px-6 max-w-4xl">
         {/* Header */}
         <button
@@ -253,19 +251,13 @@ export default function JobDetailsPage() {
           {/* Action CTA */}
           {!isApplied && (
             <div className="flex gap-3 pt-4 border-t border-slate-100">
-              <button
-                onClick={handleApply}
-                className="flex-1 px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 transition-colors"
-              >
-                <FileText size={16} className="inline mr-2" />
+              <Button variant="primary" size="md" className="flex-1" onClick={handleApply}>
+                <FileText size={16} />
                 Apply Now
-              </button>
-              <button
-                onClick={handleSaveToggle}
-                className="px-6 py-3 border-2 border-slate-200 text-slate-700 font-semibold rounded-lg hover:border-slate-300 transition-colors"
-              >
+              </Button>
+              <Button variant="outline" size="md" onClick={handleSaveToggle}>
                 {isSaved ? 'Remove Save' : 'Save Job'}
-              </button>
+              </Button>
             </div>
           )}
         </div>

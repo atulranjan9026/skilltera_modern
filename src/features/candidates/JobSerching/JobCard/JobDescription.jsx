@@ -5,7 +5,6 @@ import {
   Briefcase, CheckCircle, Gift,
 } from 'lucide-react';
 import { THEME_CLASSES } from '../../../../theme';
-import './job.css';
 
 /**
  * JobDescription Component - Shows detailed job information

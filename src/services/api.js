@@ -1,265 +1,134 @@
-/* Central API configuration and base axios instance with optimizations */
+/**
+ * Central API configuration with caching, deduplication, and auth management.
+ */
 import axios from 'axios';
 
-// Vite uses import.meta.env instead of process.env
-// Environment variables must be prefixed with VITE_ to be exposed
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
 
-
-// Cache for GET requests
+// ─── Cache & Deduplication ────────────────────────────────────────────────
 const cache = new Map();
 const pendingRequests = new Map();
 
-// Create axios instance with optimizations
+// ─── Axios Instance ───────────────────────────────────────────────────────
 export const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 30000, // Increased timeout to 30 seconds
-  withCredentials: true, // Send cookies for cross-origin (refresh token)
-  headers: {
-    'Content-Type': 'application/json',
-  }
+  timeout: 30000,
+  withCredentials: true,
+  headers: { 'Content-Type': 'application/json' },
 });
 
-/**
- * Set JWT token for authentication
- */
+// ─── Auth Token Helpers ───────────────────────────────────────────────────
 export const setAuthToken = (token) => {
   localStorage.setItem('token', token);
-  // Update default headers for future requests
   api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 };
 
-/**
- * Clear authentication token
- */
 export const clearAuthToken = () => {
   localStorage.removeItem('token');
   delete api.defaults.headers.common['Authorization'];
 };
 
-/**
- * Initialize with existing token
- */
-const initializeAuth = () => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-  }
-};
-
-// Initialize auth on module load
-initializeAuth();
-
-// Request interceptor for authentication and FormData
-api.interceptors.request.use(config => {
+// ─── Request Interceptor ──────────────────────────────────────────────────
+api.interceptors.request.use((config) => {
+  // Always read fresh token (handles race conditions with login/logout)
   const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-  // For FormData, remove Content-Type so browser sets multipart/form-data with boundary
+  // Let browser set Content-Type for FormData (multipart boundary)
   if (config.data instanceof FormData) {
     delete config.headers['Content-Type'];
   }
   return config;
 });
 
-// Response interceptor for error handling and caching
+// ─── Response Interceptor ─────────────────────────────────────────────────
 api.interceptors.response.use(
-  response => response.data,
-  error => {
+  (response) => response.data,
+  (error) => {
     if (error.response?.status === 401) {
-      // Handle token refresh or redirect to login
       localStorage.removeItem('token');
+      localStorage.removeItem('user');
       window.location.href = '/auth/login';
     }
     return Promise.reject(error);
   }
 );
 
-/**
- * Get cached data with TTL support
- */
+// ─── Internal Helpers ─────────────────────────────────────────────────────
 const getCachedData = (key, fetcher, ttl = 300000) => {
   if (cache.has(key)) {
     const { data, timestamp } = cache.get(key);
     if (Date.now() - timestamp < ttl) {
       return Promise.resolve(data);
     }
+    cache.delete(key);
   }
-
-  return fetcher().then(data => {
+  return fetcher().then((data) => {
     cache.set(key, { data, timestamp: Date.now() });
     return data;
   });
 };
 
-/**
- * Prevent duplicate requests
- */
 const deduplicateRequest = (key, requestFn) => {
   if (pendingRequests.has(key)) {
     return pendingRequests.get(key);
   }
-
-  const promise = requestFn().finally(() => {
-    pendingRequests.delete(key);
-  });
-
+  const promise = requestFn().finally(() => pendingRequests.delete(key));
   pendingRequests.set(key, promise);
   return promise;
 };
 
-/**
- * Batch multiple requests
- */
-export const batchRequests = async (requests) => {
-  return Promise.allSettled(requests.map(req => api(req)));
-};
-
-/**
- * Clear cache for specific key or all cache
- */
-export const clearCache = (key) => {
-  if (key) {
-    cache.delete(key);
-  } else {
-    cache.clear();
+const invalidateRelatedCache = (endpoint) => {
+  const segment = endpoint.split('/')[1];
+  if (!segment) return;
+  for (const [key] of cache) {
+    if (key.includes(segment)) cache.delete(key);
   }
 };
 
-/**
- * Optimized GET request with caching and deduplication
- */
+// ─── Public API Methods ───────────────────────────────────────────────────
+
+/** GET with optional caching + deduplication */
 export const get = async (endpoint, useCache = true, ttl = 300000) => {
   const cacheKey = `GET:${endpoint}`;
-
   if (useCache) {
     return getCachedData(cacheKey, () =>
       deduplicateRequest(cacheKey, () => api.get(endpoint)), ttl
     );
   }
-
   return deduplicateRequest(cacheKey, () => api.get(endpoint));
 };
 
-/**
- * Optimized POST request
- */
+/** POST (no deduplication — mutations should not be deduped) */
 export const post = async (endpoint, data) => {
-  const cacheKey = `POST:${endpoint}`;
-  // Handle undefined data by not sending any body
-  const config = data === undefined ? {} : { data };
-  return deduplicateRequest(cacheKey, () => api.post(endpoint, data, config));
+  return data === undefined ? api.post(endpoint) : api.post(endpoint, data);
 };
 
-/**
- * Optimized PUT request with cache invalidation
- */
+/** PUT with cache invalidation */
 export const put = async (endpoint, data) => {
-  // Clear related cache entries
-  for (const [key] of cache) {
-    if (key.includes(endpoint.split('/')[1])) {
-      cache.delete(key);
-    }
-  }
-
-  const cacheKey = `PUT:${endpoint}`;
-  return deduplicateRequest(cacheKey, () => api.put(endpoint, data));
+  invalidateRelatedCache(endpoint);
+  return api.put(endpoint, data);
 };
 
-/**
- * Optimized PATCH request with cache invalidation
- */
+/** PATCH with cache invalidation */
 export const patch = async (endpoint, data) => {
-  // Clear related cache entries
-  for (const [key] of cache) {
-    if (key.includes(endpoint.split('/')[1])) {
-      cache.delete(key);
-    }
-  }
-
-  const cacheKey = `PATCH:${endpoint}`;
-  return deduplicateRequest(cacheKey, () => api.patch(endpoint, data));
+  invalidateRelatedCache(endpoint);
+  return api.patch(endpoint, data);
 };
 
-/**
- * Optimized DELETE request with cache cleanup
- */
+/** DELETE with cache cleanup */
 export const del = async (endpoint) => {
-  // Clear related cache entries
-  for (const [key] of cache) {
-    if (key.includes(endpoint.split('/')[1])) {
-      cache.delete(key);
-    }
-  }
-
-  const cacheKey = `DELETE:${endpoint}`;
-  return deduplicateRequest(cacheKey, () => api.delete(endpoint));
+  invalidateRelatedCache(endpoint);
+  return api.delete(endpoint);
 };
 
-// Legacy methods for backward compatibility
-export const legacyApi = {
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${localStorage.getItem('token')}`,
-  },
-
-  get: async (endpoint) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`);
-      if (!response.ok) throw new Error('API request failed');
-      return await response.json();
-    } catch (error) {
-      console.error('GET request failed:', error);
-      throw error;
-    }
-  },
-
-  post: async (endpoint, data) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        method: 'POST',
-        headers: legacyApi.headers,
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) throw new Error('API request failed');
-      return await response.json();
-    } catch (error) {
-      console.error('POST request failed:', error);
-      throw error;
-    }
-  },
-
-  put: async (endpoint, data) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        method: 'PUT',
-        headers: legacyApi.headers,
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) throw new Error('API request failed');
-      return await response.json();
-    } catch (error) {
-      console.error('PUT request failed:', error);
-      throw error;
-    }
-  },
-
-  delete: async (endpoint) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) throw new Error('API request failed');
-      return await response.json();
-    } catch (error) {
-      console.error('DELETE request failed:', error);
-      throw error;
-    }
-  },
+/** Batch multiple requests */
+export const batchRequests = (requests) => {
+  return Promise.allSettled(requests.map((req) => api(req)));
 };
 
-// Export both new optimized methods and legacy for migration
-export { api as axiosInstance };
-export default { get, post, put, patch, delete: del, batchRequests, clearCache, legacyApi };
+/** Clear cache for a specific key or all */
+export const clearCache = (key) => {
+  key ? cache.delete(key) : cache.clear();
+};
