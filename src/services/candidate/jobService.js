@@ -3,9 +3,17 @@ import { get, post, del, clearCache } from '../api';
 export const jobService = {
     /**
      * Get candidate's applications (cached for 2 minutes)
+     * Supports optional filtering by status
      */
-    getApplications: async (candidateId) => {
-        return get(`/candidates/${candidateId}/applications`, true, 120000);
+    getApplications: async (candidateId, options = {}) => {
+        const params = new URLSearchParams();
+        if (options.status) params.append('status', options.status);
+        if (options.page) params.append('page', options.page);
+        if (options.limit) params.append('limit', options.limit);
+        
+        const queryString = params.toString();
+        const endpoint = `/candidates/${candidateId}/applications${queryString ? `?${queryString}` : ''}`;
+        return get(endpoint, true, 120000);
     },
 
     /**

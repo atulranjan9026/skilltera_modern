@@ -4,6 +4,8 @@ import LandingPage from '../features/candidates/LandingPage';
 import JobSearchPage from '../features/candidates/JobSearchPage';
 import UserDashboard from '../features/candidates/UserDashboard';
 import ProfilePage from '../features/candidates/ProfilePage';
+import SettingsPage from '../features/candidates/SettingsPage';
+import JobDetailsPage from '../features/candidates/JobDetailsPage';
 
 /**
  * Job/User routes - Main user-facing pages after login
@@ -27,6 +29,14 @@ const jobRoutes = {
     {
       path: '/profile',
       element: <ProfilePage />,
+    },
+    {
+      path: '/settings',
+      element: <SettingsPage />,
+    },
+    {
+      path: '/job/:jobId',
+      element: <JobDetailsPage />,
     },
   ],
 };

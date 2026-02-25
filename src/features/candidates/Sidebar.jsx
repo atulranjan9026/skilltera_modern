@@ -12,6 +12,7 @@ import {
   ChevronLeft
 } from 'lucide-react';
 import { useAuthContext } from '../../store/context/AuthContext';
+import { toast } from '../../utils/toast';
 
 /**
  * Sidebar Navigation - Left sidebar with icon-based navigation
@@ -23,8 +24,10 @@ export default React.memo(function Sidebar() {
   const handleLogout = async () => {
     try {
       await logout();
+      toast.success('Logged out successfully');
       navigate('/auth/login');
     } catch (error) {
+      toast.error('Logout failed');
       console.error('Logout failed:', error);
       // Still navigate to login even if logout API fails
       navigate('/auth/login');
@@ -53,7 +56,7 @@ export default React.memo(function Sidebar() {
     {
       label: 'Settings',
       icon: Settings,
-      path: '#',
+      path: '/settings',
       color: 'text-slate-600'
     },
   ];

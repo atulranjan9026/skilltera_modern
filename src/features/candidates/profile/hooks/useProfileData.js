@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { candidateService } from '../../../../services/candidateService';
 
 export const useProfileData = () => {
-    const [editedData, setEditedData] = useState({});
+    const location = useLocation();
+    const [editedData, setEditedData] = useState(null);
     const [newExperience, setNewExperience] = useState({
         position: '',
         company: '',
@@ -27,50 +29,53 @@ export const useProfileData = () => {
     });
     const [profileLoading, setProfileLoading] = useState(false);
 
-    // console.log('editedData', editedData);
+    const loadProfile = useCallback(async () => {
+        setProfileLoading(true);
+        try {
+            const response = await candidateService.getProfile();
 
-    useEffect(() => {
-        const loadProfile = async () => {
-            setProfileLoading(true);
-            try {
-                const response = await candidateService.getProfile();
-
-                if (response?.success && response?.data) {
-                    const profile = response.data;
-                    console.log('profile', profile);
-                    setEditedData({
-                        name: profile.name,
-                        email: profile.email,
-                        phone: profile.phone,
-                        currentCity: profile.currentCity,
-                        country: profile.country,
-                        avatar: profile.avatar,
-                        linkedInUrl: profile.linkedInUrl,
-                        currentCompany: profile.currentCompany || profile.currentRole,
-                        overallExperience: profile.overallExperience ?? '',
-                        experienceSummary: profile.experienceSummary,
-                        expectedSalary: profile.expectedSalary || '',
-                        noticePeriod: profile.noticePeriod,
-                        skills: profile.skills?.map(skill => ({
-                            ...skill,
-                            skillName: skill.skillId?.name || skill.skillName || skill.name || 'Unknown Skill'
-                        })) || [],
-                        experiences: profile.experiences || [],
-                        education: profile.education || [],
-                        certificates: profile.certificates || [],
-                        resume: profile.resume || null,
-                        profileStrength: profile.profileStrength || 0,
-                    });
-                }
-            } catch (error) {
-                console.error('Error loading profile:', error);
-            } finally {
-                setProfileLoading(false);
+            if (response?.success && response?.data) {
+                const profile = response.data;
+                console.log('profile loaded:', profile);
+                setEditedData({
+                    name: profile.name,
+                    email: profile.email,
+                    phone: profile.phone,
+                    currentCity: profile.currentCity,
+                    country: profile.country,
+                    avatar: profile.avatar,
+                    linkedInUrl: profile.linkedInUrl,
+                    currentCompany: profile.currentCompany || profile.currentRole,
+                    overallExperience: profile.overallExperience ?? '',
+                    experienceSummary: profile.experienceSummary,
+                    expectedSalary: profile.expectedSalary || '',
+                    noticePeriod: profile.noticePeriod,
+                    skills: profile.skills?.map(skill => ({
+                        ...skill,
+                        skillName: skill.skillId?.name || skill.skillName || skill.name || 'Unknown Skill'
+                    })) || [],
+                    experiences: profile.experiences || [],
+                    education: profile.education || [],
+                    certificates: profile.certificates || [],
+                    resume: profile.resume || null,
+                    profileStrength: profile.profileStrength || 0,
+                });
             }
-        };
-
-        loadProfile();
+        } catch (error) {
+            console.error('Error loading profile:', error);
+            setEditedData({});
+        } finally {
+            setProfileLoading(false);
+        }
     }, []);
+
+    // Load profile when component mounts or route changes
+    useEffect(() => {
+        console.log('Route changed to:', location.pathname);
+        if (location.pathname.includes('/profile')) {
+            loadProfile();
+        }
+    }, [location.pathname, loadProfile]);
 
     const handleInputChange = (field, value) => {
         setEditedData(prev => ({

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Bookmark, CheckCircle, Briefcase, MapPin, DollarSign,
   Clock, Search, User, ArrowUpRight, Building2, FileText,
@@ -255,6 +256,10 @@ const ErrorBlock = ({ message, onRetry }) => (
 /** Status filter pill row — shows only statuses present in data */
 const StatusFilterChips = ({ activeFilter, onChange, counts }) => {
   const total = Object.values(counts).reduce((a, b) => a + b, 0);
+  
+  // Debug log
+  // console.log('StatusFilterChips - counts:', counts, 'activeFilter:', activeFilter);
+  
   return (
     <div className="flex gap-2 flex-wrap mb-5" style={{ opacity: 0, animation: 'fadeSlideUp 0.4s ease 0ms forwards' }}>
       {['all', ...Object.keys(STATUS_CONFIG)].map((key) => {
@@ -267,10 +272,13 @@ const StatusFilterChips = ({ activeFilter, onChange, counts }) => {
         return (
           <button
             key={key}
-            onClick={() => onChange(key)}
+            onClick={() => {
+              // console.log('Clicked status:', key);
+              onChange(key);
+            }}
             className={`
               inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold
-              transition-all duration-150 select-none
+              transition-all duration-150 select-none cursor-pointer
               ${active
                 ? isAll
                   ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
@@ -356,12 +364,13 @@ export const StatusTimeline = ({ history = [] }) => (
 // ─────────────────────────────────────────────────────────────────────────────
 // JOB CARD
 // ─────────────────────────────────────────────────────────────────────────────
-const JobCard = ({ job, isApplied, index = 0 }) => (
+const JobCard = ({ job, isApplied, index = 0, onJobClick }) => (
   <div
     className="group bg-white border border-slate-100 rounded-2xl p-5 flex gap-4 items-start shadow-sm
       hover:shadow-md hover:-translate-y-0.5 hover:border-slate-200
       transition-all duration-200 cursor-pointer"
     style={{ opacity: 0, animation: `fadeSlideUp 0.4s ease ${index * 55}ms forwards` }}
+    onClick={() => onJobClick?.(job.id)}
   >
     {/* Avatar */}
     <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary-50 to-primary-100
@@ -424,11 +433,16 @@ const JobCard = ({ job, isApplied, index = 0 }) => (
 
     {/* Action */}
     <button
+      onClick={(e) => {
+        e.stopPropagation();
+        onJobClick?.(job.id);
+      }}
       className="shrink-0 w-8 h-8 rounded-xl bg-slate-50 border border-slate-100
         hover:bg-primary-50 hover:border-primary-100 hover:text-primary-600
         flex items-center justify-center text-slate-300
-        transition-all duration-150"
-      aria-label="Open job"
+        transition-all duration-150 active:scale-95"
+      aria-label="Open job details"
+      title="View job details"
     >
       <ArrowUpRight size={15} />
     </button>
@@ -440,6 +454,7 @@ const JobCard = ({ job, isApplied, index = 0 }) => (
 // ─────────────────────────────────────────────────────────────────────────────
 export default function UserDashboard() {
   const { user } = useAuthContext();
+  const navigate = useNavigate();
   const [activeTab,    setActiveTab]    = useState('saved');
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchQuery,  setSearchQuery]  = useState('');
@@ -500,6 +515,7 @@ export default function UserDashboard() {
   const allAppsCount = allAppsData?.apps?.length ?? 0;
   const displayApps  = filteredData ?? allAppsData?.apps ?? [];
 
+
   const activeJobsCount = ACTIVE_STATUSES.reduce((acc, s) => acc + (statusCounts[s] ?? 0), 0);
   const applyRate = savedJobs.length + allAppsCount > 0
     ? Math.round((allAppsCount / (savedJobs.length + allAppsCount)) * 100)
@@ -547,7 +563,7 @@ export default function UserDashboard() {
       `}</style>
 
       <div className="min-h-screen bg-[#f8f9fb]">
-        <div className="container mx-auto px-4 sm:px-6 py-10 max-w-3xl">
+        <div className="container mx-auto px-4 sm:px-6 py-10 max-w-[75rem]">
 
           {/* ── Header ──────────────────────────────────────────────────── */}
           <div className="mb-9" style={{ opacity: 0, animation: 'fadeSlideUp 0.5s ease 0ms forwards' }}>
@@ -670,7 +686,15 @@ export default function UserDashboard() {
                 <>
                   <div className="space-y-3">
                     {paginatedSaved.map((job, i) => (
-                      <JobCard key={job.id} job={job} isApplied={false} index={i} />
+                      <JobCard 
+                        key={job.id} 
+                        job={job} 
+                        isApplied={false} 
+                        index={i}
+                        onJobClick={(jobId) => {
+                          navigate(`/job/${jobId}`);
+                        }}
+                      />
                     ))}
                   </div>
                   <Pagination
@@ -707,7 +731,15 @@ export default function UserDashboard() {
                 <>
                   <div className="space-y-3">
                     {paginatedApps.map((job, i) => (
-                      <JobCard key={job.id} job={job} isApplied={true} index={i} />
+                      <JobCard 
+                        key={job.id} 
+                        job={job} 
+                        isApplied={true} 
+                        index={i}
+                        onJobClick={(jobId) => {
+                          navigate(`/job/${jobId}`);
+                        }}
+                      />
                     ))}
                   </div>
                   <Pagination

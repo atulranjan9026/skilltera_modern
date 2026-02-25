@@ -1,17 +1,16 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
+// import RootLayout from '../layouts/RootLayout';
 
+// Import modular routes
 import authRoutes from './authRoutes';
 import jobRoutes from './candidateRoutes';
-import companyRoutes from './companyRoutes';
+// import companyRoutes from './companyRoutes';
+
+// Import pages
 import NotFound from '../pages/NotFound';
 
 export const router = createBrowserRouter(
   [
-    // ── Auth pages — rendered in RootLayout (WITH navbar) ──────────────────
-    // Users see: Company Login, Refer Candidate buttons in navbar
-    authRoutes,
-
-    // ── App pages — rendered WITHOUT navbar after login ─────────────────────
     {
       path: '/',
       errorElement: <NotFound />,
@@ -20,8 +19,9 @@ export const router = createBrowserRouter(
           index: true,
           element: <Navigate to="/jobs-search" replace />,
         },
+        authRoutes,
         jobRoutes,
-        companyRoutes,
+        // companyRoutes,
         {
           path: '*',
           element: <NotFound />,

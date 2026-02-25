@@ -52,7 +52,7 @@ export default function ProfileEditor() {
     );
   }
 
-  if (!editedData) {
+  if (!editedData || Object.keys(editedData).length === 0) {
     return (
       <div className="text-center p-8">Please log in to view your profile.</div>
     );
