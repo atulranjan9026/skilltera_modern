@@ -10,6 +10,7 @@ export const ResumeSection = ({ resume, onResumeUpdate }) => {
     const [isUploading, setIsUploading] = useState(false);
     const [uploadError, setUploadError] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [confirmingDelete, setConfirmingDelete] = useState(false);
 
     const hasResume = resume?.url;
     
@@ -43,9 +44,24 @@ export const ResumeSection = ({ resume, onResumeUpdate }) => {
         }
     };
 
+    const handleDeleteClick = () => {
+        if (!confirmingDelete) {
+            setConfirmingDelete(true);
+            toast(
+                'Resume will be deleted',
+                {
+                    description: 'Click the Delete button again to confirm',
+                    duration: 5000,
+                }
+            );
+            return;
+        }
+        handleDelete();
+    };
+
     const handleDelete = async () => {
-        if (!confirm('Are you sure you want to delete your resume?')) return;
         setIsDeleting(true);
+        setConfirmingDelete(false);
         setUploadError(null);
         try {
             await candidateService.deleteResume();
@@ -89,12 +105,16 @@ export const ResumeSection = ({ resume, onResumeUpdate }) => {
                                     View
                                 </a>
                                 <button
-                                    onClick={handleDelete}
+                                    onClick={handleDeleteClick}
                                     disabled={isDeleting}
-                                    className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 flex items-center gap-2 text-sm font-medium disabled:opacity-50"
+                                    className={`px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium disabled:opacity-50 transition-colors ${
+                                        confirmingDelete
+                                            ? 'bg-red-600 text-white hover:bg-red-700'
+                                            : 'bg-red-100 text-red-700 hover:bg-red-200'
+                                    }`}
                                 >
                                     {isDeleting ? <Loader size={16} className="animate-spin" /> : <Trash2 size={16} />}
-                                    Delete
+                                    {confirmingDelete ? 'Confirm Delete' : 'Delete'}
                                 </button>
                             </div>
                         </div>
