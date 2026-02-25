@@ -5,6 +5,8 @@ import {
   Phone, MapPin, FileText, Key, Globe, MessageSquare, Briefcase,
   AlertTriangle
 } from 'lucide-react';
+import {useAuthContext} from '../../store/context/AuthContext';
+import { toast } from '../../utils/toast';
 
 const Toggle = ({ checked, onChange }) => (
   <button
@@ -72,17 +74,42 @@ const SettingRow = ({ icon: Icon, label, desc, children, last }) => (
   </div>
 );
 
+// Helper to get user initials
+const getUserInitials = (name) => {
+  if (!name) return '?';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+  return name.substring(0, 2).toUpperCase();
+};
+
 export default function SettingsPage() {
+  const { user } = useAuthContext();
   const [activeTab, setActiveTab] = useState('account');
   const [saved, setSaved] = useState(false);
   const [showCurrentPw, setShowCurrentPw] = useState(false);
   const [showNewPw, setShowNewPw] = useState(false);
 
+  // Parse user name into first and last name
+  const getNameParts = () => {
+    if (!user?.name) return { firstName: '', lastName: '' };
+    const parts = user.name.trim().split(/\s+/);
+    return {
+      firstName: parts[0] || '',
+      lastName: parts.slice(1).join(' ') || ''
+    };
+  };
+
+  const nameParts = getNameParts();
+
   const [accountForm, setAccountForm] = useState({
-    firstName: 'John', lastName: 'Doe',
-    email: 'john.doe@email.com', phone: '+1 (555) 000-0000',
-    location: 'San Francisco, CA',
-    bio: 'Full-stack engineer passionate about building great products.'
+    firstName: nameParts.firstName,
+    lastName: nameParts.lastName,
+    email: user?.email || '',
+    phone: user?.phone || '',
+    location: user?.currentCity && user?.country ? `${user.currentCity}, ${user.country}` : '',
+    bio: user?.bio || ''
   });
 
   const [notifications, setNotifications] = useState({
@@ -146,18 +173,29 @@ export default function SettingsPage() {
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 mb-4">
               <div className="flex flex-col items-center text-center">
                 <div className="relative mb-3">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-xl font-bold shadow-lg">
-                    JD
-                  </div>
+                  {user?.avatar?.url ? (
+                    <img
+                      src={user.avatar.url}
+                      alt="Profile Avatar"
+                      referrerPolicy="no-referrer"
+                      className="w-16 h-16 rounded-2xl object-cover shadow-lg border-2 border-white"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-xl font-bold shadow-lg">
+                      {getUserInitials(user?.name)}
+                    </div>
+                  )}
                   <button className="absolute -bottom-1.5 -right-1.5 w-6 h-6 bg-white border-2 border-white rounded-lg shadow-sm flex items-center justify-center hover:bg-primary-50 transition-colors">
                     <Camera size={11} className="text-primary-600" />
                   </button>
                 </div>
-                <p className="font-semibold text-slate-800 text-sm">{accountForm.firstName} {accountForm.lastName}</p>
-                <p className="text-xs text-slate-400 mt-0.5 truncate w-full">{accountForm.email}</p>
-                <span className="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-600 text-xs font-medium rounded-lg">
-                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
-                  Active
+                <p className="font-semibold text-slate-800 text-sm">{user?.name || 'User'}</p>
+                <p className="text-xs text-slate-400 mt-0.5 truncate w-full">{user?.email}</p>
+                <span className={`mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg ${
+                  user?.isActive ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-600'
+                }`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${user?.isActive ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+                  {user?.isActive ? 'Active' : 'Inactive'}
                 </span>
               </div>
             </div>
