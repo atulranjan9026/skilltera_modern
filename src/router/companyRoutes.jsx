@@ -1,20 +1,26 @@
 import { Navigate } from 'react-router-dom';
 import CompanyLogin from '../features/company/CompanyAuth/CompanyLogin';
+import CompanyDashboard from '../features/company/pages/CompanyDashboard';
+import CompanyProfile from '../features/company/pages/CompanyProfile';
+import ManageJobs from '../features/company/pages/ManageJobs';
+import PostJob from '../features/company/pages/PostJob';
+import Applications from '../features/company/pages/Applications';
+import TeamMembers from '../features/company/pages/TeamMembers';
+import AuthLayout from '../layouts/AuthLayout';
 
-/**
- * Company/Client-specific routes
- * Protected routes that require company authentication
- */
 const companyRoutes = {
   path: 'company',
-  // element: <CompanyDashboardLayout />, // Uncomment when layout is created
   children: [
-    // Company Login
     {
       path: 'login',
-      element: <CompanyLogin />,
+      element: <AuthLayout />,
+      children: [
+        {
+          index: true,
+          element: <CompanyLogin />,
+        },
+      ],
     },
-    // Refer Candidate
     {
       path: 'refer',
       element: <div>Refer Candidate (Coming Soon)</div>,
@@ -25,27 +31,27 @@ const companyRoutes = {
     },
     {
       path: 'dashboard',
-      element: <div>Company Dashboard (Coming Soon)</div>,
+      element: <CompanyDashboard />,
     },
     {
       path: 'profile',
-      element: <div>Company Profile (Coming Soon)</div>,
+      element: <CompanyProfile />,
     },
     {
       path: 'jobs',
-      element: <div>Manage Jobs (Coming Soon)</div>,
+      element: <ManageJobs />,
     },
     {
       path: 'jobs/new',
-      element: <div>Post New Job (Coming Soon)</div>,
+      element: <PostJob />,
     },
     {
       path: 'applications',
-      element: <div>Applications (Coming Soon)</div>,
+      element: <Applications />,
     },
     {
       path: 'team',
-      element: <div>Team Members (Coming Soon)</div>,
+      element: <TeamMembers />,
     },
     {
       path: '*',

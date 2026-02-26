@@ -1,6 +1,6 @@
 import { Navigate } from 'react-router-dom';
 import AuthLayout from '../layouts/AuthLayout';
-import Login from '../features/candidates/CandidatesAuth/CandidateLogin';
+import CandidateLogin from '../features/candidates/CandidatesAuth/CandidateLogin';
 import CandidateSignup from '../features/candidates/CandidatesAuth/CandidateSignup';
 
 /**
@@ -14,7 +14,7 @@ const authRoutes = {
   children: [
     {
       path: 'login',
-      element: <Login />,
+      element: <CandidateLogin />,
     },
     {
       path: 'signup',

@@ -1,13 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { User, Building2 } from 'lucide-react';
-// import { useAuthContext } from '../../../store/context/AuthContext';
+import { post, setAuthToken } from '../../../services/api';
 
 export default function CompanyLogin() {
     const navigate = useNavigate();
-    // const { companyLogin, isLoading, error: authError } = useAuthContext();
+    const [isLoading, setIsLoading] = useState(false);
 
     const {
         register,
@@ -17,15 +17,28 @@ export default function CompanyLogin() {
     } = useForm();
 
     const onSubmit = async (data) => {
+        setIsLoading(true);
         try {
-            // await companyLogin(data.email, data.companyName, data.password);
-            // navigate('/company/dashboard');
-            console.log('Company login:', data);
+            const response = await post('/company/login', {
+                companyName: data.companyName,
+                email: data.email,
+                password: data.password,
+            });
+
+            // Store token and user data
+            if (response?.data?.accessToken) {
+                setAuthToken(response.data.accessToken);
+                localStorage.setItem('companyUser', JSON.stringify(response.data.user));
+            }
+
+            navigate('/company/dashboard');
         } catch (error) {
             setFormError('root', {
                 type: 'manual',
                 message: error.response?.data?.message || error.message || 'Login failed. Please try again.',
             });
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -34,20 +47,20 @@ export default function CompanyLogin() {
 
             {/* ── Role Switcher ─────────────────────────────────────────── */}
             <div className="flex gap-1 bg-slate-100 rounded-xl p-1">
-              
+
 
                 {/* Company — active (current page) */}
                 <div className="flex-1 flex items-center justify-center gap-2 py-2 px-3
                     rounded-lg bg-white border border-slate-200 shadow-sm text-sm font-semibold
                     text-primary-600 cursor-default select-none">
                     <Building2 size={15} />
-                    Company
+                    Company Sign In
                 </div>
             </div>
 
             {/* ── Heading ───────────────────────────────────────────────── */}
             <div className="text-center">
-                <h2 className="text-xl font-bold text-slate-900">Company Sign In</h2>
+                {/* <h2 className="text-xl font-bold text-slate-900">Company Sign In</h2> */}
                 <p className="text-xs text-slate-500 mt-0.5">Access your employer dashboard</p>
             </div>
 
@@ -137,14 +150,14 @@ export default function CompanyLogin() {
                 )}
 
                 {/* Submit */}
-                <Button type="submit" className="w-full mt-2" size="sm">
-                    Sign In as Company
+                <Button type="submit" className="w-full mt-2" size="sm" disabled={isLoading}>
+                    {isLoading ? 'Signing In...' : 'Sign In as Company'}
                 </Button>
 
                 {/* Register link */}
                 <p className="text-center text-xs text-slate-500">
                     New to Skilltera?{' '}
-                    <Link to="/auth/signup"
+                    <Link to="/auth/login"
                         className="text-primary-500 hover:text-primary-600 font-medium">
                         Register your company
                     </Link>
