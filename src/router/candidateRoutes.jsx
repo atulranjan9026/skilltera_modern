@@ -6,6 +6,8 @@ import UserDashboard from '../features/candidates/UserDashboard';
 import ProfilePage from '../features/candidates/ProfilePage';
 import SettingsPage from '../features/candidates/SettingsPage';
 import JobDetailsPage from '../features/candidates/JobDetailsPage';
+import AssessmentHubPage from '../features/assessment/AssessmentHubPage';
+import TestResultsPage from '../features/assessment/components/TestResultsPage';
 
 /**
  * Job/User routes - Main user-facing pages after login
@@ -37,6 +39,14 @@ const jobRoutes = {
     {
       path: '/job/:jobId',
       element: <JobDetailsPage />,
+    },
+    {
+      path: '/assessments',
+      element: <AssessmentHubPage />,
+    },
+    {
+      path: '/test-results',
+      element: <TestResultsPage />,
     },
   ],
 };

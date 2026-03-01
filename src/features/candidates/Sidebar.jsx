@@ -9,7 +9,8 @@ import {
   ChevronRight,
   Menu,
   X,
-  ChevronLeft
+  ChevronLeft,
+  ClipboardCheck
 } from 'lucide-react';
 import { useAuthContext } from '../../store/context/AuthContext';
 import { toast } from '../../utils/toast';
@@ -52,6 +53,12 @@ export default React.memo(function Sidebar() {
       icon: User,
       path: '/profile',
       color: 'text-purple-600'
+    },
+    {
+      label: 'Assessment',
+      icon: ClipboardCheck,
+      path: '/assessments',
+      color: 'text-amber-600'
     },
     {
       label: 'Settings',

@@ -53,7 +53,7 @@ const NoJobs = () => (
 );
 
 // ─── Main Component ───────────────────────────────────────────────────────────
-export default function JobListings({ jobs, savedJobs, onSave, onApply }) {
+export default function JobListings({ jobs, savedJobs, onSave, onApply, assessmentCompleted = true }) {
   const [selectedJob, setSelectedJob] = React.useState(null);
   const detailPanelRef = React.useRef(null);
 
@@ -168,6 +168,7 @@ export default function JobListings({ jobs, savedJobs, onSave, onApply }) {
                   onApply={onApply}
                   onSave={onSave}
                   isSaved={savedJobs.includes(selectedJob.id)}
+                  assessmentCompleted={assessmentCompleted}
                 />
               </Suspense>
             </div>

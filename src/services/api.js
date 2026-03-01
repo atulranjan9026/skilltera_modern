@@ -42,10 +42,66 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// ─── Response Interceptor ─────────────────────────────────────────────────
+// ─── Response Interceptor (with silent token refresh) ─────────────────────
+let isRefreshing = false;
+let refreshQueue = [];
+
+const processQueue = (error, token = null) => {
+  refreshQueue.forEach(({ resolve, reject }) => {
+    if (error) reject(error);
+    else resolve(token);
+  });
+  refreshQueue = [];
+};
+
 api.interceptors.response.use(
   (response) => response.data,
-  (error) => {
+  async (error) => {
+    const originalRequest = error.config;
+
+    // Only attempt refresh on 401, and not if this IS the refresh request
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !originalRequest.url?.includes('/auth/refresh') &&
+      !originalRequest.url?.includes('/auth/login')
+    ) {
+      if (isRefreshing) {
+        // Another refresh is in-flight — queue this request
+        return new Promise((resolve, reject) => {
+          refreshQueue.push({ resolve, reject });
+        }).then((token) => {
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          return api(originalRequest);
+        });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        const res = await api.post('/candidates/auth/refresh', {});
+        const newToken = res?.data?.accessToken ?? res?.accessToken;
+        if (newToken) {
+          localStorage.setItem('token', newToken);
+          api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+          processQueue(null, newToken);
+          originalRequest.headers.Authorization = `Bearer ${newToken}`;
+          return api(originalRequest);
+        }
+        throw new Error('No token in refresh response');
+      } catch (refreshError) {
+        processQueue(refreshError);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/auth/login';
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
+    // Non-401 or refresh itself failed — reject as-is
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
@@ -101,8 +157,8 @@ export const get = async (endpoint, useCache = true, ttl = 300000) => {
 };
 
 /** POST (no deduplication — mutations should not be deduped) */
-export const post = async (endpoint, data) => {
-  return data === undefined ? api.post(endpoint) : api.post(endpoint, data);
+export const post = async (endpoint, data, config) => {
+  return data === undefined ? api.post(endpoint, undefined, config) : api.post(endpoint, data, config);
 };
 
 /** PUT with cache invalidation */

@@ -5,8 +5,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import authRoutes from './authRoutes';
 import candidateRoutes from './candidateRoutes';
 import companyRoutes from './companyRoutes';
-
-// Import pages
+import assessmentRoutes from './assessmentRoutes';
 import NotFound from '../pages/NotFound';
 
 export const router = createBrowserRouter(
@@ -21,6 +20,7 @@ export const router = createBrowserRouter(
         },
         authRoutes,
         candidateRoutes,
+        assessmentRoutes,
         companyRoutes,
         {
           path: '*',
