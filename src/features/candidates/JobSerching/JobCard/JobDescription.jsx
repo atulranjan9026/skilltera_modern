@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import {
   X, MapPin, Clock, DollarSign, Building, Users,
   Calendar, Share2, Bookmark, ExternalLink, ChevronLeft,
@@ -9,7 +10,7 @@ import { THEME_CLASSES } from '../../../../theme';
 /**
  * JobDescription Component - Shows detailed job information
  */
-export default function JobDescription({ job, onClose, onApply, onSave, isSaved }) {
+export default function JobDescription({ job, onClose, onApply, onSave, isSaved, assessmentCompleted = true }) {
   if (!job) return null;
 
   return (
@@ -111,13 +112,23 @@ export default function JobDescription({ job, onClose, onApply, onSave, isSaved 
 
           {/* CTA buttons */}
           <div className="flex gap-2">
-            <button
-              onClick={() => onApply(job.id)}
-              className={`flex-1 ${THEME_CLASSES.buttons.primary} py-2.5 rounded-xl font-semibold text-sm
-                transition-all duration-200 hover:shadow-lg hover:shadow-primary-200/50`}
-            >
-              Apply Now
-            </button>
+            {assessmentCompleted ? (
+              <button
+                onClick={() => onApply(job.id)}
+                className={`flex-1 ${THEME_CLASSES.buttons.primary} py-2.5 rounded-xl font-semibold text-sm
+                  transition-all duration-200 hover:shadow-lg hover:shadow-primary-200/50`}
+              >
+                Apply Now
+              </button>
+            ) : (
+              <Link
+                to="/assessments"
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold text-sm
+                  bg-amber-100 text-amber-800 border border-amber-200 hover:bg-amber-200 transition-colors"
+              >
+                Complete assessment to apply
+              </Link>
+            )}
             <button
               className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600
                 rounded-xl font-medium text-sm transition-colors flex items-center gap-1.5 border border-slate-200"
@@ -253,13 +264,23 @@ export default function JobDescription({ job, onClose, onApply, onSave, isSaved 
       {/* ── Sticky Footer ─────────────────────────────────────────────────── */}
       <div className="sticky bottom-0 bg-white/95 backdrop-blur-sm border-t border-slate-100 p-4">
         <div className="flex gap-2">
-          <button
-            onClick={() => onApply(job.id)}
-            className={`flex-1 ${THEME_CLASSES.buttons.primary} py-3 rounded-xl font-semibold text-sm
-              transition-all duration-200 hover:shadow-lg hover:shadow-primary-200/50`}
-          >
-            Apply for this Position
-          </button>
+          {assessmentCompleted ? (
+            <button
+              onClick={() => onApply(job.id)}
+              className={`flex-1 ${THEME_CLASSES.buttons.primary} py-3 rounded-xl font-semibold text-sm
+                transition-all duration-200 hover:shadow-lg hover:shadow-primary-200/50`}
+            >
+              Apply for this Position
+            </button>
+          ) : (
+            <Link
+              to="/assessments"
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm
+                bg-amber-100 text-amber-800 border border-amber-200 hover:bg-amber-200 transition-colors"
+            >
+              Complete assessment to apply
+            </Link>
+          )}
           <button
             onClick={(e) => { e.stopPropagation(); onSave(job.id); }}
             className={`

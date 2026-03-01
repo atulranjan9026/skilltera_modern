@@ -1,0 +1,29 @@
+#!/bin/bash
+# Download face-api.js models into public/models/
+# Run: ./scripts/download-models.sh or npm run download-models
+
+set -e
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+MODEL_DIR="$SCRIPT_DIR/../public/models"
+mkdir -p "$MODEL_DIR"
+cd "$MODEL_DIR"
+
+BASE="https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights"
+FILES=(
+  "tiny_face_detector_model-weights_manifest.json"
+  "tiny_face_detector_model-shard1"
+  "face_landmark_68_model-weights_manifest.json"
+  "face_landmark_68_model-shard1"
+  "face_recognition_model-weights_manifest.json"
+  "face_recognition_model-shard1"
+  "face_recognition_model-shard2"
+  "face_expression_model-weights_manifest.json"
+  "face_expression_model-shard1"
+)
+
+for f in "${FILES[@]}"; do
+  echo "Downloading $f..."
+  curl -sSL "$BASE/$f" -o "$f" || { echo "Warning: failed to download $f"; }
+done
+
+echo "Models downloaded to public/models/"

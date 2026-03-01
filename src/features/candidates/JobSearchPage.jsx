@@ -4,6 +4,7 @@ import JobListings from './JobSerching/JobCard/JobListings';
 import EmptyState from '../../components/common/EmptyState';
 import { candidateService } from '../../services/candidateService';
 import { useAuthContext } from '../../store/context/AuthContext';
+import { useTestCompletion } from '../assessment/hooks/useTestCompletion';
 import { toast } from '../../utils/toast';
 
 /**
@@ -11,6 +12,7 @@ import { toast } from '../../utils/toast';
  */
 export default function JobSearchPage() {
   const { user } = useAuthContext();
+  const { completed: assessmentCompleted } = useTestCompletion(user?._id);
   const [jobs, setJobs] = useState([]);
   const [savedJobs, setSavedJobs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -224,6 +226,10 @@ export default function JobSearchPage() {
       toast.error('Please log in to apply for jobs');
       return;
     }
+    if (!assessmentCompleted) {
+      toast.error('Complete assessment to apply for jobs');
+      return;
+    }
 
     try {
       const applicationData = {}; // Backend uses jobId from URL params
@@ -302,6 +308,7 @@ export default function JobSearchPage() {
                 savedJobs={savedJobs}
                 onSave={handleSaveJob}
                 onApply={handleApplyJob}
+                assessmentCompleted={assessmentCompleted}
               />
 
               {/* Pagination Controls */}
