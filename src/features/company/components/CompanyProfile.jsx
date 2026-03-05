@@ -5,7 +5,7 @@ import { Building2, Mail, Globe, Phone, MapPin, Loader2, AlertCircle, CheckCircl
 import { companyService } from "../../../services/companyService";
 import { getCompanyUser, getCompanyId, saveCompanyUser } from "../../../utils/auth";
 
-export default function CompanyProfile({ companyUser: propCompanyUser, companyId: propCompanyId, onRetry }) {
+export function CompanyProfile({ companyUser: propCompanyUser, companyId: propCompanyId, onRetry }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);

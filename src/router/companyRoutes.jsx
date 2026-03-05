@@ -1,4 +1,4 @@
-// routes/companyRoutes.js
+// router/companyRoutes.jsx
 import { Navigate } from "react-router-dom";
 import CompanyLogin from "../features/company/CompanyAuth/CompanyLogin";
 import CompanyDashboard from "../features/company/pages/CompanyDashboard";
@@ -30,26 +30,6 @@ const companyRoutes = {
       path: "dashboard",
       element: guarded(<CompanyDashboard />),
     },
-    // {
-    //   path: "profile",
-    //   element: guarded(<CompanyProfile />),
-    // },
-    // {
-    //   path: "jobs",
-    //   element: guarded(<ManageJobs />),
-    // },
-    // {
-    //   path: "jobs/new",
-    //   element: guarded(<CreateJob />),
-    // },
-    // {
-    //   path: "applications",
-    //   element: guarded(<Applications />),
-    // },
-    // {
-    //   path: "team",
-    //   element: guarded(<TeamMembers />),
-    // },
     {
       path: "refer",
       // Placeholder – replace with a real component when ready

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { companyService } from "../../../services/companyService";
 import { getCompanyUser, getCompanyId } from "../../../utils/auth";
 
-import { STATUS_CFG, FUNNEL_COLORS } from "../constants";
+import { STATUS_CFG, FUNNEL_COLORS, NAV_ITEMS } from "../constants";
 
 // Layout
 import { DashboardSidebar } from "../components/DashboardSidebar";
@@ -15,7 +15,7 @@ import { JobsTab } from "../components/JobsTab";
 import { ApplicationsTab } from "../components/ApplicationsTab";
 import { InterviewsTab } from "../components/InterviewsTab";
 import { AnalyticsTab } from "../components/AnalyticsTab";
-import CompanyProfile from "../components/CompanyProfile";
+import { CompanyProfile } from "../components/CompanyProfile";
 
 // ─── Main Dashboard ────────────────────────────────────────────────────────────
 export default function CompanyDashboard() {
@@ -189,15 +189,9 @@ export default function CompanyDashboard() {
   const goTo = (tab) => { setActiveTab(tab); setShowCreate(false); };
 
   // ── Sidebar nav badges ────────────────────────────────────────────────────
-  // Inject dynamic badges into NAV_ITEMS for the sidebar
-  const navWithBadges = [
-    { tab: "Overview", badge: null },
-    { tab: "Jobs", badge: pendingJobs || null },
-    { tab: "Applications", badge: totalApps || null },
-    { tab: "Interviews", badge: interviews || null },
-    { tab: "Analytics", badge: null },
-    { tab: "CompanyProfile", badge: null },
-  ];
+  // Derive dynamic badge counts from NAV_ITEMS — no need to maintain a parallel list
+  const BADGE_MAP = { Jobs: pendingJobs, Applications: totalApps, Interviews: interviews };
+  const navWithBadges = NAV_ITEMS.map(({ tab }) => ({ tab, badge: BADGE_MAP[tab] || null }));
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
