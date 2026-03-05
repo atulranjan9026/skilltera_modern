@@ -1,60 +1,68 @@
-import { Navigate } from 'react-router-dom';
-import CompanyLogin from '../features/company/CompanyAuth/CompanyLogin';
-import CompanyDashboard from '../features/company/pages/CompanyDashboard';
-import CompanyProfile from '../features/company/pages/CompanyProfile';
-import ManageJobs from '../features/company/pages/ManageJobs';
-import PostJob from '../features/company/pages/PostJob';
-import Applications from '../features/company/pages/Applications';
-import TeamMembers from '../features/company/pages/TeamMembers';
-import AuthLayout from '../layouts/AuthLayout';
+// routes/companyRoutes.js
+import { Navigate } from "react-router-dom";
+import CompanyLogin from "../features/company/CompanyAuth/CompanyLogin";
+import CompanyDashboard from "../features/company/pages/CompanyDashboard";
+// import CompanyProfile    from "../features/company/pages/CompanyProfile";
+import ManageJobs from "../features/company/pages/ManageJobs";
+// import CreateJob         from "../features/company/pages/CreateJob";
+// import Applications from "../features/company/pages/Applications";
+import TeamMembers from "../features/company/pages/TeamMembers";
+import AuthLayout from "../layouts/AuthLayout";
+import RequireCompanyAuth from "../components/RequireCompanyAuth";
+
+// ─── Tiny helper so we don't repeat <RequireCompanyAuth> on every route ───────
+const guarded = (element) => <RequireCompanyAuth>{element}</RequireCompanyAuth>;
 
 const companyRoutes = {
-  path: 'company',
+  path: "company",
   children: [
+    // ── Public ──────────────────────────────────────────────────────────────
     {
-      path: 'login',
+      path: "login",
       element: <AuthLayout />,
-      children: [
-        {
-          index: true,
-          element: <CompanyLogin />,
-        },
-      ],
+      children: [{ index: true, element: <CompanyLogin /> }],
     },
-    {
-      path: 'refer',
-      element: <div>Refer Candidate (Coming Soon)</div>,
-    },
+
+    // ── Default redirect ─────────────────────────────────────────────────
     {
       index: true,
       element: <Navigate to="dashboard" replace />,
     },
+
+    // ── Protected ────────────────────────────────────────────────────────
     {
-      path: 'dashboard',
-      element: <CompanyDashboard />,
+      path: "dashboard",
+      element: guarded(<CompanyDashboard />),
+    },
+    // {
+    //   path: "profile",
+    //   element: guarded(<CompanyProfile />),
+    // },
+    {
+      path: "jobs",
+      element: guarded(<ManageJobs />),
+    },
+    // {
+    //   path: "jobs/new",
+    //   element: guarded(<CreateJob />),
+    // },
+    // {
+    //   path: "applications",
+    //   element: guarded(<Applications />),
+    // },
+    {
+      path: "team",
+      element: guarded(<TeamMembers />),
     },
     {
-      path: 'profile',
-      element: <CompanyProfile />,
+      path: "refer",
+      // Placeholder – replace with a real component when ready
+      element: guarded(<div className="p-8 text-slate-500">Refer Candidate – Coming Soon</div>),
     },
+
+    // ── Catch-all ────────────────────────────────────────────────────────
     {
-      path: 'jobs',
-      element: <ManageJobs />,
-    },
-    {
-      path: 'jobs/new',
-      element: <PostJob />,
-    },
-    {
-      path: 'applications',
-      element: <Applications />,
-    },
-    {
-      path: 'team',
-      element: <TeamMembers />,
-    },
-    {
-      path: '*',
+      path: "*",
       element: <Navigate to="/company/dashboard" replace />,
     },
   ],

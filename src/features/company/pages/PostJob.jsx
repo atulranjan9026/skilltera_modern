@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { Loader2, AlertCircle, CheckCircle } from 'lucide-react';
+import { Loader2, AlertCircle, CheckCircle, X } from 'lucide-react';
 import { companyService } from '../../../services/companyService';
 
 function getCompanyUser() {
@@ -12,13 +12,18 @@ function getCompanyUser() {
   }
 }
 
-const JOB_TYPES = ['Full-time', 'Part-time', 'Contract', 'Internship', 'Remote', 'Hybrid'];
-const EXPERIENCE_LEVELS = ['Entry Level', 'Mid Level', 'Senior Level', 'Lead', 'Manager'];
+const JOB_TYPES = ['Full-time', 'Part-time', 'Contract', 'Internship'];
+const TRAVEL_OPTIONS = ['Yes', 'No', 'Occasional'];
 
 export default function PostJob() {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [apiError, setApiError] = useState(null);
+  const [skills, setSkills] = useState([]);
+  const [allSkills, setAllSkills] = useState([]);
+  const [roles, setRoles] = useState([]);
+  const [skillInput, setSkillInput] = useState('');
+  const [showSkillDropdown, setShowSkillDropdown] = useState(false);
   const navigate = useNavigate();
 
   const companyUser = getCompanyUser();
@@ -28,36 +33,138 @@ export default function PostJob() {
     register,
     handleSubmit,
     reset,
+    control,
+    watch,
     formState: { errors },
-  } = useForm();
+  } = useForm({
+    defaultValues: {
+      travelRequired: 'No',
+      experienceLevel: 'mid',
+      currency: 'USD',
+      salaryPeriod: 'yearly',
+      openings: 1
+    },
+    mode: 'onChange',
+    criteriaMode: 'firstError',
+    shouldFocusError: true,
+  });
+
+  // Fetch skills and roles on component mount
+  useEffect(() => {
+    const fetchMetadata = async () => {
+      try {
+        // These would come from your API - adjust endpoints as needed
+        // For now, we'll use mock data or fetch from existing endpoints
+        const mockSkills = [
+          { _id: '1', skillName: 'JavaScript' },
+          { _id: '2', skillName: 'React' },
+          { _id: '3', skillName: 'Node.js' },
+          { _id: '4', skillName: 'Python' },
+          { _id: '5', skillName: 'Java' },
+          { _id: '6', skillName: 'SQL' },
+          { _id: '7', skillName: 'MongoDB' },
+          { _id: '8', skillName: 'TypeScript' },
+          { _id: '9', skillName: 'AWS' },
+          { _id: '10', skillName: 'Docker' },
+        ];
+        
+        const mockRoles = [
+          { _id: '1', role: 'Frontend Developer' },
+          { _id: '2', role: 'Backend Developer' },
+          { _id: '3', role: 'Full Stack Developer' },
+          { _id: '4', role: 'DevOps Engineer' },
+          { _id: '5', role: 'Data Scientist' },
+          { _id: '6', role: 'QA Engineer' },
+          { _id: '7', role: 'Product Manager' },
+          { _id: '8', role: 'Solutions Architect' },
+        ];
+        
+        setAllSkills(mockSkills);
+        setRoles(mockRoles);
+      } catch (err) {
+        console.error('Error fetching metadata:', err);
+      }
+    };
+
+    fetchMetadata();
+  }, []);
+
+  const handleAddSkill = (skill) => {
+    if (!skills.find(s => s._id === skill._id)) {
+      setSkills([...skills, skill]);
+      setSkillInput('');
+      setShowSkillDropdown(false);
+    }
+  };
+
+  const handleRemoveSkill = (skillId) => {
+    setSkills(skills.filter(s => s._id !== skillId));
+  };
+
+  const filteredSkills = allSkills.filter(skill =>
+    skill.skillName.toLowerCase().includes(skillInput.toLowerCase()) &&
+    !skills.find(s => s._id === skill._id)
+  );
 
   const onSubmit = async (data) => {
     if (!companyId) {
       setApiError('Company ID not found. Please log in again.');
       return;
     }
+
+    if (skills.length === 0) {
+      setApiError('Please add at least one required skill.');
+      return;
+    }
+
     try {
       setSubmitting(true);
       setApiError(null);
-      const jobData = {
-        ...data,
-        skills: data.skills
-          ? data.skills.split(',').map((s) => s.trim()).filter(Boolean)
-          : [],
-        salary: data.salaryMin || data.salaryMax
-          ? { min: data.salaryMin, max: data.salaryMax, currency: data.currency || 'USD' }
-          : undefined,
-      };
-      delete jobData.salaryMin;
-      delete jobData.salaryMax;
-      delete jobData.currency;
 
-      await companyService.postJob(companyId, jobData);
+      const jobData = {
+        title: data.jobTitle.trim(),
+        description: data.jobDescription.trim(),
+        jobType: data.jobType.toLowerCase().replace(' ', '-'),
+        experienceLevel: data.experienceLevel || 'mid',
+        minExperience: parseInt(data.workExperience) || 0,
+        maxExperience: parseInt(data.maxExperience) || parseInt(data.workExperience) + 5 || 5,
+        location: {
+          city: data.city?.trim() || '',
+          state: data.state?.trim() || '',
+          country: data.country?.trim() || '',
+          isRemote: data.isRemote || false,
+          remoteType: data.isRemote ? (data.remoteType || 'fully-remote') : 'on-site'
+        },
+        salary: data.salaryMin ? {
+          min: parseFloat(data.salaryMin),
+          max: parseFloat(data.salaryMax) || parseFloat(data.salaryMin),
+          currency: data.currency || 'USD',
+          period: data.salaryPeriod || 'yearly'
+        } : undefined,
+        applicationDeadline: data.deadline ? new Date(data.deadline) : null,
+        openings: parseInt(data.openings) || 1,
+        benefits: data.benefits ? data.benefits.split(',').map(b => b.trim()).filter(b => b) : [],
+        responsibilities: data.responsibilities ? data.responsibilities.split(',').map(r => r.trim()).filter(r => r) : [],
+        qualifications: data.qualifications ? data.qualifications.split(',').map(q => q.trim()).filter(q => q) : [],
+        requiredSkills: skills.map(skill => ({
+          skillId: skill._id,
+          skillName: skill.skillName,
+          experience: parseInt(data[`experience_${skill._id}`]) || 1,
+          rating: parseInt(data[`rating_${skill._id}`]) || 3,
+          isMandatory: true
+        })),
+        tags: data.tags ? data.tags.split(',').map(t => t.trim()).filter(t => t) : [],
+        category: data.category?.trim() || ''
+      };
+
+      const res = await companyService.postJob(jobData);
       setSuccess(true);
       reset();
+      setSkills([]);
       setTimeout(() => navigate('/company/jobs'), 2000);
     } catch (err) {
-      setApiError(err?.response?.data?.message || 'Failed to post job. Please try again.');
+      setApiError(err?.response?.data?.message || 'Failed to create job. Please try again.');
+      console.error('Job creation error:', err);
     } finally {
       setSubmitting(false);
     }
@@ -66,14 +173,14 @@ export default function PostJob() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Post a New Job</h1>
-        <p className="text-slate-500 mt-1">Create and publish a new job opening.</p>
+        <h1 className="text-2xl font-bold text-slate-900">Create a New Job</h1>
+        <p className="text-slate-500 mt-1">Fill in all required fields to post a job opening.</p>
       </div>
 
       {success && (
         <div className="flex items-center gap-2 text-green-700 bg-green-50 border border-green-200 rounded-lg p-4">
           <CheckCircle className="w-5 h-5 flex-shrink-0" />
-          Job posted successfully! Redirecting to jobs list...
+          Job created successfully! Redirecting...
         </div>
       )}
 
@@ -85,49 +192,46 @@ export default function PostJob() {
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {/* Section 1: Basic Job Information */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-5">
-          <h2 className="text-lg font-semibold text-slate-900 border-b pb-3">Job Details</h2>
+          <h2 className="text-lg font-semibold text-slate-900 border-b pb-3">Basic Information</h2>
 
-          {/* Title */}
+          {/* Job Title */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">
               Job Title <span className="text-red-500">*</span>
             </label>
             <input
-              {...register('title', { required: 'Job title is required' })}
+              {...register('jobTitle', { required: 'Job title is required' })}
               type="text"
               placeholder="e.g. Senior Frontend Developer"
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            {errors.title && (
-              <p className="text-red-500 text-xs mt-1">{errors.title.message}</p>
-            )}
+            {errors.jobTitle && <p className="text-red-500 text-xs mt-1">{errors.jobTitle.message}</p>}
           </div>
 
-          {/* Description */}
+          {/* Job Description */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">
               Job Description <span className="text-red-500">*</span>
             </label>
             <textarea
-              {...register('description', { required: 'Description is required' })}
-              rows={5}
-              placeholder="Describe the role, responsibilities, and what you're looking for..."
+              {...register('jobDescription', { required: 'Job description is required' })}
+              rows={6}
+              placeholder="Describe the role, responsibilities, requirements, and company culture..."
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
             />
-            {errors.description && (
-              <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>
-            )}
+            {errors.jobDescription && <p className="text-red-500 text-xs mt-1">{errors.jobDescription.message}</p>}
           </div>
 
-          {/* Type & Experience */}
+          {/* Job Type and Role */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
                 Job Type <span className="text-red-500">*</span>
               </label>
               <select
-                {...register('type', { required: 'Job type is required' })}
+                {...register('jobType', { required: 'Job type is required' })}
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Select type</option>
@@ -137,23 +241,21 @@ export default function PostJob() {
                   </option>
                 ))}
               </select>
-              {errors.type && (
-                <p className="text-red-500 text-xs mt-1">{errors.type.message}</p>
-              )}
+              {errors.jobType && <p className="text-red-500 text-xs mt-1">{errors.jobType.message}</p>}
             </div>
 
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
-                Experience Level
+                Job Role <span className="text-red-500">*</span>
               </label>
               <select
-                {...register('experienceLevel')}
+                {...register('jobRole', { required: 'Job role is required' })}
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="">Select level</option>
-                {EXPERIENCE_LEVELS.map((l) => (
-                  <option key={l} value={l}>
-                    {l}
+                <option value="">Select role</option>
+                {roles.map((role) => (
+                  <option key={role._id} value={role._id}>
+                    {role.role}
                   </option>
                 ))}
               </select>

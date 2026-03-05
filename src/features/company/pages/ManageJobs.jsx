@@ -41,7 +41,7 @@ export default function ManageJobs() {
     try {
       setLoading(true);
       const res = await companyService.getJobs(companyId);
-      setJobs(res?.data || []);
+      setJobs(res?.data?.jobs || []);
     } catch (err) {
       setError('Failed to load jobs.');
     } finally {
@@ -57,7 +57,7 @@ export default function ManageJobs() {
     if (!window.confirm('Are you sure you want to delete this job?')) return;
     try {
       setDeletingId(jobId);
-      await companyService.deleteJob(companyId, jobId);
+      await companyService.deleteJob(jobId);
       setJobs((prev) => prev.filter((j) => (j._id || j.id) !== jobId));
     } catch {
       alert('Failed to delete job. Please try again.');

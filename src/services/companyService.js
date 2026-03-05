@@ -1,30 +1,36 @@
-import { get, post, put, del, clearCache } from './api';
+// services/companyService.js
+import { get, post, put, del, clearCache } from "./api";
 
 export const companyService = {
+  // ─── Profile ──────────────────────────────────────────────────────────────
+
   getProfile: async (companyId) => {
-    return get(`/company/${companyId}`, true, 300000);
+    return get(`/company/${companyId}`, true, 300_000);
   },
 
   updateProfile: async (companyId, profileData) => {
+    // Invalidate the cached profile so the next getProfile call is fresh
+    clearCache(`GET:/company/${companyId}`);
     return put(`/company/${companyId}`, profileData);
   },
 
-  // ✅ FIX: Was using raw `axios` with hardcoded `/api/v1/` prefix — inconsistent
-  // with every other method which uses the `get` helper (which already has the
-  // base URL baked in). Also was NOT caching, unlike other GET calls.
-  // Now uses `get` helper with cache disabled (0) so pagination stays fresh.
+  // ─── Jobs ─────────────────────────────────────────────────────────────────
+
   getJobs: async (companyId, page = 1, params = {}) => {
-    const queryParams = new URLSearchParams({ page, limit: 10 });
-    if (params.search) queryParams.set('search', params.search);
-    if (params.status) queryParams.set('status', params.status);
-    return get(`/company/${companyId}/jobs?${queryParams}`, false);
+    const qs = new URLSearchParams({ page, limit: 10 });
+    if (params.search)  qs.set("search",  params.search);
+    if (params.status)  qs.set("status",  params.status);
+    if (params.jobType) qs.set("jobType", params.jobType);
+    return get(`/company/${companyId}/jobs?${qs}`, false);
   },
 
+  // FIX: removed hardcoded company ID — caller must supply companyId
   postJob: async (companyId, jobData) => {
     clearCache(`GET:/company/${companyId}/jobs`);
     return post(`/company/${companyId}/jobs`, jobData);
   },
 
+  // FIX: scoped all job mutation endpoints under /company/:companyId/jobs/:jobId
   updateJob: async (companyId, jobId, jobData) => {
     clearCache(`GET:/company/${companyId}/jobs`);
     return put(`/company/${companyId}/jobs/${jobId}`, jobData);
@@ -35,16 +41,31 @@ export const companyService = {
     return del(`/company/${companyId}/jobs/${jobId}`);
   },
 
-  getJobApplications: async (companyId, jobId) => {
-    return get(`/company/${companyId}/jobs/${jobId}/applications`, true, 60000);
+  getJobById: async (companyId, jobId) => {
+    return get(`/company/${companyId}/jobs/${jobId}`, false);
   },
 
-  // ✅ FIX: Same issue as getJobs — was using raw `axios` instead of `get` helper.
+  toggleJobStatus: async (companyId, jobId) => {
+    clearCache(`GET:/company/${companyId}/jobs`);
+    return post(`/company/${companyId}/jobs/${jobId}/toggle-status`);
+  },
+
+  // FIX: scoped under companyId so the backend can authorise the request
+  getJobStats: async (companyId) => {
+    return get(`/company/${companyId}/jobs/stats`, false);
+  },
+
+  getJobApplications: async (companyId, jobId) => {
+    return get(`/company/${companyId}/jobs/${jobId}/applications`, true, 60_000);
+  },
+
+  // ─── Applications ─────────────────────────────────────────────────────────
+
   getAllApplications: async (companyId, page = 1, params = {}) => {
-    const queryParams = new URLSearchParams({ page, limit: 10 });
-    if (params.search) queryParams.set('search', params.search);
-    if (params.status) queryParams.set('status', params.status);
-    return get(`/company/${companyId}/applications?${queryParams}`, false);
+    const qs = new URLSearchParams({ page, limit: 10 });
+    if (params.search) qs.set("search", params.search);
+    if (params.status) qs.set("status", params.status);
+    return get(`/company/${companyId}/applications?${qs}`, false);
   },
 
   updateApplicationStatus: async (companyId, applicationId, status) => {
@@ -53,8 +74,21 @@ export const companyService = {
     return put(`/company/${companyId}/applications/${applicationId}`, { status });
   },
 
+  // ─── Skills ───────────────────────────────────────────────────────────────
+
+  // FIX: only append ?search= when the search string is non-empty
+  getAllActiveSkills: async (search = "") => {
+    const endpoint = search.trim()
+      ? `/company/profile/allActiveSkills?search=${encodeURIComponent(search.trim())}`
+      : "/company/profile/allActiveSkills";
+    const response = await get(endpoint, false, 0);
+    return response?.data || [];
+  },
+
+  // ─── Team ─────────────────────────────────────────────────────────────────
+
   getTeamMembers: async (companyId) => {
-    return get(`/company/${companyId}/team`, true, 600000);
+    return get(`/company/${companyId}/team`, true, 600_000);
   },
 
   addTeamMember: async (companyId, memberData) => {
