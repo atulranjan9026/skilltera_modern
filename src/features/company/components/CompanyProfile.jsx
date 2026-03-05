@@ -96,8 +96,9 @@ export default function CompanyProfile({ companyUser: propCompanyUser, companyId
 
   if (loading) {
     return (
-      <div className="flex justify-center py-24">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      <div className="flex justify-center py-12">
+        <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
+        <span className="ml-2 text-sm text-slate-500">Loading profile...</span>
       </div>
     );
   }

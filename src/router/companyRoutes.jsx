@@ -2,11 +2,7 @@
 import { Navigate } from "react-router-dom";
 import CompanyLogin from "../features/company/CompanyAuth/CompanyLogin";
 import CompanyDashboard from "../features/company/pages/CompanyDashboard";
-// import CompanyProfile    from "../features/company/pages/CompanyProfile";
-import ManageJobs from "../features/company/pages/ManageJobs";
-// import CreateJob         from "../features/company/pages/CreateJob";
-// import Applications from "../features/company/pages/Applications";
-import TeamMembers from "../features/company/pages/TeamMembers";
+
 import AuthLayout from "../layouts/AuthLayout";
 import RequireCompanyAuth from "../components/RequireCompanyAuth";
 
@@ -38,10 +34,10 @@ const companyRoutes = {
     //   path: "profile",
     //   element: guarded(<CompanyProfile />),
     // },
-    {
-      path: "jobs",
-      element: guarded(<ManageJobs />),
-    },
+    // {
+    //   path: "jobs",
+    //   element: guarded(<ManageJobs />),
+    // },
     // {
     //   path: "jobs/new",
     //   element: guarded(<CreateJob />),
@@ -50,10 +46,10 @@ const companyRoutes = {
     //   path: "applications",
     //   element: guarded(<Applications />),
     // },
-    {
-      path: "team",
-      element: guarded(<TeamMembers />),
-    },
+    // {
+    //   path: "team",
+    //   element: guarded(<TeamMembers />),
+    // },
     {
       path: "refer",
       // Placeholder – replace with a real component when ready
