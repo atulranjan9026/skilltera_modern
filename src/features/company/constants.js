@@ -29,4 +29,5 @@ export const NAV_ITEMS = [
     { icon: "👥", label: "Applications", tab: "Applications" },
     { icon: "📅", label: "Interviews", tab: "Interviews" },
     { icon: "📊", label: "Analytics", tab: "Analytics" },
+    { icon: "🏢", label: "Enterprise", tab: "EnterpriseManagement" },
 ];

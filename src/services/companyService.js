@@ -100,4 +100,101 @@ export const companyService = {
     clearCache(`GET:/company/${companyId}/team`);
     return del(`/company/${companyId}/team/${memberId}`);
   },
+
+  // ─── Enterprise Management ────────────────────────────────────────────────────
+
+  // LOB Management
+  getLOBs: async () => {
+    return get("/company/lobs", false);
+  },
+
+  createLOB: async (lobData) => {
+    clearCache("GET:/company/lobs");
+    return post("/company/lobs", lobData);
+  },
+
+  updateLOB: async (lobId, lobData) => {
+    clearCache("GET:/company/lobs");
+    return put(`/company/lobs/${lobId}`, lobData);
+  },
+
+  deleteLOB: async (lobId) => {
+    clearCache("GET:/company/lobs");
+    return del(`/company/lobs/${lobId}`);
+  },
+
+  bulkCreateLOBs: async (lobData) => {
+    clearCache("GET:/company/lobs");
+    return post("/company/lobs/bulk", lobData);
+  },
+
+  // Hiring Manager Management
+  getHiringManagers: async () => {
+    return get("/company/hiring-managers", false);
+  },
+
+  createHiringManager: async (hmData) => {
+    clearCache("GET:/company/hiring-managers");
+    return post("/company/hiring-managers", hmData);
+  },
+
+  updateHiringManager: async (hmId, hmData) => {
+    clearCache("GET:/company/hiring-managers");
+    return put(`/company/hiring-managers/${hmId}`, hmData);
+  },
+
+  deleteHiringManager: async (hmId) => {
+    clearCache("GET:/company/hiring-managers");
+    return del(`/company/hiring-managers/${hmId}`);
+  },
+
+  bulkCreateHiringManagers: async (hmData) => {
+    clearCache("GET:/company/hiring-managers");
+    return post("/company/hiring-managers/bulk", hmData);
+  },
+
+  // Backup Hiring Manager Management
+  getBackupHiringManagers: async () => {
+    return get("/company/backup-hiring-managers", false);
+  },
+
+  createBackupHiringManager: async (bhmData) => {
+    clearCache("GET:/company/backup-hiring-managers");
+    return post("/company/backup-hiring-managers", bhmData);
+  },
+
+  updateBackupHiringManager: async (bhmId, bhmData) => {
+    clearCache("GET:/company/backup-hiring-managers");
+    return put(`/company/backup-hiring-managers/${bhmId}`, bhmData);
+  },
+
+  deleteBackupHiringManager: async (bhmId) => {
+    clearCache("GET:/company/backup-hiring-managers");
+    return del(`/company/backup-hiring-managers/${bhmId}`);
+  },
+
+  // Recruiter Management
+  getRecruiters: async () => {
+    return get("/company/recruiters", false);
+  },
+
+  createRecruiter: async (recruiterData) => {
+    clearCache("GET:/company/recruiters");
+    return post("/company/recruiters", recruiterData);
+  },
+
+  updateRecruiter: async (recruiterId, recruiterData) => {
+    clearCache("GET:/company/recruiters");
+    return put(`/company/recruiters/${recruiterId}`, recruiterData);
+  },
+
+  deleteRecruiter: async (recruiterId) => {
+    clearCache("GET:/company/recruiters");
+    return del(`/company/recruiters/${recruiterId}`);
+  },
+
+  bulkCreateRecruiters: async (recruiterData) => {
+    clearCache("GET:/company/recruiters");
+    return post("/company/recruiters/bulk", recruiterData);
+  },
 };

@@ -16,6 +16,7 @@ import { ApplicationsTab } from "../components/ApplicationsTab";
 import { InterviewsTab } from "../components/InterviewsTab";
 import { AnalyticsTab } from "../components/AnalyticsTab";
 import { CompanyProfile } from "../components/CompanyProfile";
+import EnterpriseManagement from "../components/EnterpriseManagement";
 
 // ─── Main Dashboard ────────────────────────────────────────────────────────────
 export default function CompanyDashboard() {
@@ -311,6 +312,11 @@ export default function CompanyDashboard() {
               companyId={companyId}
               onRetry={refreshAll}
             />
+          )}
+
+          {/* EnterpriseManagement */}
+          {!showCreate && activeTab === "EnterpriseManagement" && (
+            <EnterpriseManagement />
           )}
 
         </main>
