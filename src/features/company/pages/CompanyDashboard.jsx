@@ -11,8 +11,7 @@ import { DashboardHeader } from "../components/DashboardHeader";
 // Feature components
 import { CreateJobForm } from "../components/CreateJobForm";
 import { OverviewTab } from "../components/OverviewTab";
-import { JobsTab } from "../components/JobsTab";
-import { ApplicationsTab } from "../components/ApplicationsTab";
+import { JobsSection } from "../components/job/Jobssection";
 import { InterviewsTab } from "../components/InterviewsTab";
 import { AnalyticsTab } from "../components/AnalyticsTab";
 import { CompanyProfile } from "../components/CompanyProfile";
@@ -260,7 +259,7 @@ export default function CompanyDashboard() {
 
           {/* Job Postings */}
           {!showCreate && activeTab === "Jobs" && (
-            <JobsTab
+            <JobsSection
               totalJobs={totalJobs} activeJobs={activeJobs} pendingJobs={pendingJobs}
               jobSearch={jobSearch} setJobSearch={setJobSearch}
               jobsLoading={jobsLoading} jobsError={jobsError} jobs={jobs}
