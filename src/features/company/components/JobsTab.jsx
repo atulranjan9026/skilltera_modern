@@ -117,12 +117,14 @@ export function JobsTab({
                         {totalJobs} total · {activeJobs} active · {pendingJobs} pending approval
                     </p>
                 </div>
-                <button
-                    onClick={onPostNew}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors"
-                >
-                    + Post New Job
-                </button>
+                {onPostNew && (
+                    <button
+                        onClick={onPostNew}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors"
+                    >
+                        + Post New Job
+                    </button>
+                )}
             </div>
 
             {jobsError && <ErrorBanner message={jobsError} onRetry={onRetry} />}

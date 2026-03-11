@@ -92,7 +92,7 @@ export function JobsSection(props) {
             <JobDetailPage
                 job={selectedJob}
                 onBack={handleBack}
-                onEdit={handleEditJob}
+                onEdit={props.canEdit !== false ? handleEditJob : undefined}
             />
         );
     }

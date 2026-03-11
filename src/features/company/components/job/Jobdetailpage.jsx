@@ -25,12 +25,14 @@ export function JobDetailPage({ job, onBack, onEdit }) {
                 >
                     ← Back to Jobs
                 </button>
-                <button
-                    onClick={() => onEdit(job)}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors"
-                >
-                    ✏️ Edit Job
-                </button>
+                {onEdit && (
+                    <button
+                        onClick={() => onEdit(job)}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors"
+                    >
+                        ✏️ Edit Job
+                    </button>
+                )}
             </div>
 
             {/* ── Header card ── */}

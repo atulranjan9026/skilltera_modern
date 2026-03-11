@@ -8,45 +8,51 @@ import SettingsPage from '../features/candidates/SettingsPage';
 import JobDetailsPage from '../features/candidates/JobDetailsPage';
 import AssessmentHubPage from '../features/assessment/AssessmentHubPage';
 import TestResultsPage from '../features/assessment/components/TestResultsPage';
+import ProtectedRoute from '../components/ProtectedRoute';
 
 /**
  * Job/User routes - Main user-facing pages after login
  * All routes use UserLayout which includes Sidebar and Footer
  */
 const jobRoutes = {
-  element: <UserLayout />,
+  element: <ProtectedRoute />,
   children: [
     {
-      path: '/',
-      element: <LandingPage />,
-    },
-    {
-      path: '/jobs-search',
-      element: <JobSearchPage />,
-    },
-    {
-      path: '/dashboard',
-      element: <UserDashboard />,
-    },
-    {
-      path: '/profile',
-      element: <ProfilePage />,
-    },
-    {
-      path: '/settings',
-      element: <SettingsPage />,
-    },
-    {
-      path: '/job/:jobId',
-      element: <JobDetailsPage />,
-    },
-    {
-      path: '/assessments',
-      element: <AssessmentHubPage />,
-    },
-    {
-      path: '/test-results',
-      element: <TestResultsPage />,
+      element: <UserLayout />,
+      children: [
+        {
+          path: '/',
+          element: <LandingPage />,
+        },
+        {
+          path: '/jobs-search',
+          element: <JobSearchPage />,
+        },
+        {
+          path: '/dashboard',
+          element: <UserDashboard />,
+        },
+        {
+          path: '/profile',
+          element: <ProfilePage />,
+        },
+        {
+          path: '/settings',
+          element: <SettingsPage />,
+        },
+        {
+          path: '/job/:jobId',
+          element: <JobDetailsPage />,
+        },
+        {
+          path: '/assessments',
+          element: <AssessmentHubPage />,
+        },
+        {
+          path: '/test-results',
+          element: <TestResultsPage />,
+        },
+      ],
     },
   ],
 };

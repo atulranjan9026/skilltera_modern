@@ -21,7 +21,7 @@ export function getCompanyUser() {
  */
 export function getCompanyId() {
   const user = getCompanyUser();
-  return user._id || user.id || "";
+  return user.companyId || user._id || user.id || "";
 }
 
 /**

@@ -153,6 +153,31 @@ export const companyService = {
     return post("/company/hiring-managers/bulk", hmData);
   },
 
+  // Interviewer Management
+  getInterviewers: async () => {
+    return get("/company/interviewers", false);
+  },
+
+  createInterviewer: async (data) => {
+    clearCache("GET:/company/interviewers");
+    return post("/company/interviewers", data);
+  },
+
+  updateInterviewer: async (id, data) => {
+    clearCache("GET:/company/interviewers");
+    return put(`/company/interviewers/${id}`, data);
+  },
+
+  deleteInterviewer: async (id) => {
+    clearCache("GET:/company/interviewers");
+    return del(`/company/interviewers/${id}`);
+  },
+
+  bulkCreateInterviewers: async (data) => {
+    clearCache("GET:/company/interviewers");
+    return post("/company/interviewers/bulk", data);
+  },
+
   // Backup Hiring Manager Management
   getBackupHiringManagers: async () => {
     return get("/company/backup-hiring-managers", false);
@@ -196,5 +221,29 @@ export const companyService = {
   bulkCreateRecruiters: async (recruiterData) => {
     clearCache("GET:/company/recruiters");
     return post("/company/recruiters/bulk", recruiterData);
+  },
+
+  // ─── Referrals ────────────────────────────────────────────────────────────
+
+  getRecruiterAssignedJobs: async () => {
+    return get("/company/jobs/assigned", false);
+  },
+
+  createReferral: async (data) => {
+    return post("/company/referrals", data);
+  },
+
+  getRecruiterReferrals: async (jobId) => {
+    const qs = jobId ? `?jobId=${jobId}` : "";
+    return get(`/company/referrals${qs}`, false);
+  },
+
+  getRecruiterReferralStats: async () => {
+    return get("/company/referrals/stats", false);
+  },
+
+  searchCandidates: async (query, limit = 20) => {
+    const qs = new URLSearchParams({ search: query, limit });
+    return get(`/company/candidates/search?${qs}`, false);
   },
 };

@@ -23,6 +23,7 @@ export const FUNNEL_COLORS = {
 };
 
 // ─── Dashboard Navigation ─────────────────────────────────────────────────────
+// Full admin nav (company_admin, company)
 export const NAV_ITEMS = [
     { icon: "▦", label: "Overview", tab: "Overview" },
     { icon: "💼", label: "Job Postings", tab: "Jobs" },
@@ -31,3 +32,107 @@ export const NAV_ITEMS = [
     { icon: "📊", label: "Analytics", tab: "Analytics" },
     { icon: "🏢", label: "Enterprise", tab: "EnterpriseManagement" },
 ];
+
+// Hiring manager: no Enterprise, no Company Profile
+export const HIRING_MANAGER_NAV_ITEMS = [
+    { icon: "▦", label: "Overview", tab: "Overview" },
+    { icon: "💼", label: "Job Postings", tab: "Jobs" },
+    { icon: "👥", label: "Applications", tab: "Applications" },
+    { icon: "📅", label: "Interviews", tab: "Interviews" },
+    { icon: "📊", label: "Analytics", tab: "Analytics" },
+];
+
+// Recruiter sees limited nav: jobs assigned to them, refer candidates, their referrals
+export const RECRUITER_NAV_ITEMS = [
+    { icon: "▦", label: "Overview", tab: "Overview" },
+    { icon: "💼", label: "Assigned Jobs", tab: "Jobs" },
+    { icon: "👥", label: "Applications", tab: "Applications" },
+    { icon: "➕", label: "Refer Candidate", tab: "ReferCandidate" },
+];
+
+// Interviewer sees: overview, jobs (view only), applications, interviews
+export const INTERVIEWER_NAV_ITEMS = [
+    { icon: "▦", label: "Overview", tab: "Overview" },
+    { icon: "💼", label: "Jobs", tab: "Jobs" },
+    { icon: "👥", label: "Applications", tab: "Applications" },
+    { icon: "📅", label: "Interviews", tab: "Interviews" },
+];
+
+// ─── Role-based permissions (company_admin, hiring_manager, interviewer, recruiter, company) ───
+const ROLES_WITH_POST_JOB = ["company_admin", "company", "hiring_manager"];
+const ROLES_WITH_EDIT_JOB = ["company_admin", "company", "hiring_manager"];
+const ROLES_WITH_COMPANY_PROFILE = ["company_admin", "company"];
+const ROLES_WITH_ENTERPRISE = ["company_admin", "company"];
+
+const getUserRoles = (companyUser) => {
+    const roles = companyUser?.roles || [];
+    const role = companyUser?.role;
+    const primary = role || (roles.includes("company_admin") ? "company_admin" : roles[0]);
+    return { roles, role: primary, all: [...new Set([primary, ...roles])] };
+};
+
+export const canPostJob = (companyUser) => {
+    const { all } = getUserRoles(companyUser);
+    return ROLES_WITH_POST_JOB.some((r) => all.includes(r));
+};
+
+export const canEditJob = (companyUser) => {
+    const { all } = getUserRoles(companyUser);
+    return ROLES_WITH_EDIT_JOB.some((r) => all.includes(r));
+};
+
+export const canManageCompanyProfile = (companyUser) => {
+    const { all } = getUserRoles(companyUser);
+    return ROLES_WITH_COMPANY_PROFILE.some((r) => all.includes(r));
+};
+
+export const canAccessEnterprise = (companyUser) => {
+    const { all } = getUserRoles(companyUser);
+    return ROLES_WITH_ENTERPRISE.some((r) => all.includes(r));
+};
+
+export const getNavItems = (companyUser) => {
+    const { all } = getUserRoles(companyUser);
+    if (all.includes("recruiter")) return RECRUITER_NAV_ITEMS;
+    if (all.includes("interviewer") && !all.includes("company_admin") && !all.includes("company") && !all.includes("hiring_manager")) {
+        return INTERVIEWER_NAV_ITEMS;
+    }
+    if (all.includes("hiring_manager") && !all.includes("company_admin") && !all.includes("company")) {
+        return HIRING_MANAGER_NAV_ITEMS;
+    }
+    return NAV_ITEMS;
+};
+
+export const getDashboardLabel = (companyUser) => {
+    const { all } = getUserRoles(companyUser);
+    if (all.includes("recruiter")) return "Recruiter Dashboard";
+    if (all.includes("interviewer") && !all.includes("company_admin") && !all.includes("company") && !all.includes("hiring_manager")) {
+        return "Interviewer Dashboard";
+    }
+    if (all.includes("hiring_manager")) return "Hiring Manager Dashboard";
+    return "Company Dashboard";
+};
+
+export const getRoleBadge = (companyUser) => {
+    const { all } = getUserRoles(companyUser);
+    if (all.includes("recruiter")) return "Recruiter";
+    if (all.includes("interviewer") && !all.includes("company_admin") && !all.includes("company") && !all.includes("hiring_manager")) {
+        return "Interviewer";
+    }
+    if (all.includes("hiring_manager")) return "Hiring Manager";
+    return null;
+};
+
+export const getDisplayName = (companyUser) => {
+    const { all } = getUserRoles(companyUser);
+    if (all.includes("recruiter") || (all.includes("interviewer") && !all.includes("company_admin") && !all.includes("company") && !all.includes("hiring_manager"))) {
+        return companyUser?.name || "User";
+    }
+    return companyUser?.companyName || companyUser?.name || "Company";
+};
+
+export const isRecruiterRole = (companyUser) => {
+    const roles = companyUser?.roles || [];
+    const role = companyUser?.role;
+    return roles.includes("recruiter") || role === "recruiter";
+};

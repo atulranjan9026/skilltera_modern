@@ -59,12 +59,13 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Only attempt refresh on 401, and not if this IS the refresh request
+    // Only attempt refresh on 401, and not if this IS the refresh request or a login attempt
+    const isLoginRequest = originalRequest.url?.includes('/auth/login') || originalRequest.url?.includes('/company/login');
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
       !originalRequest.url?.includes('/auth/refresh') &&
-      !originalRequest.url?.includes('/auth/login')
+      !isLoginRequest
     ) {
       if (isRefreshing) {
         // Another refresh is in-flight — queue this request
@@ -101,8 +102,9 @@ api.interceptors.response.use(
       }
     }
 
-    // Non-401 or refresh itself failed — reject as-is
-    if (error.response?.status === 401) {
+    // For 401 on non-login requests (e.g. expired token), redirect to login
+    // Do NOT redirect when login itself failed — let the form show the error
+    if (error.response?.status === 401 && !isLoginRequest) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/auth/login';

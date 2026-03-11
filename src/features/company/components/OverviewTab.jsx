@@ -6,6 +6,7 @@ import { StatusBadge } from "../ui/StatusBadge";
 import { JobTypePill } from "../ui/JobTypePill";
 import { Avatar } from "../ui/Avatar";
 import { daysLeft } from "../helpers";
+import { getDisplayName, getRoleBadge } from "../constants";
 
 export function OverviewTab({
     companyUser,
@@ -21,9 +22,13 @@ export function OverviewTab({
             <div className="flex items-center justify-between">
                 <div>
                     <h2 className="text-xl font-bold text-slate-900">
-                        Good morning, {companyUser?.companyName || "there"} 👋
+                        Good morning, {getDisplayName(companyUser) || "there"} 👋
                     </h2>
-                    <p className="text-sm text-slate-500 mt-0.5">Here's your hiring overview at a glance.</p>
+                    <p className="text-sm text-slate-500 mt-0.5">
+                        {getRoleBadge(companyUser)
+                            ? `Here's your ${getRoleBadge(companyUser).toLowerCase()} overview.`
+                            : "Here's your hiring overview at a glance."}
+                    </p>
                 </div>
                 <span className="text-xs text-slate-400 bg-slate-100 px-3 py-1.5 rounded-lg font-medium">
                     📅 {new Date().toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}

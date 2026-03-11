@@ -1,8 +1,9 @@
-import { NAV_ITEMS } from "../constants";
+import { getNavItems, getDisplayName, getRoleBadge, canManageCompanyProfile } from "../constants";
 
 export function DashboardSidebar({ companyUser, activeTab, showCreate, goTo, navBadges = [] }) {
+    const navItems = getNavItems(companyUser);
     // Merge static nav items with dynamic badge counts from parent
-    const items = NAV_ITEMS.map((item) => {
+    const items = navItems.map((item) => {
         const badgeEntry = navBadges.find((b) => b.tab === item.tab);
         return { ...item, badge: badgeEntry?.badge ?? null };
     });
@@ -17,15 +18,20 @@ export function DashboardSidebar({ companyUser, activeTab, showCreate, goTo, nav
                 </div>
             </div>
 
-            {/* Company info */}
+            {/* Company / Recruiter info */}
             <div className="px-5 py-4 border-b border-white/5">
                 <div className="flex items-center gap-2.5">
                     <div className="w-9 h-9 bg-gradient-to-br from-indigo-400 to-violet-500 rounded-xl flex items-center justify-center text-white font-black text-sm">
-                        {(companyUser?.companyName || "C")[0].toUpperCase()}
+                        {(getDisplayName(companyUser) || "C")[0].toUpperCase()}
                     </div>
                     <div className="min-w-0">
-                        <p className="text-white text-xs font-semibold truncate">{companyUser?.companyName || "Your Company"}</p>
+                        <p className="text-white text-xs font-semibold truncate">
+                            {getDisplayName(companyUser)}
+                        </p>
                         <p className="text-slate-400 text-[10px] truncate">{companyUser?.email || ""}</p>
+                        {getRoleBadge(companyUser) && (
+                            <span className="text-[10px] text-indigo-300 font-medium">{getRoleBadge(companyUser)}</span>
+                        )}
                     </div>
                 </div>
             </div>
@@ -52,13 +58,15 @@ export function DashboardSidebar({ companyUser, activeTab, showCreate, goTo, nav
                 ))}
             </nav>
 
-            {/* Settings */}
-            <div className="px-3 py-4 border-t border-white/5">
-                <button onClick={() => goTo("CompanyProfile")} className="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-400 hover:text-slate-200 transition-all">
-                    <span>⚙️</span>
-                    <span>Company Profile</span>
-                </button>
-            </div>
+            {/* Settings - Company Profile only for roles with permission */}
+            {canManageCompanyProfile(companyUser) && (
+                <div className="px-3 py-4 border-t border-white/5">
+                    <button onClick={() => goTo("CompanyProfile")} className="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-400 hover:text-slate-200 transition-all">
+                        <span>⚙️</span>
+                        <span>Company Profile</span>
+                    </button>
+                </div>
+            )}
         </aside>
     );
 }

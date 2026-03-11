@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { companyService } from "../../../services/companyService";
 import { getCompanyUser, getCompanyId } from "../../../utils/auth";
 
-import { STATUS_CFG, FUNNEL_COLORS, NAV_ITEMS } from "../constants";
+import { STATUS_CFG, FUNNEL_COLORS, getNavItems, canPostJob, canEditJob, canManageCompanyProfile } from "../constants";
 
 // Layout
 import { DashboardSidebar } from "../components/DashboardSidebar";
@@ -12,13 +13,14 @@ import { DashboardHeader } from "../components/DashboardHeader";
 import { CreateJobForm } from "../components/CreateJobForm";
 import { OverviewTab } from "../components/OverviewTab";
 import { JobsSection } from "../components/job/Jobssection";
+import { ApplicationsTab } from "../components/ApplicationsTab";
 import { InterviewsTab } from "../components/InterviewsTab";
 import { AnalyticsTab } from "../components/AnalyticsTab";
 import { CompanyProfile } from "../components/CompanyProfile";
-import EnterpriseManagement from "../components/EnterpriseManagement";
 
 // ─── Main Dashboard ────────────────────────────────────────────────────────────
 export default function CompanyDashboard() {
+  const navigate = useNavigate();
   const companyUser = getCompanyUser();
   const companyId = getCompanyId();
 
@@ -186,12 +188,23 @@ export default function CompanyDashboard() {
   );
 
   // ── Navigation helper ─────────────────────────────────────────────────────
-  const goTo = (tab) => { setActiveTab(tab); setShowCreate(false); };
+  const goTo = (tab) => {
+    if (tab === "EnterpriseManagement") {
+      navigate("/company/enterprise");
+      return;
+    }
+    if (tab === "ReferCandidate") {
+      navigate("/company/refer");
+      return;
+    }
+    setActiveTab(tab);
+    setShowCreate(false);
+  };
 
   // ── Sidebar nav badges ────────────────────────────────────────────────────
-  // Derive dynamic badge counts from NAV_ITEMS — no need to maintain a parallel list
+  const navItems = getNavItems(companyUser);
   const BADGE_MAP = { Jobs: pendingJobs, Applications: totalApps, Interviews: interviews };
-  const navWithBadges = NAV_ITEMS.map(({ tab }) => ({ tab, badge: BADGE_MAP[tab] || null }));
+  const navWithBadges = navItems.map(({ tab }) => ({ tab, badge: BADGE_MAP[tab] || null }));
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
@@ -234,8 +247,8 @@ export default function CompanyDashboard() {
 
         <main className="flex-1 overflow-y-auto px-6 py-6">
 
-          {/* Create Job form */}
-          {showCreate && (
+          {/* Create Job form - only for roles with post permission */}
+          {showCreate && canPostJob(companyUser) && (
             <CreateJobForm
               companyId={companyId}
               onSuccess={() => { setShowCreate(false); setActiveTab("Jobs"); fetchJobs(1, ""); }}
@@ -264,9 +277,10 @@ export default function CompanyDashboard() {
               jobSearch={jobSearch} setJobSearch={setJobSearch}
               jobsLoading={jobsLoading} jobsError={jobsError} jobs={jobs}
               jobsPage={jobsPage} jobsTotalPages={jobsTotalPages}
-              onPostNew={() => setShowCreate(true)}
+              onPostNew={canPostJob(companyUser) ? () => setShowCreate(true) : undefined}
               onRetry={() => fetchJobs(jobsPage, jobSearch)}
               handleJobsPage={handleJobsPage}
+              canEdit={canEditJob(companyUser)}
             />
           )}
 
@@ -311,11 +325,6 @@ export default function CompanyDashboard() {
               companyId={companyId}
               onRetry={refreshAll}
             />
-          )}
-
-          {/* EnterpriseManagement */}
-          {!showCreate && activeTab === "EnterpriseManagement" && (
-            <EnterpriseManagement />
           )}
 
         </main>
