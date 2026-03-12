@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { companyService } from "../../../services/companyService";
 import { getCompanyUser, getCompanyId } from "../../../utils/auth";
-
 import { STATUS_CFG, FUNNEL_COLORS, NAV_ITEMS } from "../constants";
 
 // Layout
@@ -12,6 +11,7 @@ import { DashboardHeader } from "../components/DashboardHeader";
 import { CreateJobForm } from "../components/CreateJobForm";
 import { OverviewTab } from "../components/OverviewTab";
 import { JobsSection } from "../components/job/Jobssection";
+import { ApplicationsTab } from "../components/ApplicationsTab";
 import { InterviewsTab } from "../components/InterviewsTab";
 import { AnalyticsTab } from "../components/AnalyticsTab";
 import { CompanyProfile } from "../components/CompanyProfile";
@@ -184,6 +184,7 @@ export default function CompanyDashboard() {
     () => applications.filter((a) => a.status === "interviewed"),
     [applications]
   );
+
 
   // ── Navigation helper ─────────────────────────────────────────────────────
   const goTo = (tab) => { setActiveTab(tab); setShowCreate(false); };

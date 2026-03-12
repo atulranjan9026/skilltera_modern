@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Search, Briefcase, MapPin } from 'lucide-react';
 import SearchBar from './JobSerching/Search/SearchBar';
 import { THEME_CLASSES } from '../../theme';
@@ -8,6 +8,7 @@ import { THEME_CLASSES } from '../../theme';
  * Landing Page - Hero section with job search and CTAs
  */
 export default function LandingPage() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = React.useState('');
 
   const handleSearch = (query) => {
@@ -55,7 +56,7 @@ export default function LandingPage() {
 
           {/* Search Bar */}
           <div className="max-w-4xl mx-auto mb-12">
-            <SearchBar onSearch={handleSearch} />
+            <SearchBar onSearch={handleSearch} onChatClick={() => navigate('/chat')} />
           </div>
 
           {/* Quick Stats */}

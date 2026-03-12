@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { NAV_ITEMS } from "../constants";
 
 export function DashboardHeader({
@@ -5,7 +6,12 @@ export function DashboardHeader({
     sidebarOpen, setSidebarOpen,
     onRefresh, onPostJob, setShowCreate,
 }) {
+    const navigate = useNavigate();
     const currentNavLabel = NAV_ITEMS.find((n) => n.tab === activeTab)?.label;
+
+    const handleChatClick = () => {
+        navigate("/company/chat");
+    };
 
     return (
         <header className="bg-white border-b border-slate-100 px-6 py-3.5 flex items-center gap-4 flex-shrink-0">
@@ -52,6 +58,14 @@ export function DashboardHeader({
                     className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors"
                 >
                     + Post Job
+                </button>
+                {/* Chat option */}
+                <button
+                    onClick={handleChatClick}
+                    title="Chat"
+                    className="text-slate-400 hover:text-emerald-600 transition-colors text-base font-bold cursor-pointer"
+                >
+                    💬
                 </button>
                 {/* Avatar */}
                 <div className="relative">

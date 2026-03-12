@@ -2,6 +2,7 @@
 import { Navigate } from "react-router-dom";
 import CompanyLogin from "../features/company/CompanyAuth/CompanyLogin";
 import CompanyDashboard from "../features/company/pages/CompanyDashboard";
+import ChatPage from "../features/chat/pages/ChatPage";
 
 import AuthLayout from "../layouts/AuthLayout";
 import RequireCompanyAuth from "../components/RequireCompanyAuth";
@@ -34,6 +35,10 @@ const companyRoutes = {
       path: "refer",
       // Placeholder – replace with a real component when ready
       element: guarded(<div className="p-8 text-slate-500">Refer Candidate – Coming Soon</div>),
+    },
+    {
+      path: "chat",
+      element: guarded(<ChatPage />),
     },
 
     // ── Catch-all ────────────────────────────────────────────────────────

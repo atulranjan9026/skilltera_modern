@@ -148,6 +148,9 @@ export default function EnterpriseManagement() {
   // Message State
   const [message, setMessage] = useState({ type: "", text: "" });
 
+  // Search State
+  const [searchTerm, setSearchTerm] = useState("");
+
   useEffect(() => {
     if (companyId) {
       fetchAllData();
@@ -179,7 +182,7 @@ export default function EnterpriseManagement() {
   const fetchLOBs = async () => {
     try {
       const response = await companyService.getLOBs();
-      setLobs(response.data?.lobs || []);
+      setLobs(response.lobs || []);
     } catch (error) {
       console.error("Failed to fetch LOBs:", error);
     }
@@ -188,7 +191,7 @@ export default function EnterpriseManagement() {
   const fetchHiringManagers = async () => {
     try {
       const response = await companyService.getHiringManagers();
-      setHiringManagers(response.data?.hiringManagers || []);
+      setHiringManagers(response.hiringManagers || []);
     } catch (error) {
       console.error("Failed to fetch hiring managers:", error);
     }
@@ -197,7 +200,7 @@ export default function EnterpriseManagement() {
   const fetchBackupHiringManagers = async () => {
     try {
       const response = await companyService.getBackupHiringManagers();
-      setBackupHiringManagers(response.data?.backupHiringManagers || []);
+      setBackupHiringManagers(response.backupHiringManagers || []);
     } catch (error) {
       console.error("Failed to fetch backup hiring managers:", error);
     }
@@ -206,7 +209,7 @@ export default function EnterpriseManagement() {
   const fetchRecruiters = async () => {
     try {
       const response = await companyService.getRecruiters();
-      setRecruiters(response.data?.recruiters || []);
+      setRecruiters(response.recruiters || []);
     } catch (error) {
       console.error("Failed to fetch recruiters:", error);
     }
@@ -234,7 +237,9 @@ export default function EnterpriseManagement() {
       setEditingLOB(null);
       fetchLOBs();
     } catch (error) {
-      showMessage("error", error.response?.data?.message || "Failed to save LOB");
+      const errorMessage = error.response?.data?.error || error.response?.data?.message || "Failed to save LOB";
+      showMessage("error", errorMessage);
+      console.error("LOB creation error:", error);
     }
   };
 
@@ -247,13 +252,23 @@ export default function EnterpriseManagement() {
   };
 
   const handleDeleteLOB = async (lobId) => {
-    if (window.confirm("Are you sure you want to delete this LOB?")) {
+    const isConfirmed = await showConfirmationDialog("Are you sure you want to delete this LOB?");
+    
+    if (isConfirmed) {
       try {
         await companyService.deleteLOB(lobId);
         showMessage("success", ENTERPRISE_MESSAGES.LOB.DELETE_SUCCESS);
         fetchLOBs();
       } catch (error) {
-        showMessage("error", "Failed to delete LOB");
+        if (error.response?.status === 404) {
+          showMessage("error", "LOB not found");
+        } else if (error.response?.status === 403) {
+          showMessage("error", "Insufficient permissions to delete LOB");
+        } else {
+          const errorMessage = error.response?.data?.error || error.response?.data?.message || "Failed to delete LOB";
+          showMessage("error", errorMessage);
+          console.error("LOB deletion error:", error);
+        }
       }
     }
   };
@@ -280,7 +295,9 @@ export default function EnterpriseManagement() {
       setEditingHiringManager(null);
       fetchHiringManagers();
     } catch (error) {
-      showMessage("error", error.response?.data?.message || "Failed to save Hiring Manager");
+      const errorMessage = error.response?.data?.error || error.response?.data?.message || "Failed to save Hiring Manager";
+      showMessage("error", errorMessage);
+      console.error("Hiring manager creation error:", error);
     }
   };
 
@@ -293,13 +310,23 @@ export default function EnterpriseManagement() {
   };
 
   const handleDeleteHiringManager = async (hmId) => {
-    if (window.confirm("Are you sure you want to delete this Hiring Manager?")) {
+    const isConfirmed = await showConfirmationDialog("Are you sure you want to delete this Hiring Manager?");
+    
+    if (isConfirmed) {
       try {
         await companyService.deleteHiringManager(hmId);
         showMessage("success", ENTERPRISE_MESSAGES.HIRING_MANAGER.DELETE_SUCCESS);
         fetchHiringManagers();
       } catch (error) {
-        showMessage("error", "Failed to delete Hiring Manager");
+        if (error.response?.status === 404) {
+          showMessage("error", "Hiring Manager not found");
+        } else if (error.response?.status === 403) {
+          showMessage("error", "Insufficient permissions to delete Hiring Manager");
+        } else {
+          const errorMessage = error.response?.data?.error || error.response?.data?.message || "Failed to delete Hiring Manager";
+          showMessage("error", errorMessage);
+          console.error("Hiring manager deletion error:", error);
+        }
       }
     }
   };
@@ -326,7 +353,9 @@ export default function EnterpriseManagement() {
       setEditingBackupHiringManager(null);
       fetchBackupHiringManagers();
     } catch (error) {
-      showMessage("error", error.response?.data?.message || "Failed to save Backup Hiring Manager");
+      const errorMessage = error.response?.data?.error || error.response?.data?.message || "Failed to save Backup Hiring Manager";
+      showMessage("error", errorMessage);
+      console.error("Backup hiring manager creation error:", error);
     }
   };
 
@@ -340,13 +369,92 @@ export default function EnterpriseManagement() {
   };
 
   const handleDeleteBackupHiringManager = async (bhmId) => {
-    if (window.confirm("Are you sure you want to delete this Backup Hiring Manager?")) {
+    // Helper function to show confirmation dialog
+    const showConfirmationDialog = (message) => {
+      return new Promise((resolve) => {
+        // Create modal overlay
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          backgroundColor: rgba(0, 0, 0, 0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 9999;
+          padding: 20px;
+        `;
+        
+        modal.innerHTML = `
+          <div style="background: white; padding: 20px; border-radius: 8px; max-width: 400px; text-align: center;">
+            <h3 style="margin: 0 0 15px 0; color: #333;">Confirm Delete</h3>
+            <p style="margin: 0 0 15px 0; color: #666;">${message}</p>
+            <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
+              <button id="confirm-btn" style="background: #dc3545; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px;">
+                Yes, Delete
+              </button>
+              <button id="cancel-btn" style="background: #6b7280; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">
+                Cancel
+              </button>
+            </div>
+          </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        const handleConfirm = (e) => {
+          if (e.target.id === 'confirm-btn') {
+            resolve(true);
+            document.body.removeChild(modal);
+          } else if (e.target.id === 'cancel-btn') {
+            resolve(false);
+            document.body.removeChild(modal);
+          }
+        };
+        
+        modal.addEventListener('click', handleConfirm);
+        
+        // Auto-cancel if user clicks outside modal
+        const handleOutsideClick = (e) => {
+          if (e.target === modal) {
+            resolve(false);
+            document.body.removeChild(modal);
+          }
+        };
+        
+        modal.addEventListener('click', handleOutsideClick);
+        
+        // Timeout auto-cancel after 10 seconds
+        setTimeout(() => {
+          if (document.body.contains(modal)) {
+            resolve(false);
+            document.body.removeChild(modal);
+          }
+        }, 10000);
+      });
+    };
+
+    // Helper function to show confirmation dialog instead of window.confirm
+    const isConfirmed = await showConfirmationDialog("Are you sure you want to delete this Backup Hiring Manager?");
+    
+    if (isConfirmed) {
       try {
         await companyService.deleteBackupHiringManager(bhmId);
         showMessage("success", ENTERPRISE_MESSAGES.BACKUP_HIRING_MANAGER.DELETE_SUCCESS);
         fetchBackupHiringManagers();
       } catch (error) {
-        showMessage("error", "Failed to delete Backup Hiring Manager");
+        if (error.response?.status === 404) {
+          showMessage("error", "Backup Hiring Manager not found");
+        } else if (error.response?.status === 403) {
+          showMessage("error", "Insufficient permissions to delete Backup Hiring Manager");
+        } else {
+          const errorMessage = error.response?.data?.error || error.response?.data?.message || "Failed to delete Backup Hiring Manager";
+          showMessage("error", errorMessage);
+        }
+        console.error("Backup hiring manager deletion error:", error);
       }
     }
   };
@@ -387,7 +495,9 @@ export default function EnterpriseManagement() {
       setEditingRecruiter(null);
       fetchRecruiters();
     } catch (error) {
-      showMessage("error", error.response?.data?.message || "Failed to save Recruiter");
+      const errorMessage = error.response?.data?.error || error.response?.data?.message || "Failed to save Recruiter";
+      showMessage("error", errorMessage);
+      console.error("Recruiter creation error:", error);
     }
   };
 
@@ -401,13 +511,23 @@ export default function EnterpriseManagement() {
   };
 
   const handleDeleteRecruiter = async (recruiterId) => {
-    if (window.confirm("Are you sure you want to delete this Recruiter?")) {
+    const isConfirmed = await showConfirmationDialog("Are you sure you want to delete this Recruiter?");
+    
+    if (isConfirmed) {
       try {
         await companyService.deleteRecruiter(recruiterId);
         showMessage("success", ENTERPRISE_MESSAGES.RECRUITER.DELETE_SUCCESS);
         fetchRecruiters();
       } catch (error) {
-        showMessage("error", "Failed to delete Recruiter");
+        if (error.response?.status === 404) {
+          showMessage("error", "Recruiter not found");
+        } else if (error.response?.status === 403) {
+          showMessage("error", "Insufficient permissions to delete Recruiter");
+        } else {
+          const errorMessage = error.response?.data?.error || error.response?.data?.message || "Failed to delete Recruiter";
+          showMessage("error", errorMessage);
+          console.error("Recruiter deletion error:", error);
+        }
       }
     }
   };
@@ -452,14 +572,48 @@ export default function EnterpriseManagement() {
     }
   };
 
+  // Filtered Data
+  const filteredLobs = lobs.filter(lob => 
+    lob.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    (lob.description && lob.description.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  const filteredHMs = hiringManagers.filter(hm => 
+    hm.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    hm.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredBHMs = backupHiringManagers.filter(bhm => 
+    bhm.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    bhm.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (bhm.hiringManagerId?.name && bhm.hiringManagerId.name.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  const filteredRecruiters = recruiters.filter(recruiter => 
+    recruiter.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    recruiter.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (recruiter.keySkills && recruiter.keySkills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase())))
+  );
+
   const tabHeaders = ["LOBs", "Hiring Managers", "Backup HMs", "Recruiters"];
   const tabKeys = ["lob", "hiringManager", "backupHiringManager", "recruiter"];
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Enterprise Management</h1>
-        <p className="text-gray-500 mt-1">Manage your company's organizational structure</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Enterprise Management</h1>
+          <p className="text-gray-500 mt-1">Manage your company's organizational structure</p>
+        </div>
+        <div className="relative w-full md:w-64">
+          <InputText
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search..."
+            className="pl-10"
+          />
+          <Users className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+        </div>
       </div>
 
       {message.text && (
@@ -639,7 +793,7 @@ export default function EnterpriseManagement() {
 
             <Card>
               <h3 className="text-lg font-semibold mb-4">LOBs List</h3>
-              <DataTable value={lobs} loading={loading}>
+              <DataTable value={filteredLobs} loading={loading}>
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -849,7 +1003,7 @@ export default function EnterpriseManagement() {
 
             <Card>
               <h3 className="text-lg font-semibold mb-4">Hiring Managers List</h3>
-              <DataTable value={hiringManagers} loading={loading}>
+              <DataTable value={filteredHMs} loading={loading}>
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -970,7 +1124,7 @@ export default function EnterpriseManagement() {
 
             <Card>
               <h3 className="text-lg font-semibold mb-4">Backup Hiring Managers List</h3>
-              <DataTable value={backupHiringManagers} loading={loading}>
+              <DataTable value={filteredBHMs} loading={loading}>
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -1205,7 +1359,7 @@ export default function EnterpriseManagement() {
 
             <Card>
               <h3 className="text-lg font-semibold mb-4">Recruiters List</h3>
-              <DataTable value={recruiters} loading={loading}>
+              <DataTable value={filteredRecruiters} loading={loading}>
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">

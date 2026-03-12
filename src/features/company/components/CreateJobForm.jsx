@@ -19,6 +19,7 @@ const INITIAL_FORM = {
     benefits: "", responsibilities: "", qualifications: "", tags: "",
     country: "", state: "", city: "", isRemote: false, remoteType: "On-site",
     salaryMin: "", salaryMax: "", salaryCurrency: "USD", salaryPeriod: "Yearly",
+    lobId: "", hiringManagerId: "", backupHiringManagerId: "", recruiterIds: []
 };
 
 export function CreateJobForm({ companyId, onSuccess, onCancel }) {
@@ -37,16 +38,25 @@ export function CreateJobForm({ companyId, onSuccess, onCancel }) {
     const [form, setForm] = useState(INITIAL_FORM);
     const [errors, setErrors] = useState({});
 
+    // Enterprise data state
+    const [lobs, setLobs] = useState([]);
+    const [hiringManagers, setHiringManagers] = useState([]);
+    const [recruiters, setRecruiters] = useState([]);
+    const [recruiterInput, setRecruiterInput] = useState("");
+    const [showRecruiterDropdown, setShowRecruiterDropdown] = useState(false);
+    const recruiterDropdownRef = useRef(null);
+
     const setField = (k, v) => {
         setForm((p) => ({ ...p, [k]: v }));
         setErrors((p) => ({ ...p, [k]: "" }));
     };
 
-    // Close skill dropdown on outside click
     useEffect(() => {
         const h = (e) => {
             if (dropdownRef.current && !dropdownRef.current.contains(e.target))
                 setShowDropdown(false);
+            if (recruiterDropdownRef.current && !recruiterDropdownRef.current.contains(e.target))
+                setShowRecruiterDropdown(false);
         };
         document.addEventListener("mousedown", h);
         return () => document.removeEventListener("mousedown", h);
@@ -70,6 +80,25 @@ export function CreateJobForm({ companyId, onSuccess, onCancel }) {
         const t = setTimeout(load, 300);
         return () => { cancelled = true; clearTimeout(t); };
     }, [skillInput]);
+
+    // Fetch Enterprise data
+    useEffect(() => {
+        const fetchEnterprise = async () => {
+            try {
+                const [lobsRes, hmRes, recruitersRes] = await Promise.all([
+                    companyService.getLOBs(),
+                    companyService.getHiringManagers(),
+                    companyService.getRecruiters()
+                ]);
+                setLobs(lobsRes.lobs || []);
+                setHiringManagers(hmRes.hiringManagers || []);
+                setRecruiters(recruitersRes.recruiters || []);
+            } catch (error) {
+                console.error("Failed to fetch enterprise data:", error);
+            }
+        };
+        fetchEnterprise();
+    }, []);
 
     const filteredSkills = availableSkills.filter(
         (s) => !skills.find((x) => x._id === s._id)
@@ -136,6 +165,12 @@ export function CreateJobForm({ companyId, onSuccess, onCancel }) {
                     rating: parseInt(s.rating) || 3,
                     isMandatory: true,
                 })),
+                enterpriseAssignment: {
+                    lobId: form.lobId || null,
+                    hiringManagerId: form.hiringManagerId || null,
+                    backupHiringManagerId: form.backupHiringManagerId || null,
+                    recruiterIds: form.recruiterIds || []
+                }
             });
 
             setSubmitted(true);
@@ -211,6 +246,104 @@ export function CreateJobForm({ companyId, onSuccess, onCancel }) {
                         <textarea value={form.description} onChange={(e) => setField("description", e.target.value)}
                             rows={5} placeholder="Describe the role, responsibilities…" className={`${inp} resize-none`} />
                         {errors.description && <p className="text-rose-500 text-xs mt-1">{errors.description}</p>}
+                    </div>
+                </FormSection>
+
+                {/* ── Enterprise Assignment ────────────────────────────────────────── */}
+                <FormSection title="Enterprise Assignment" subtitle="Assign this job to a specific business unit or manager">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label className={lbl}>Line of Business</label>
+                            <select value={form.lobId} onChange={(e) => setField("lobId", e.target.value)} className={inp}>
+                                <option value="">Select LOB (Optional)</option>
+                                {lobs.map((lob) => <option key={lob._id} value={lob._id}>{lob.name}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label className={lbl}>Hiring Manager</label>
+                            <select value={form.hiringManagerId} onChange={(e) => setField("hiringManagerId", e.target.value)} className={inp}>
+                                <option value="">Select Hiring Manager (Optional)</option>
+                                {hiringManagers.map((hm) => (
+                                    <option key={hm._id} value={hm._id}>{hm.name} ({hm.email})</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label className={lbl}>Backup Hiring Manager</label>
+                            <select value={form.backupHiringManagerId} onChange={(e) => setField("backupHiringManagerId", e.target.value)} className={inp}>
+                                <option value="">Select Backup Manager (Optional)</option>
+                                {hiringManagers.map((hm) => (
+                                    <option key={hm._id} value={hm._id}>{hm.name} ({hm.email})</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="relative" ref={recruiterDropdownRef}>
+                            <label className={lbl}>Recruiters</label>
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    value={recruiterInput}
+                                    onChange={(e) => { setRecruiterInput(e.target.value); setShowRecruiterDropdown(true); }}
+                                    onFocus={() => setShowRecruiterDropdown(true)}
+                                    placeholder="Search recruiters…"
+                                    className={`${inp} pr-10`}
+                                />
+                                <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">🔍</span>
+                            </div>
+
+                            {showRecruiterDropdown && (
+                                <div className="absolute z-20 w-full mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
+                                    <div className="max-h-52 overflow-y-auto">
+                                        {recruiters
+                                            .filter(r => 
+                                                !form.recruiterIds.includes(r._id) && 
+                                                (r.name.toLowerCase().includes(recruiterInput.toLowerCase()) || 
+                                                 r.email.toLowerCase().includes(recruiterInput.toLowerCase()))
+                                            )
+                                            .map((r) => (
+                                                <button
+                                                    key={r._id} type="button" 
+                                                    onClick={() => {
+                                                        setField("recruiterIds", [...form.recruiterIds, r._id]);
+                                                        setRecruiterInput(""); 
+                                                        setShowRecruiterDropdown(false);
+                                                    }}
+                                                    className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-indigo-50 transition-colors text-left"
+                                                >
+                                                    <div className="flex flex-col">
+                                                        <span className="text-sm font-semibold text-slate-800">{r.name}</span>
+                                                        <span className="text-[10px] text-slate-500">{r.email}</span>
+                                                    </div>
+                                                    <span className="text-indigo-400 text-lg leading-none">+</span>
+                                                </button>
+                                            ))
+                                        }
+                                    </div>
+                                </div>
+                            )}
+
+                            {form.recruiterIds.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                    {recruiters
+                                        .filter(r => form.recruiterIds.includes(r._id))
+                                        .map(r => (
+                                            <div key={r._id} className="flex items-center gap-1.5 bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-lg text-xs font-semibold border border-indigo-100">
+                                                <span>{r.name}</span>
+                                                <button 
+                                                    type="button" 
+                                                    onClick={() => setField("recruiterIds", form.recruiterIds.filter(id => id !== r._id))}
+                                                    className="hover:text-indigo-900"
+                                                >
+                                                    ✕
+                                                </button>
+                                            </div>
+                                        ))
+                                    }
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </FormSection>
 

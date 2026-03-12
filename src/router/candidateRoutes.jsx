@@ -8,6 +8,7 @@ import SettingsPage from '../features/candidates/SettingsPage';
 import JobDetailsPage from '../features/candidates/JobDetailsPage';
 import AssessmentHubPage from '../features/assessment/AssessmentHubPage';
 import TestResultsPage from '../features/assessment/components/TestResultsPage';
+import ChatPage from '../features/chat/pages/ChatPage';
 
 /**
  * Job/User routes - Main user-facing pages after login
@@ -47,6 +48,10 @@ const jobRoutes = {
     {
       path: '/test-results',
       element: <TestResultsPage />,
+    },
+    {
+      path: '/chat',
+      element: <ChatPage />,
     },
   ],
 };

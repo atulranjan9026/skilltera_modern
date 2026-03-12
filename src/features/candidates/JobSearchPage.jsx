@@ -6,12 +6,14 @@ import { candidateService } from '../../services/candidateService';
 import { useAuthContext } from '../../store/context/AuthContext';
 import { useTestCompletion } from '../assessment/hooks/useTestCompletion';
 import { toast } from '../../utils/toast';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * Job Search Page - Browse and filter jobs
  */
 export default function JobSearchPage() {
   const { user } = useAuthContext();
+  const navigate = useNavigate();
   const { completed: assessmentCompleted } = useTestCompletion(user?._id);
   const [jobs, setJobs] = useState([]);
   const [savedJobs, setSavedJobs] = useState([]);
@@ -262,7 +264,7 @@ export default function JobSearchPage() {
       {/* Search Bar - Sticky */}
       <div className="sticky top-0 bg-white border-b border-slate-200 z-20 py-4">
         <div className="container mx-auto px-4">
-          <SearchBar onSearch={handleSearch} />
+          <SearchBar onSearch={handleSearch} onChatClick={() => navigate('/chat')} />
         </div>
       </div>
 
