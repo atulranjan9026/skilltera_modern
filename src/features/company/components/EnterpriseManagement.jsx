@@ -1,41 +1,47 @@
 import React, { useState, useEffect, forwardRef } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { companyService } from "../../../services/companyService";
 import { getCompanyId } from "../../../utils/auth";
 import { ENTERPRISE_MESSAGES } from "../constants/enterprise";
-import { Users, UserPlus, Edit2, Trash2, Plus, X, Check, AlertCircle, Loader2 } from "lucide-react";
+import { Building2, Users, UserPlus, Mail, Phone, Edit2, Trash2, Plus, X, Check, AlertCircle, Loader2, Briefcase } from "lucide-react";
+import { CreateJobForm } from "./CreateJobForm";
 
-// ─── UI Primitives ────────────────────────────────────────────────────────────
-
-const TabView = ({ activeIndex, onTabChange, children }) => (
-  <div className="w-full">
-    <div className="flex border-b border-gray-200">
-      {React.Children.map(children, (child, index) => (
-        <button
-          key={index}
-          onClick={() => onTabChange(index)}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-            activeIndex === index
-              ? "border-blue-500 text-blue-600"
-              : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-          }`}
-        >
-          {child.props.header}
-        </button>
-      ))}
+// Simple Tab Component
+const TabView = ({ activeIndex, onTabChange, children }) => {
+  return (
+    <div className="w-full">
+      <div className="flex border-b border-gray-200">
+        {React.Children.map(children, (child, index) => (
+          <button
+            key={index}
+            onClick={() => onTabChange(index)}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              activeIndex === index
+                ? "border-blue-500 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+            }`}
+          >
+            {child.props.header}
+          </button>
+        ))}
+      </div>
+      <div className="mt-4">
+        {children[activeIndex]}
+      </div>
     </div>
-    <div className="mt-4">{children[activeIndex]}</div>
-  </div>
-);
+  );
+};
 
 const TabPanel = ({ children }) => children;
 
+// Simple Card Component
 const Card = ({ children, className = "" }) => (
   <div className={`bg-white rounded-lg border border-gray-200 shadow-sm ${className}`}>
     <div className="p-6">{children}</div>
   </div>
 );
 
+// Simple Input Components
 const InputText = forwardRef(({ className = "", ...props }, ref) => (
   <input
     ref={ref}
@@ -43,7 +49,7 @@ const InputText = forwardRef(({ className = "", ...props }, ref) => (
     {...props}
   />
 ));
-InputText.displayName = "InputText";
+InputText.displayName = 'InputText';
 
 const InputTextarea = forwardRef(({ className = "", rows = 3, ...props }, ref) => (
   <textarea
@@ -53,9 +59,9 @@ const InputTextarea = forwardRef(({ className = "", rows = 3, ...props }, ref) =
     {...props}
   />
 ));
-InputTextarea.displayName = "InputTextarea";
+InputTextarea.displayName = 'InputTextarea';
 
-const Btn = ({ label, icon: Icon, className = "", children, ...props }) => (
+const Button = ({ label, icon: Icon, className = "", children, ...props }) => (
   <button
     className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors ${className}`}
     {...props}
@@ -71,28 +77,54 @@ const Dropdown = forwardRef(({ options, className = "", ...props }, ref) => (
     className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${className}`}
     {...props}
   >
-    {options.map((opt, i) => (
-      <option key={i} value={opt.value}>{opt.label}</option>
+    {options.map((option, index) => (
+      <option key={index} value={option.value}>
+        {option.label}
+      </option>
     ))}
   </select>
 ));
-Dropdown.displayName = "Dropdown";
+Dropdown.displayName = 'Dropdown';
 
+// Simple DataTable Component
 const DataTable = ({ value, children, emptyMessage = "No data found", loading = false }) => {
-  if (loading) return <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>;
-  if (!value || value.length === 0) return <div className="text-center py-8 text-gray-500">{emptyMessage}</div>;
-  return <div className="overflow-x-auto"><table className="min-w-full divide-y divide-gray-200">{children}</table></div>;
+  if (loading) {
+    return (
+      <div className="flex justify-center py-8">
+        <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+      </div>
+    );
+  }
+
+  if (!value || value.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        {emptyMessage}
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="min-w-full divide-y divide-gray-200">
+        {children}
+      </table>
+    </div>
+  );
 };
 
-// ─── Confirm Dialog ───────────────────────────────────────────────────────────
-
+// ─── Confirm Dialog Component ─────────────────────────────────────────────────
 const ConfirmDialog = ({ open, message, onConfirm, onCancel }) => {
   if (!open) return null;
   return (
     <div
       onClick={onCancel}
       className="fixed inset-0 z-50 flex items-center justify-center p-5"
-      style={{ background: "rgba(15,15,20,0.6)", backdropFilter: "blur(4px)", animation: "fadeIn 0.15s ease" }}
+      style={{
+        background: "rgba(15,15,20,0.6)",
+        backdropFilter: "blur(4px)",
+        animation: "fadeIn 0.15s ease",
+      }}
     >
       <div
         onClick={(e) => e.stopPropagation()}
@@ -100,14 +132,20 @@ const ConfirmDialog = ({ open, message, onConfirm, onCancel }) => {
         style={{ animation: "slideUp 0.2s cubic-bezier(.34,1.56,.64,1)" }}
       >
         {/* Header */}
-        <div className="p-6" style={{ background: "linear-gradient(135deg, #ef4444, #b91c1c)" }}>
+        <div
+          className="p-6"
+          style={{ background: "linear-gradient(135deg, #ef4444, #b91c1c)" }}
+        >
           <div
             className="w-12 h-12 rounded-full flex items-center justify-center mb-3"
             style={{ background: "rgba(255,255,255,0.2)" }}
           >
             <Trash2 className="w-6 h-6 text-white" />
           </div>
-          <h3 className="text-white font-bold text-lg" style={{ fontFamily: "Georgia, serif" }}>
+          <h3
+            className="text-white font-bold text-lg"
+            style={{ fontFamily: "Georgia, serif" }}
+          >
             Confirm Delete
           </h3>
         </div>
@@ -146,14 +184,12 @@ const ConfirmDialog = ({ open, message, onConfirm, onCancel }) => {
   );
 };
 
-// ─── Main Component ───────────────────────────────────────────────────────────
-
 export default function EnterpriseManagement() {
   const [activeTab, setActiveTab] = useState("lob");
   const [loading, setLoading] = useState(false);
   const companyId = getCompanyId();
 
-  // Confirm dialog state
+  // ── Confirm Dialog State ───────────────────────────────────────────────────
   const [confirmDialog, setConfirmDialog] = useState({ open: false, message: "", resolve: null });
 
   // LOB State
@@ -177,7 +213,6 @@ export default function EnterpriseManagement() {
   const [editingRecruiter, setEditingRecruiter] = useState(null);
   const [bulkModeRecruiter, setBulkModeRecruiter] = useState(false);
   const [bulkEntriesRecruiter, setBulkEntriesRecruiter] = useState([{ name: "", email: "", keySkills: "" }]);
-  const [keySkills, setKeySkills] = useState("");
 
   // Message State
   const [message, setMessage] = useState({ type: "", text: "" });
@@ -185,27 +220,35 @@ export default function EnterpriseManagement() {
   // Search State
   const [searchTerm, setSearchTerm] = useState("");
 
-  // ── Forms ──────────────────────────────────────────────────────────────────
-
-  const { register: registerLOB, handleSubmit: handleSubmitLOB, reset: resetLOB, formState: { errors: errorsLOB } } = useForm();
-  const { register: registerHM, handleSubmit: handleSubmitHM, reset: resetHM, formState: { errors: errorsHM } } = useForm();
-  const { register: registerBHM, handleSubmit: handleSubmitBHM, reset: resetBHM, formState: { errors: errorsBHM } } = useForm();
-  const { register: registerRecruiter, handleSubmit: handleSubmitRecruiter, reset: resetRecruiter, formState: { errors: errorsRecruiter } } = useForm();
-
-  // ── Effects ────────────────────────────────────────────────────────────────
-
   useEffect(() => {
-    if (companyId) fetchAllData();
+    if (companyId) {
+      fetchAllData();
+    }
   }, [companyId]);
 
-  // ── Helpers ────────────────────────────────────────────────────────────────
+  const fetchAllData = async () => {
+    setLoading(true);
+    try {
+      await Promise.all([
+        fetchLOBs(),
+        fetchHiringManagers(),
+        fetchBackupHiringManagers(),
+        fetchRecruiters(),
+      ]);
+    } catch (error) {
+      showMessage("error", "Failed to load enterprise data");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const showMessage = (type, text) => {
     setMessage({ type, text });
     setTimeout(() => setMessage({ type: "", text: "" }), 3000);
   };
 
-  /** Returns a Promise that resolves true/false based on user action */
+  // ── Confirm Dialog Helpers ─────────────────────────────────────────────────
+  /** Returns a Promise that resolves true (confirm) or false (cancel) */
   const showConfirmationDialog = (message) =>
     new Promise((resolve) => {
       setConfirmDialog({ open: true, message, resolve });
@@ -221,61 +264,51 @@ export default function EnterpriseManagement() {
     setConfirmDialog({ open: false, message: "", resolve: null });
   };
 
-  const resetAllEditing = () => {
-    setEditingLOB(null);
-    setEditingHiringManager(null);
-    setEditingBackupHiringManager(null);
-    setEditingRecruiter(null);
-    resetLOB();
-    resetHM();
-    resetBHM();
-    resetRecruiter();
-    setKeySkills("");
-  };
-
-  // ── Fetch ──────────────────────────────────────────────────────────────────
-
-  const fetchAllData = async () => {
-    setLoading(true);
+  // API Functions
+  const fetchLOBs = async () => {
     try {
-      await Promise.all([fetchLOBs(), fetchHiringManagers(), fetchBackupHiringManagers(), fetchRecruiters()]);
-    } catch {
-      showMessage("error", "Failed to load enterprise data");
-    } finally {
-      setLoading(false);
+      const response = await companyService.getLOBs();
+      setLobs(response.lobs || []);
+    } catch (error) {
+      console.error("Failed to fetch LOBs:", error);
     }
   };
 
-  const fetchLOBs = async () => {
-    try { const r = await companyService.getLOBs(); setLobs(r.lobs || []); }
-    catch (e) { console.error("Failed to fetch LOBs:", e); }
-  };
-
   const fetchHiringManagers = async () => {
-    try { const r = await companyService.getHiringManagers(); setHiringManagers(r.hiringManagers || []); }
-    catch (e) { console.error("Failed to fetch hiring managers:", e); }
+    try {
+      const response = await companyService.getHiringManagers();
+      setHiringManagers(response.hiringManagers || []);
+    } catch (error) {
+      console.error("Failed to fetch hiring managers:", error);
+    }
   };
 
   const fetchBackupHiringManagers = async () => {
-    try { const r = await companyService.getBackupHiringManagers(); setBackupHiringManagers(r.backupHiringManagers || []); }
-    catch (e) { console.error("Failed to fetch backup hiring managers:", e); }
+    try {
+      const response = await companyService.getBackupHiringManagers();
+      setBackupHiringManagers(response.backupHiringManagers || []);
+    } catch (error) {
+      console.error("Failed to fetch backup hiring managers:", error);
+    }
   };
 
   const fetchRecruiters = async () => {
-    try { const r = await companyService.getRecruiters(); setRecruiters(r.recruiters || []); }
-    catch (e) { console.error("Failed to fetch recruiters:", e); }
+    try {
+      const response = await companyService.getRecruiters();
+      setRecruiters(response.recruiters || []);
+    } catch (error) {
+      console.error("Failed to fetch recruiters:", error);
+    }
   };
 
-  // ── Delete error handler ───────────────────────────────────────────────────
-
-  const handleDeleteError = (error, entity) => {
-    if (error.response?.status === 404) showMessage("error", `${entity} not found`);
-    else if (error.response?.status === 403) showMessage("error", `Insufficient permissions to delete ${entity}`);
-    else showMessage("error", error.response?.data?.error || error.response?.data?.message || `Failed to delete ${entity}`);
-    console.error(`${entity} deletion error:`, error);
-  };
-
-  // ── LOB Handlers ──────────────────────────────────────────────────────────
+  // LOB Functions
+  const {
+    register: registerLOB,
+    handleSubmit: handleSubmitLOB,
+    reset: resetLOB,
+    control: controlLOB,
+    formState: { errors: errorsLOB },
+  } = useForm();
 
   const onSubmitLOB = async (data) => {
     try {
@@ -286,27 +319,54 @@ export default function EnterpriseManagement() {
         await companyService.createLOB(data);
         showMessage("success", ENTERPRISE_MESSAGES.LOB.CREATE_SUCCESS);
       }
-      resetLOB(); setEditingLOB(null); fetchLOBs();
+      resetLOB();
+      setEditingLOB(null);
+      fetchLOBs();
     } catch (error) {
-      showMessage("error", error.response?.data?.error || error.response?.data?.message || "Failed to save LOB");
+      const errorMessage = error.response?.data?.error || error.response?.data?.message || "Failed to save LOB";
+      showMessage("error", errorMessage);
+      console.error("LOB creation error:", error);
     }
   };
 
   const handleEditLOB = (lob) => {
     setEditingLOB(lob);
-    resetLOB({ name: lob.name, description: lob.description || "" });
+    resetLOB({
+      name: lob.name,
+      description: lob.description || "",
+    });
   };
 
   const handleDeleteLOB = async (lobId) => {
-    if (!await showConfirmationDialog("Are you sure you want to delete this LOB?")) return;
-    try {
-      await companyService.deleteLOB(lobId);
-      showMessage("success", ENTERPRISE_MESSAGES.LOB.DELETE_SUCCESS);
-      fetchLOBs();
-    } catch (error) { handleDeleteError(error, "LOB"); }
+    const isConfirmed = await showConfirmationDialog("Are you sure you want to delete this LOB?");
+
+    if (isConfirmed) {
+      try {
+        await companyService.deleteLOB(lobId);
+        showMessage("success", ENTERPRISE_MESSAGES.LOB.DELETE_SUCCESS);
+        fetchLOBs();
+      } catch (error) {
+        if (error.response?.status === 404) {
+          showMessage("error", "LOB not found");
+        } else if (error.response?.status === 403) {
+          showMessage("error", "Insufficient permissions to delete LOB");
+        } else {
+          const errorMessage = error.response?.data?.error || error.response?.data?.message || "Failed to delete LOB";
+          showMessage("error", errorMessage);
+          console.error("LOB deletion error:", error);
+        }
+      }
+    }
   };
 
-  // ── Hiring Manager Handlers ────────────────────────────────────────────────
+  // Hiring Manager Functions
+  const {
+    register: registerHM,
+    handleSubmit: handleSubmitHM,
+    reset: resetHM,
+    control: controlHM,
+    formState: { errors: errorsHM },
+  } = useForm();
 
   const onSubmitHiringManager = async (data) => {
     try {
@@ -317,27 +377,54 @@ export default function EnterpriseManagement() {
         await companyService.createHiringManager(data);
         showMessage("success", ENTERPRISE_MESSAGES.HIRING_MANAGER.CREATE_SUCCESS);
       }
-      resetHM(); setEditingHiringManager(null); fetchHiringManagers();
+      resetHM();
+      setEditingHiringManager(null);
+      fetchHiringManagers();
     } catch (error) {
-      showMessage("error", error.response?.data?.error || error.response?.data?.message || "Failed to save Hiring Manager");
+      const errorMessage = error.response?.data?.error || error.response?.data?.message || "Failed to save Hiring Manager";
+      showMessage("error", errorMessage);
+      console.error("Hiring manager creation error:", error);
     }
   };
 
   const handleEditHiringManager = (hm) => {
     setEditingHiringManager(hm);
-    resetHM({ name: hm.name, email: hm.email });
+    resetHM({
+      name: hm.name,
+      email: hm.email,
+    });
   };
 
   const handleDeleteHiringManager = async (hmId) => {
-    if (!await showConfirmationDialog("Are you sure you want to delete this Hiring Manager?")) return;
-    try {
-      await companyService.deleteHiringManager(hmId);
-      showMessage("success", ENTERPRISE_MESSAGES.HIRING_MANAGER.DELETE_SUCCESS);
-      fetchHiringManagers();
-    } catch (error) { handleDeleteError(error, "Hiring Manager"); }
+    const isConfirmed = await showConfirmationDialog("Are you sure you want to delete this Hiring Manager?");
+
+    if (isConfirmed) {
+      try {
+        await companyService.deleteHiringManager(hmId);
+        showMessage("success", ENTERPRISE_MESSAGES.HIRING_MANAGER.DELETE_SUCCESS);
+        fetchHiringManagers();
+      } catch (error) {
+        if (error.response?.status === 404) {
+          showMessage("error", "Hiring Manager not found");
+        } else if (error.response?.status === 403) {
+          showMessage("error", "Insufficient permissions to delete Hiring Manager");
+        } else {
+          const errorMessage = error.response?.data?.error || error.response?.data?.message || "Failed to delete Hiring Manager";
+          showMessage("error", errorMessage);
+          console.error("Hiring manager deletion error:", error);
+        }
+      }
+    }
   };
 
-  // ── Backup Hiring Manager Handlers ────────────────────────────────────────
+  // Backup Hiring Manager Functions
+  const {
+    register: registerBHM,
+    handleSubmit: handleSubmitBHM,
+    reset: resetBHM,
+    control: controlBHM,
+    formState: { errors: errorsBHM },
+  } = useForm();
 
   const onSubmitBackupHiringManager = async (data) => {
     try {
@@ -348,105 +435,188 @@ export default function EnterpriseManagement() {
         await companyService.createBackupHiringManager(data);
         showMessage("success", ENTERPRISE_MESSAGES.BACKUP_HIRING_MANAGER.CREATE_SUCCESS);
       }
-      resetBHM(); setEditingBackupHiringManager(null); fetchBackupHiringManagers();
+      resetBHM();
+      setEditingBackupHiringManager(null);
+      fetchBackupHiringManagers();
     } catch (error) {
-      showMessage("error", error.response?.data?.error || error.response?.data?.message || "Failed to save Backup Hiring Manager");
+      const errorMessage = error.response?.data?.error || error.response?.data?.message || "Failed to save Backup Hiring Manager";
+      showMessage("error", errorMessage);
+      console.error("Backup hiring manager creation error:", error);
     }
   };
 
   const handleEditBackupHiringManager = (bhm) => {
     setEditingBackupHiringManager(bhm);
-    resetBHM({ name: bhm.name, email: bhm.email, hiringManagerId: bhm.hiringManagerId?._id || bhm.hiringManagerId || "" });
+    resetBHM({
+      name: bhm.name,
+      email: bhm.email,
+      hiringManagerId: bhm.hiringManagerId?._id || bhm.hiringManagerId || "",
+    });
   };
 
   const handleDeleteBackupHiringManager = async (bhmId) => {
-    if (!await showConfirmationDialog("Are you sure you want to delete this Backup Hiring Manager?")) return;
-    try {
-      await companyService.deleteBackupHiringManager(bhmId);
-      showMessage("success", ENTERPRISE_MESSAGES.BACKUP_HIRING_MANAGER.DELETE_SUCCESS);
-      fetchBackupHiringManagers();
-    } catch (error) { handleDeleteError(error, "Backup Hiring Manager"); }
+    const isConfirmed = await showConfirmationDialog("Are you sure you want to delete this Backup Hiring Manager?");
+
+    if (isConfirmed) {
+      try {
+        await companyService.deleteBackupHiringManager(bhmId);
+        showMessage("success", ENTERPRISE_MESSAGES.BACKUP_HIRING_MANAGER.DELETE_SUCCESS);
+        fetchBackupHiringManagers();
+      } catch (error) {
+        if (error.response?.status === 404) {
+          showMessage("error", "Backup Hiring Manager not found");
+        } else if (error.response?.status === 403) {
+          showMessage("error", "Insufficient permissions to delete Backup Hiring Manager");
+        } else {
+          const errorMessage = error.response?.data?.error || error.response?.data?.message || "Failed to delete Backup Hiring Manager";
+          showMessage("error", errorMessage);
+        }
+        console.error("Backup hiring manager deletion error:", error);
+      }
+    }
   };
 
-  // ── Recruiter Handlers ────────────────────────────────────────────────────
+  // Recruiter Functions
+  const {
+    register: registerRecruiter,
+    handleSubmit: handleSubmitRecruiter,
+    reset: resetRecruiter,
+    control: controlRecruiter,
+    formState: { errors: errorsRecruiter },
+  } = useForm();
+
+  const [keySkills, setKeySkills] = useState("");
 
   const onSubmitRecruiter = async (data) => {
-    const keySkillsArray = keySkills.split(",").map((s) => s.trim()).filter(Boolean);
+    const keySkillsArray = keySkills
+      .split(",")
+      .map((skill) => skill.trim())
+      .filter((skill) => skill.length > 0);
+
     try {
       if (editingRecruiter) {
-        await companyService.updateRecruiter(editingRecruiter._id, { ...data, keySkills: keySkillsArray });
+        await companyService.updateRecruiter(editingRecruiter._id, {
+          ...data,
+          keySkills: keySkillsArray,
+        });
         showMessage("success", ENTERPRISE_MESSAGES.RECRUITER.UPDATE_SUCCESS);
       } else {
-        await companyService.createRecruiter({ ...data, keySkills: keySkillsArray });
+        await companyService.createRecruiter({
+          ...data,
+          keySkills: keySkillsArray,
+        });
         showMessage("success", ENTERPRISE_MESSAGES.RECRUITER.CREATE_SUCCESS);
       }
-      resetRecruiter(); setKeySkills(""); setEditingRecruiter(null); fetchRecruiters();
+      resetRecruiter();
+      setKeySkills("");
+      setEditingRecruiter(null);
+      fetchRecruiters();
     } catch (error) {
-      showMessage("error", error.response?.data?.error || error.response?.data?.message || "Failed to save Recruiter");
+      const errorMessage = error.response?.data?.error || error.response?.data?.message || "Failed to save Recruiter";
+      showMessage("error", errorMessage);
+      console.error("Recruiter creation error:", error);
     }
   };
 
   const handleEditRecruiter = (recruiter) => {
     setEditingRecruiter(recruiter);
-    resetRecruiter({ name: recruiter.name, email: recruiter.email });
-    setKeySkills(recruiter.keySkills?.join(", ") || "");
+    resetRecruiter({
+      name: recruiter.name,
+      email: recruiter.email,
+    });
+    setKeySkills(recruiter.keySkills ? recruiter.keySkills.join(", ") : "");
   };
 
   const handleDeleteRecruiter = async (recruiterId) => {
-    if (!await showConfirmationDialog("Are you sure you want to delete this Recruiter?")) return;
-    try {
-      await companyService.deleteRecruiter(recruiterId);
-      showMessage("success", ENTERPRISE_MESSAGES.RECRUITER.DELETE_SUCCESS);
-      fetchRecruiters();
-    } catch (error) { handleDeleteError(error, "Recruiter"); }
+    const isConfirmed = await showConfirmationDialog("Are you sure you want to delete this Recruiter?");
+
+    if (isConfirmed) {
+      try {
+        await companyService.deleteRecruiter(recruiterId);
+        showMessage("success", ENTERPRISE_MESSAGES.RECRUITER.DELETE_SUCCESS);
+        fetchRecruiters();
+      } catch (error) {
+        if (error.response?.status === 404) {
+          showMessage("error", "Recruiter not found");
+        } else if (error.response?.status === 403) {
+          showMessage("error", "Insufficient permissions to delete Recruiter");
+        } else {
+          const errorMessage = error.response?.data?.error || error.response?.data?.message || "Failed to delete Recruiter";
+          showMessage("error", errorMessage);
+          console.error("Recruiter deletion error:", error);
+        }
+      }
+    }
   };
 
-  // ── Bulk Helpers ──────────────────────────────────────────────────────────
-
+  // Helper functions for bulk entry management
   const addBulkRow = (type) => {
-    if (type === "lob") setBulkEntriesLOB([...bulkEntriesLOB, { name: "", description: "" }]);
-    else if (type === "hm") setBulkEntriesHM([...bulkEntriesHM, { name: "", email: "" }]);
-    else if (type === "recruiter") setBulkEntriesRecruiter([...bulkEntriesRecruiter, { name: "", email: "", keySkills: "" }]);
+    if (type === "lob") {
+      setBulkEntriesLOB([...bulkEntriesLOB, { name: "", description: "" }]);
+    } else if (type === "hm") {
+      setBulkEntriesHM([...bulkEntriesHM, { name: "", email: "" }]);
+    } else if (type === "recruiter") {
+      setBulkEntriesRecruiter([...bulkEntriesRecruiter, { name: "", email: "", keySkills: "" }]);
+    }
   };
 
   const removeBulkRow = (type, index) => {
-    const update = (arr, empty) => { const n = arr.filter((_, i) => i !== index); return n.length ? n : [empty]; };
-    if (type === "lob") setBulkEntriesLOB(update(bulkEntriesLOB, { name: "", description: "" }));
-    else if (type === "hm") setBulkEntriesHM(update(bulkEntriesHM, { name: "", email: "" }));
-    else if (type === "recruiter") setBulkEntriesRecruiter(update(bulkEntriesRecruiter, { name: "", email: "", keySkills: "" }));
+    if (type === "lob") {
+      const newEntries = bulkEntriesLOB.filter((_, i) => i !== index);
+      setBulkEntriesLOB(newEntries.length > 0 ? newEntries : [{ name: "", description: "" }]);
+    } else if (type === "hm") {
+      const newEntries = bulkEntriesHM.filter((_, i) => i !== index);
+      setBulkEntriesHM(newEntries.length > 0 ? newEntries : [{ name: "", email: "" }]);
+    } else if (type === "recruiter") {
+      const newEntries = bulkEntriesRecruiter.filter((_, i) => i !== index);
+      setBulkEntriesRecruiter(newEntries.length > 0 ? newEntries : [{ name: "", email: "", keySkills: "" }]);
+    }
   };
 
   const updateBulkEntry = (type, index, field, value) => {
-    const update = (arr, setter) => { const n = [...arr]; n[index][field] = value; setter(n); };
-    if (type === "lob") update(bulkEntriesLOB, setBulkEntriesLOB);
-    else if (type === "hm") update(bulkEntriesHM, setBulkEntriesHM);
-    else if (type === "recruiter") update(bulkEntriesRecruiter, setBulkEntriesRecruiter);
+    if (type === "lob") {
+      const newEntries = [...bulkEntriesLOB];
+      newEntries[index][field] = value;
+      setBulkEntriesLOB(newEntries);
+    } else if (type === "hm") {
+      const newEntries = [...bulkEntriesHM];
+      newEntries[index][field] = value;
+      setBulkEntriesHM(newEntries);
+    } else if (type === "recruiter") {
+      const newEntries = [...bulkEntriesRecruiter];
+      newEntries[index][field] = value;
+      setBulkEntriesRecruiter(newEntries);
+    }
   };
 
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  // Filtered Data
+  const filteredLobs = lobs.filter(lob =>
+    lob.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (lob.description && lob.description.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
-  // ── Filtered Data ─────────────────────────────────────────────────────────
+  const filteredHMs = hiringManagers.filter(hm =>
+    hm.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    hm.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  const s = searchTerm.toLowerCase();
-  const filteredLobs = lobs.filter(l => l.name.toLowerCase().includes(s) || l.description?.toLowerCase().includes(s));
-  const filteredHMs = hiringManagers.filter(h => h.name.toLowerCase().includes(s) || h.email.toLowerCase().includes(s));
-  const filteredBHMs = backupHiringManagers.filter(b => b.name.toLowerCase().includes(s) || b.email.toLowerCase().includes(s) || b.hiringManagerId?.name?.toLowerCase().includes(s));
-  const filteredRecruiters = recruiters.filter(r => r.name.toLowerCase().includes(s) || r.email.toLowerCase().includes(s) || r.keySkills?.some(sk => sk.toLowerCase().includes(s)));
+  const filteredBHMs = backupHiringManagers.filter(bhm =>
+    bhm.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    bhm.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (bhm.hiringManagerId?.name && bhm.hiringManagerId.name.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
-  const tabKeys = ["lob", "hiringManager", "backupHiringManager", "recruiter"];
+  const filteredRecruiters = recruiters.filter(recruiter =>
+    recruiter.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    recruiter.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (recruiter.keySkills && recruiter.keySkills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase())))
+  );
 
-  // ── Shared table styles ───────────────────────────────────────────────────
-
-  const thClass = "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider";
-  const tdClass = "px-6 py-4 whitespace-nowrap text-sm text-gray-900";
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // RENDER
-  // ─────────────────────────────────────────────────────────────────────────
+  const tabHeaders = ["LOBs", "Hiring Managers", "Backup HMs", "Recruiters", "Job Posting"];
+  const tabKeys = ["lob", "hiringManager", "backupHiringManager", "recruiter", "jobPosting"];
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Enterprise Management</h1>
@@ -463,9 +633,14 @@ export default function EnterpriseManagement() {
         </div>
       </div>
 
-      {/* Toast */}
       {message.text && (
-        <div className={`p-4 rounded-lg ${message.type === "success" ? "bg-green-50 text-green-800 border border-green-200" : "bg-red-50 text-red-800 border border-red-200"}`}>
+        <div
+          className={`p-4 rounded-lg ${
+            message.type === "success"
+              ? "bg-green-50 text-green-800 border border-green-200"
+              : "bg-red-50 text-red-800 border border-red-200"
+          }`}
+        >
           <div className="flex items-center gap-2">
             {message.type === "success" ? <Check className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
             {message.text}
@@ -473,21 +648,41 @@ export default function EnterpriseManagement() {
         </div>
       )}
 
-      {/* Tabs */}
       <TabView
         activeIndex={tabKeys.indexOf(activeTab)}
-        onTabChange={(i) => { setActiveTab(tabKeys[i]); resetAllEditing(); }}
+        onTabChange={(index) => {
+          setActiveTab(tabKeys[index]);
+          // Reset editing states when switching tabs
+          setEditingLOB(null);
+          setEditingHiringManager(null);
+          setEditingBackupHiringManager(null);
+          setEditingRecruiter(null);
+          resetLOB();
+          resetHM();
+          resetBHM();
+          resetRecruiter();
+          setKeySkills("");
+        }}
       >
-        {/* ── LOBs Tab ──────────────────────────────────────────────────────── */}
+        {/* LOB Tab */}
         <TabPanel header="LOBs">
           <div className="space-y-6">
             <Card>
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">{editingLOB ? "Edit LOB" : bulkModeLOB ? "Bulk Add LOBs" : "Add LOB"}</h3>
+                <h3 className="text-lg font-semibold">
+                  {editingLOB ? "Edit LOB" : bulkModeLOB ? "Bulk Add LOBs" : "Add LOB"}
+                </h3>
                 {!editingLOB && (
-                  <Btn label={bulkModeLOB ? "Single Mode" : "Bulk Mode"} icon={bulkModeLOB ? Users : Plus}
+                  <Button
+                    label={bulkModeLOB ? "Single Mode" : "Bulk Mode"}
+                    icon={bulkModeLOB ? Users : Plus}
                     className="px-3 py-1 text-sm border border-gray-300 text-gray-700 hover:bg-gray-50"
-                    onClick={() => { setBulkModeLOB(!bulkModeLOB); if (!bulkModeLOB) setBulkEntriesLOB([{ name: "", description: "" }]); }}
+                    onClick={() => {
+                      setBulkModeLOB(!bulkModeLOB);
+                      if (!bulkModeLOB) {
+                        setBulkEntriesLOB([{ name: "", description: "" }]);
+                      }
+                    }}
                   />
                 )}
               </div>
@@ -498,33 +693,73 @@ export default function EnterpriseManagement() {
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-gray-50">
                         <tr>
-                          <th className={thClass}>LOB Name *</th>
-                          <th className={thClass}>Description</th>
-                          <th className={thClass}>Actions</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            LOB Name *
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Description
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                          </th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {bulkEntriesLOB.map((entry, i) => (
-                          <tr key={i}>
-                            <td className="px-6 py-4"><InputText value={entry.name} onChange={(e) => updateBulkEntry("lob", i, "name", e.target.value)} placeholder="LOB Name" /></td>
-                            <td className="px-6 py-4"><InputText value={entry.description || ""} onChange={(e) => updateBulkEntry("lob", i, "description", e.target.value)} placeholder="Description (Optional)" /></td>
-                            <td className="px-6 py-4"><Btn icon={Trash2} className="text-red-600 hover:text-red-800" onClick={() => removeBulkRow("lob", i)} disabled={bulkEntriesLOB.length === 1} /></td>
+                        {bulkEntriesLOB.map((entry, index) => (
+                          <tr key={index}>
+                            <td className="px-6 py-4">
+                              <InputText
+                                value={entry.name}
+                                onChange={(e) => updateBulkEntry("lob", index, "name", e.target.value)}
+                                placeholder="LOB Name"
+                              />
+                            </td>
+                            <td className="px-6 py-4">
+                              <InputText
+                                value={entry.description || ""}
+                                onChange={(e) => updateBulkEntry("lob", index, "description", e.target.value)}
+                                placeholder="Description (Optional)"
+                              />
+                            </td>
+                            <td className="px-6 py-4">
+                              <Button
+                                icon={Trash2}
+                                className="text-red-600 hover:text-red-800"
+                                onClick={() => removeBulkRow("lob", index)}
+                                disabled={bulkEntriesLOB.length === 1}
+                              />
+                            </td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
                   <div className="flex gap-2">
-                    <Btn label="Add Row" icon={Plus} className="border border-gray-300 text-gray-700 hover:bg-gray-50" onClick={() => addBulkRow("lob")} />
-                    <Btn label="Create All" icon={Check} className="bg-blue-600 text-white hover:bg-blue-700"
+                    <Button
+                      label="Add Row"
+                      icon={Plus}
+                      className="border border-gray-300 text-gray-700 hover:bg-gray-50"
+                      onClick={() => addBulkRow("lob")}
+                    />
+                    <Button
+                      label="Create All"
+                      icon={Check}
+                      className="bg-blue-600 text-white hover:bg-blue-700"
                       onClick={async () => {
-                        const valid = bulkEntriesLOB.filter(e => e.name?.trim());
-                        if (!valid.length) { showMessage("error", "Please add at least one LOB with a name"); return; }
+                        const validEntries = bulkEntriesLOB.filter(entry => entry.name && entry.name.trim());
+                        if (validEntries.length === 0) {
+                          showMessage("error", "Please add at least one LOB with a name");
+                          return;
+                        }
                         try {
-                          await companyService.bulkCreateLOBs({ items: valid });
+                          await companyService.bulkCreateLOBs({ items: validEntries });
                           showMessage("success", ENTERPRISE_MESSAGES.LOB.BULK_CREATE_SUCCESS);
-                          setBulkEntriesLOB([{ name: "", description: "" }]); setBulkModeLOB(false); fetchLOBs();
-                        } catch { showMessage("error", "Failed to create LOBs"); }
+                          setBulkEntriesLOB([{ name: "", description: "" }]);
+                          setBulkModeLOB(false);
+                          fetchLOBs();
+                        } catch (error) {
+                          showMessage("error", "Failed to create LOBs");
+                        }
                       }}
                     />
                   </div>
@@ -533,16 +768,41 @@ export default function EnterpriseManagement() {
                 <form onSubmit={handleSubmitLOB(onSubmitLOB)} className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">LOB Name</label>
-                    <InputText {...registerLOB("name", { required: "LOB Name is required" })} placeholder="LOB Name" />
-                    {errorsLOB.name && <p className="text-red-500 text-xs mt-1">{errorsLOB.name.message}</p>}
+                    <InputText
+                      {...registerLOB("name", { required: "LOB Name is required" })}
+                      placeholder="LOB Name"
+                    />
+                    {errorsLOB.name && (
+                      <p className="text-red-500 text-xs mt-1">{errorsLOB.name.message}</p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Description (Optional)</label>
-                    <InputTextarea {...registerLOB("description")} placeholder="Description" rows={3} />
+                    <InputTextarea
+                      {...registerLOB("description")}
+                      placeholder="Description"
+                      rows={3}
+                    />
                   </div>
                   <div className="flex gap-2">
-                    <Btn type="submit" label={editingLOB ? "Update" : "Create"} icon={editingLOB ? Check : Plus} className="bg-blue-600 text-white hover:bg-blue-700" />
-                    {editingLOB && <Btn type="button" label="Cancel" icon={X} className="border border-gray-300 text-gray-700 hover:bg-gray-50" onClick={() => { setEditingLOB(null); resetLOB(); }} />}
+                    <Button
+                      type="submit"
+                      label={editingLOB ? "Update" : "Create"}
+                      icon={editingLOB ? Check : Plus}
+                      className="bg-blue-600 text-white hover:bg-blue-700"
+                    />
+                    {editingLOB && (
+                      <Button
+                        type="button"
+                        label="Cancel"
+                        icon={X}
+                        className="border border-gray-300 text-gray-700 hover:bg-gray-50"
+                        onClick={() => {
+                          setEditingLOB(null);
+                          resetLOB();
+                        }}
+                      />
+                    )}
                   </div>
                 </form>
               )}
@@ -550,18 +810,47 @@ export default function EnterpriseManagement() {
 
             <Card>
               <h3 className="text-lg font-semibold mb-4">LOBs List</h3>
-              <DataTable value={filteredLobs} loading={loading} emptyMessage="No LOBs found">
-                <thead className="bg-gray-50"><tr><th className={thClass}>ID</th><th className={thClass}>Name</th><th className={thClass}>Description</th><th className={thClass}>Actions</th></tr></thead>
+              <DataTable value={filteredLobs} loading={loading}>
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      ID
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Description
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredLobs.map((lob, i) => (
+                  {filteredLobs.map((lob, index) => (
                     <tr key={lob._id}>
-                      <td className={tdClass}>{i + 1}</td>
-                      <td className={tdClass}>{lob.name}</td>
-                      <td className="px-6 py-4 text-sm text-gray-900">{lob.description || "-"}</td>
-                      <td className={tdClass}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {index + 1}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {lob.name}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-900">
+                        {lob.description || "-"}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex gap-2">
-                          <Btn icon={Edit2} className="text-blue-600 hover:text-blue-800" onClick={() => handleEditLOB(lob)} />
-                          <Btn icon={Trash2} className="text-red-600 hover:text-red-800" onClick={() => handleDeleteLOB(lob._id)} />
+                          <Button
+                            icon={Edit2}
+                            className="text-blue-600 hover:text-blue-800"
+                            onClick={() => handleEditLOB(lob)}
+                          />
+                          <Button
+                            icon={Trash2}
+                            className="text-red-600 hover:text-red-800"
+                            onClick={() => handleDeleteLOB(lob._id)}
+                          />
                         </div>
                       </td>
                     </tr>
@@ -572,16 +861,25 @@ export default function EnterpriseManagement() {
           </div>
         </TabPanel>
 
-        {/* ── Hiring Managers Tab ───────────────────────────────────────────── */}
+        {/* Hiring Managers Tab */}
         <TabPanel header="Hiring Managers">
           <div className="space-y-6">
             <Card>
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">{editingHiringManager ? "Edit Hiring Manager" : bulkModeHM ? "Bulk Create Hiring Managers" : "Create Hiring Manager"}</h3>
+                <h3 className="text-lg font-semibold">
+                  {editingHiringManager ? "Edit Hiring Manager" : bulkModeHM ? "Bulk Create Hiring Managers" : "Create Hiring Manager"}
+                </h3>
                 {!editingHiringManager && (
-                  <Btn label={bulkModeHM ? "Single Mode" : "Bulk Mode"} icon={bulkModeHM ? Users : Plus}
+                  <Button
+                    label={bulkModeHM ? "Single Mode" : "Bulk Mode"}
+                    icon={bulkModeHM ? Users : Plus}
                     className="px-3 py-1 text-sm border border-gray-300 text-gray-700 hover:bg-gray-50"
-                    onClick={() => { setBulkModeHM(!bulkModeHM); if (!bulkModeHM) setBulkEntriesHM([{ name: "", email: "" }]); }}
+                    onClick={() => {
+                      setBulkModeHM(!bulkModeHM);
+                      if (!bulkModeHM) {
+                        setBulkEntriesHM([{ name: "", email: "" }]);
+                      }
+                    }}
                   />
                 )}
               </div>
@@ -591,31 +889,81 @@ export default function EnterpriseManagement() {
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-gray-50">
-                        <tr><th className={thClass}>Name *</th><th className={thClass}>Email *</th><th className={thClass}>Actions</th></tr>
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Name *
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Email *
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                          </th>
+                        </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {bulkEntriesHM.map((entry, i) => (
-                          <tr key={i}>
-                            <td className="px-6 py-4"><InputText value={entry.name} onChange={(e) => updateBulkEntry("hm", i, "name", e.target.value)} placeholder="Hiring Manager Name" /></td>
-                            <td className="px-6 py-4"><InputText value={entry.email} onChange={(e) => updateBulkEntry("hm", i, "email", e.target.value)} type="email" placeholder="Email" /></td>
-                            <td className="px-6 py-4"><Btn icon={Trash2} className="text-red-600 hover:text-red-800" onClick={() => removeBulkRow("hm", i)} disabled={bulkEntriesHM.length === 1} /></td>
+                        {bulkEntriesHM.map((entry, index) => (
+                          <tr key={index}>
+                            <td className="px-6 py-4">
+                              <InputText
+                                value={entry.name}
+                                onChange={(e) => updateBulkEntry("hm", index, "name", e.target.value)}
+                                placeholder="Hiring Manager Name"
+                              />
+                            </td>
+                            <td className="px-6 py-4">
+                              <InputText
+                                value={entry.email}
+                                onChange={(e) => updateBulkEntry("hm", index, "email", e.target.value)}
+                                type="email"
+                                placeholder="Email"
+                              />
+                            </td>
+                            <td className="px-6 py-4">
+                              <Button
+                                icon={Trash2}
+                                className="text-red-600 hover:text-red-800"
+                                onClick={() => removeBulkRow("hm", index)}
+                                disabled={bulkEntriesHM.length === 1}
+                              />
+                            </td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
                   <div className="flex gap-2">
-                    <Btn label="Add Row" icon={Plus} className="border border-gray-300 text-gray-700 hover:bg-gray-50" onClick={() => addBulkRow("hm")} />
-                    <Btn label="Create All" icon={Check} className="bg-blue-600 text-white hover:bg-blue-700"
+                    <Button
+                      label="Add Row"
+                      icon={Plus}
+                      className="border border-gray-300 text-gray-700 hover:bg-gray-50"
+                      onClick={() => addBulkRow("hm")}
+                    />
+                    <Button
+                      label="Create All"
+                      icon={Check}
+                      className="bg-blue-600 text-white hover:bg-blue-700"
                       onClick={async () => {
-                        const valid = bulkEntriesHM.filter(e => e.name && e.email);
-                        if (!valid.length) { showMessage("error", "Please add at least one Hiring Manager with name and email"); return; }
-                        if (valid.some(e => !emailRegex.test(e.email))) { showMessage("error", "Please ensure all emails are valid"); return; }
+                        const validEntries = bulkEntriesHM.filter(entry => entry.name && entry.email);
+                        if (validEntries.length === 0) {
+                          showMessage("error", "Please add at least one Hiring Manager with name and email");
+                          return;
+                        }
+                        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                        const invalidEmails = validEntries.filter(entry => !emailRegex.test(entry.email));
+                        if (invalidEmails.length > 0) {
+                          showMessage("error", "Please ensure all emails are valid");
+                          return;
+                        }
                         try {
-                          await companyService.bulkCreateHiringManagers({ items: valid });
+                          await companyService.bulkCreateHiringManagers({ items: validEntries });
                           showMessage("success", ENTERPRISE_MESSAGES.HIRING_MANAGER.BULK_CREATE_SUCCESS);
-                          setBulkEntriesHM([{ name: "", email: "" }]); setBulkModeHM(false); fetchHiringManagers();
-                        } catch { showMessage("error", "Failed to create Hiring Managers"); }
+                          setBulkEntriesHM([{ name: "", email: "" }]);
+                          setBulkModeHM(false);
+                          fetchHiringManagers();
+                        } catch (error) {
+                          showMessage("error", "Failed to create Hiring Managers");
+                        }
                       }}
                     />
                   </div>
@@ -624,17 +972,47 @@ export default function EnterpriseManagement() {
                 <form onSubmit={handleSubmitHM(onSubmitHiringManager)} className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                    <InputText {...registerHM("name", { required: "Name is required", minLength: { value: 3, message: "Name must be at least 3 characters" } })} placeholder="Hiring Manager Name" />
-                    {errorsHM.name && <p className="text-red-500 text-xs mt-1">{errorsHM.name.message}</p>}
+                    <InputText
+                      {...registerHM("name", { required: "Name is required", minLength: { value: 3, message: "Name must be at least 3 characters" } })}
+                      placeholder="Hiring Manager Name"
+                    />
+                    {errorsHM.name && (
+                      <p className="text-red-500 text-xs mt-1">{errorsHM.name.message}</p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <InputText {...registerHM("email", { required: "Email is required", pattern: { value: emailRegex, message: "Valid email is required" } })} type="email" placeholder="Email" />
-                    {errorsHM.email && <p className="text-red-500 text-xs mt-1">{errorsHM.email.message}</p>}
+                    <InputText
+                      {...registerHM("email", {
+                        required: "Email is required",
+                        pattern: { value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, message: "Valid email is required" }
+                      })}
+                      type="email"
+                      placeholder="Email"
+                    />
+                    {errorsHM.email && (
+                      <p className="text-red-500 text-xs mt-1">{errorsHM.email.message}</p>
+                    )}
                   </div>
                   <div className="flex gap-2">
-                    <Btn type="submit" label={editingHiringManager ? "Update" : "Create"} icon={editingHiringManager ? Check : Plus} className="bg-blue-600 text-white hover:bg-blue-700" />
-                    {editingHiringManager && <Btn type="button" label="Cancel" icon={X} className="border border-gray-300 text-gray-700 hover:bg-gray-50" onClick={() => { setEditingHiringManager(null); resetHM(); }} />}
+                    <Button
+                      type="submit"
+                      label={editingHiringManager ? "Update" : "Create"}
+                      icon={editingHiringManager ? Check : Plus}
+                      className="bg-blue-600 text-white hover:bg-blue-700"
+                    />
+                    {editingHiringManager && (
+                      <Button
+                        type="button"
+                        label="Cancel"
+                        icon={X}
+                        className="border border-gray-300 text-gray-700 hover:bg-gray-50"
+                        onClick={() => {
+                          setEditingHiringManager(null);
+                          resetHM();
+                        }}
+                      />
+                    )}
                   </div>
                 </form>
               )}
@@ -642,18 +1020,47 @@ export default function EnterpriseManagement() {
 
             <Card>
               <h3 className="text-lg font-semibold mb-4">Hiring Managers List</h3>
-              <DataTable value={filteredHMs} loading={loading} emptyMessage="No Hiring Managers found">
-                <thead className="bg-gray-50"><tr><th className={thClass}>ID</th><th className={thClass}>Name</th><th className={thClass}>Email</th><th className={thClass}>Actions</th></tr></thead>
+              <DataTable value={filteredHMs} loading={loading}>
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      ID
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Email
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredHMs.map((hm, i) => (
+                  {filteredHMs.map((hm, index) => (
                     <tr key={hm._id}>
-                      <td className={tdClass}>{i + 1}</td>
-                      <td className={tdClass}>{hm.name}</td>
-                      <td className={tdClass}>{hm.email}</td>
-                      <td className={tdClass}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {index + 1}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {hm.name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {hm.email}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex gap-2">
-                          <Btn icon={Edit2} className="text-blue-600 hover:text-blue-800" onClick={() => handleEditHiringManager(hm)} />
-                          <Btn icon={Trash2} className="text-red-600 hover:text-red-800" onClick={() => handleDeleteHiringManager(hm._id)} />
+                          <Button
+                            icon={Edit2}
+                            className="text-blue-600 hover:text-blue-800"
+                            onClick={() => handleEditHiringManager(hm)}
+                          />
+                          <Button
+                            icon={Trash2}
+                            className="text-red-600 hover:text-red-800"
+                            onClick={() => handleDeleteHiringManager(hm._id)}
+                          />
                         </div>
                       </td>
                     </tr>
@@ -664,51 +1071,123 @@ export default function EnterpriseManagement() {
           </div>
         </TabPanel>
 
-        {/* ── Backup Hiring Managers Tab ────────────────────────────────────── */}
+        {/* Backup Hiring Managers Tab */}
         <TabPanel header="Backup HMs">
           <div className="space-y-6">
             <Card>
-              <h3 className="text-lg font-semibold mb-4">{editingBackupHiringManager ? "Edit Backup Hiring Manager" : "Create Backup Hiring Manager"}</h3>
+              <h3 className="text-lg font-semibold mb-4">
+                {editingBackupHiringManager ? "Edit Backup Hiring Manager" : "Create Backup Hiring Manager"}
+              </h3>
               <form onSubmit={handleSubmitBHM(onSubmitBackupHiringManager)} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                  <InputText {...registerBHM("name", { required: "Name is required", minLength: { value: 3, message: "Name must be at least 3 characters" } })} placeholder="Backup Hiring Manager Name" />
-                  {errorsBHM.name && <p className="text-red-500 text-xs mt-1">{errorsBHM.name.message}</p>}
+                  <InputText
+                    {...registerBHM("name", { required: "Name is required", minLength: { value: 3, message: "Name must be at least 3 characters" } })}
+                    placeholder="Backup Hiring Manager Name"
+                  />
+                  {errorsBHM.name && (
+                    <p className="text-red-500 text-xs mt-1">{errorsBHM.name.message}</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                  <InputText {...registerBHM("email", { required: "Email is required", pattern: { value: emailRegex, message: "Valid email is required" } })} type="email" placeholder="Email" />
-                  {errorsBHM.email && <p className="text-red-500 text-xs mt-1">{errorsBHM.email.message}</p>}
+                  <InputText
+                    {...registerBHM("email", {
+                      required: "Email is required",
+                      pattern: { value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, message: "Valid email is required" }
+                    })}
+                    type="email"
+                    placeholder="Email"
+                  />
+                  {errorsBHM.email && (
+                    <p className="text-red-500 text-xs mt-1">{errorsBHM.email.message}</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Primary Hiring Manager (Optional)</label>
                   <Dropdown
                     {...registerBHM("hiringManagerId")}
-                    options={[{ label: "Select Hiring Manager", value: "" }, ...hiringManagers.map(hm => ({ label: `${hm.name} (${hm.email})`, value: hm._id }))]}
+                    options={[
+                      { label: "Select Hiring Manager", value: "" },
+                      ...hiringManagers.map((hm) => ({
+                        label: `${hm.name} (${hm.email})`,
+                        value: hm._id,
+                      })),
+                    ]}
                   />
                 </div>
                 <div className="flex gap-2">
-                  <Btn type="submit" label={editingBackupHiringManager ? "Update" : "Create"} icon={editingBackupHiringManager ? Check : Plus} className="bg-blue-600 text-white hover:bg-blue-700" />
-                  {editingBackupHiringManager && <Btn type="button" label="Cancel" icon={X} className="border border-gray-300 text-gray-700 hover:bg-gray-50" onClick={() => { setEditingBackupHiringManager(null); resetBHM(); }} />}
+                  <Button
+                    type="submit"
+                    label={editingBackupHiringManager ? "Update" : "Create"}
+                    icon={editingBackupHiringManager ? Check : Plus}
+                    className="bg-blue-600 text-white hover:bg-blue-700"
+                  />
+                  {editingBackupHiringManager && (
+                    <Button
+                      type="button"
+                      label="Cancel"
+                      icon={X}
+                      className="border border-gray-300 text-gray-700 hover:bg-gray-50"
+                      onClick={() => {
+                        setEditingBackupHiringManager(null);
+                        resetBHM();
+                      }}
+                    />
+                  )}
                 </div>
               </form>
             </Card>
 
             <Card>
               <h3 className="text-lg font-semibold mb-4">Backup Hiring Managers List</h3>
-              <DataTable value={filteredBHMs} loading={loading} emptyMessage="No Backup Hiring Managers found">
-                <thead className="bg-gray-50"><tr><th className={thClass}>ID</th><th className={thClass}>Name</th><th className={thClass}>Email</th><th className={thClass}>Primary HM</th><th className={thClass}>Actions</th></tr></thead>
+              <DataTable value={filteredBHMs} loading={loading}>
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      ID
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Email
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Primary HM
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredBHMs.map((bhm, i) => (
+                  {filteredBHMs.map((bhm, index) => (
                     <tr key={bhm._id}>
-                      <td className={tdClass}>{i + 1}</td>
-                      <td className={tdClass}>{bhm.name}</td>
-                      <td className={tdClass}>{bhm.email}</td>
-                      <td className={tdClass}>{bhm.hiringManagerId?.name || "-"}</td>
-                      <td className={tdClass}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {index + 1}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {bhm.name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {bhm.email}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {bhm.hiringManagerId?.name || "-"}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex gap-2">
-                          <Btn icon={Edit2} className="text-blue-600 hover:text-blue-800" onClick={() => handleEditBackupHiringManager(bhm)} />
-                          <Btn icon={Trash2} className="text-red-600 hover:text-red-800" onClick={() => handleDeleteBackupHiringManager(bhm._id)} />
+                          <Button
+                            icon={Edit2}
+                            className="text-blue-600 hover:text-blue-800"
+                            onClick={() => handleEditBackupHiringManager(bhm)}
+                          />
+                          <Button
+                            icon={Trash2}
+                            className="text-red-600 hover:text-red-800"
+                            onClick={() => handleDeleteBackupHiringManager(bhm._id)}
+                          />
                         </div>
                       </td>
                     </tr>
@@ -719,16 +1198,25 @@ export default function EnterpriseManagement() {
           </div>
         </TabPanel>
 
-        {/* ── Recruiters Tab ────────────────────────────────────────────────── */}
+        {/* Recruiters Tab */}
         <TabPanel header="Recruiters">
           <div className="space-y-6">
             <Card>
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">{editingRecruiter ? "Edit Recruiter" : bulkModeRecruiter ? "Bulk Create Recruiters" : "Create Recruiter"}</h3>
+                <h3 className="text-lg font-semibold">
+                  {editingRecruiter ? "Edit Recruiter" : bulkModeRecruiter ? "Bulk Create Recruiters" : "Create Recruiter"}
+                </h3>
                 {!editingRecruiter && (
-                  <Btn label={bulkModeRecruiter ? "Single Mode" : "Bulk Mode"} icon={bulkModeRecruiter ? Users : Plus}
+                  <Button
+                    label={bulkModeRecruiter ? "Single Mode" : "Bulk Mode"}
+                    icon={bulkModeRecruiter ? Users : Plus}
                     className="px-3 py-1 text-sm border border-gray-300 text-gray-700 hover:bg-gray-50"
-                    onClick={() => { setBulkModeRecruiter(!bulkModeRecruiter); if (!bulkModeRecruiter) setBulkEntriesRecruiter([{ name: "", email: "", keySkills: "" }]); }}
+                    onClick={() => {
+                      setBulkModeRecruiter(!bulkModeRecruiter);
+                      if (!bulkModeRecruiter) {
+                        setBulkEntriesRecruiter([{ name: "", email: "", keySkills: "" }]);
+                      }
+                    }}
                   />
                 )}
               </div>
@@ -738,32 +1226,91 @@ export default function EnterpriseManagement() {
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-gray-50">
-                        <tr><th className={thClass}>Name *</th><th className={thClass}>Email *</th><th className={thClass}>Key Skills</th><th className={thClass}>Actions</th></tr>
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Name *
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Email *
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Key Skills
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                          </th>
+                        </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {bulkEntriesRecruiter.map((entry, i) => (
-                          <tr key={i}>
-                            <td className="px-6 py-4"><InputText value={entry.name} onChange={(e) => updateBulkEntry("recruiter", i, "name", e.target.value)} placeholder="Recruiter Name" /></td>
-                            <td className="px-6 py-4"><InputText value={entry.email} onChange={(e) => updateBulkEntry("recruiter", i, "email", e.target.value)} type="email" placeholder="Email" /></td>
-                            <td className="px-6 py-4"><InputText value={entry.keySkills || ""} onChange={(e) => updateBulkEntry("recruiter", i, "keySkills", e.target.value)} placeholder="e.g., Java, React" /></td>
-                            <td className="px-6 py-4"><Btn icon={Trash2} className="text-red-600 hover:text-red-800" onClick={() => removeBulkRow("recruiter", i)} disabled={bulkEntriesRecruiter.length === 1} /></td>
+                        {bulkEntriesRecruiter.map((entry, index) => (
+                          <tr key={index}>
+                            <td className="px-6 py-4">
+                              <InputText
+                                value={entry.name}
+                                onChange={(e) => updateBulkEntry("recruiter", index, "name", e.target.value)}
+                                placeholder="Recruiter Name"
+                              />
+                            </td>
+                            <td className="px-6 py-4">
+                              <InputText
+                                value={entry.email}
+                                onChange={(e) => updateBulkEntry("recruiter", index, "email", e.target.value)}
+                                type="email"
+                                placeholder="Email"
+                              />
+                            </td>
+                            <td className="px-6 py-4">
+                              <InputText
+                                value={entry.keySkills || ""}
+                                onChange={(e) => updateBulkEntry("recruiter", index, "keySkills", e.target.value)}
+                                placeholder="e.g., Java, React"
+                              />
+                            </td>
+                            <td className="px-6 py-4">
+                              <Button
+                                icon={Trash2}
+                                className="text-red-600 hover:text-red-800"
+                                onClick={() => removeBulkRow("recruiter", index)}
+                                disabled={bulkEntriesRecruiter.length === 1}
+                              />
+                            </td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
                   <div className="flex gap-2">
-                    <Btn label="Add Row" icon={Plus} className="border border-gray-300 text-gray-700 hover:bg-gray-50" onClick={() => addBulkRow("recruiter")} />
-                    <Btn label="Create All" icon={Check} className="bg-blue-600 text-white hover:bg-blue-700"
+                    <Button
+                      label="Add Row"
+                      icon={Plus}
+                      className="border border-gray-300 text-gray-700 hover:bg-gray-50"
+                      onClick={() => addBulkRow("recruiter")}
+                    />
+                    <Button
+                      label="Create All"
+                      icon={Check}
+                      className="bg-blue-600 text-white hover:bg-blue-700"
                       onClick={async () => {
-                        const valid = bulkEntriesRecruiter.filter(e => e.name && e.email);
-                        if (!valid.length) { showMessage("error", "Please add at least one Recruiter with name and email"); return; }
-                        if (valid.some(e => !emailRegex.test(e.email))) { showMessage("error", "Please ensure all emails are valid"); return; }
+                        const validEntries = bulkEntriesRecruiter.filter(entry => entry.name && entry.email);
+                        if (validEntries.length === 0) {
+                          showMessage("error", "Please add at least one Recruiter with name and email");
+                          return;
+                        }
+                        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                        const invalidEmails = validEntries.filter(entry => !emailRegex.test(entry.email));
+                        if (invalidEmails.length > 0) {
+                          showMessage("error", "Please ensure all emails are valid");
+                          return;
+                        }
                         try {
-                          await companyService.bulkCreateRecruiters({ items: valid });
+                          await companyService.bulkCreateRecruiters({ items: validEntries });
                           showMessage("success", ENTERPRISE_MESSAGES.RECRUITER.BULK_CREATE_SUCCESS);
-                          setBulkEntriesRecruiter([{ name: "", email: "", keySkills: "" }]); setBulkModeRecruiter(false); fetchRecruiters();
-                        } catch { showMessage("error", "Failed to create Recruiters"); }
+                          setBulkEntriesRecruiter([{ name: "", email: "", keySkills: "" }]);
+                          setBulkModeRecruiter(false);
+                          fetchRecruiters();
+                        } catch (error) {
+                          showMessage("error", "Failed to create Recruiters");
+                        }
                       }}
                     />
                   </div>
@@ -772,21 +1319,56 @@ export default function EnterpriseManagement() {
                 <form onSubmit={handleSubmitRecruiter(onSubmitRecruiter)} className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                    <InputText {...registerRecruiter("name", { required: "Name is required", minLength: { value: 3, message: "Name must be at least 3 characters" } })} placeholder="Recruiter Name" />
-                    {errorsRecruiter.name && <p className="text-red-500 text-xs mt-1">{errorsRecruiter.name.message}</p>}
+                    <InputText
+                      {...registerRecruiter("name", { required: "Name is required", minLength: { value: 3, message: "Name must be at least 3 characters" } })}
+                      placeholder="Recruiter Name"
+                    />
+                    {errorsRecruiter.name && (
+                      <p className="text-red-500 text-xs mt-1">{errorsRecruiter.name.message}</p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <InputText {...registerRecruiter("email", { required: "Email is required", pattern: { value: emailRegex, message: "Valid email is required" } })} type="email" placeholder="Email" />
-                    {errorsRecruiter.email && <p className="text-red-500 text-xs mt-1">{errorsRecruiter.email.message}</p>}
+                    <InputText
+                      {...registerRecruiter("email", {
+                        required: "Email is required",
+                        pattern: { value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, message: "Valid email is required" }
+                      })}
+                      type="email"
+                      placeholder="Email"
+                    />
+                    {errorsRecruiter.email && (
+                      <p className="text-red-500 text-xs mt-1">{errorsRecruiter.email.message}</p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Key Skills (Comma-separated)</label>
-                    <InputText value={keySkills} onChange={(e) => setKeySkills(e.target.value)} placeholder="e.g., Java, React, Node.js" />
+                    <InputText
+                      value={keySkills}
+                      onChange={(e) => setKeySkills(e.target.value)}
+                      placeholder="e.g., Java, React, Node.js"
+                    />
                   </div>
                   <div className="flex gap-2">
-                    <Btn type="submit" label={editingRecruiter ? "Update" : "Create"} icon={editingRecruiter ? Check : Plus} className="bg-blue-600 text-white hover:bg-blue-700" />
-                    {editingRecruiter && <Btn type="button" label="Cancel" icon={X} className="border border-gray-300 text-gray-700 hover:bg-gray-50" onClick={() => { setEditingRecruiter(null); resetRecruiter(); setKeySkills(""); }} />}
+                    <Button
+                      type="submit"
+                      label={editingRecruiter ? "Update" : "Create"}
+                      icon={editingRecruiter ? Check : Plus}
+                      className="bg-blue-600 text-white hover:bg-blue-700"
+                    />
+                    {editingRecruiter && (
+                      <Button
+                        type="button"
+                        label="Cancel"
+                        icon={X}
+                        className="border border-gray-300 text-gray-700 hover:bg-gray-50"
+                        onClick={() => {
+                          setEditingRecruiter(null);
+                          resetRecruiter();
+                          setKeySkills("");
+                        }}
+                      />
+                    )}
                   </div>
                 </form>
               )}
@@ -794,25 +1376,78 @@ export default function EnterpriseManagement() {
 
             <Card>
               <h3 className="text-lg font-semibold mb-4">Recruiters List</h3>
-              <DataTable value={filteredRecruiters} loading={loading} emptyMessage="No Recruiters found">
-                <thead className="bg-gray-50"><tr><th className={thClass}>ID</th><th className={thClass}>Name</th><th className={thClass}>Email</th><th className={thClass}>Key Skills</th><th className={thClass}>Actions</th></tr></thead>
+              <DataTable value={filteredRecruiters} loading={loading}>
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      ID
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Email
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Key Skills
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredRecruiters.map((recruiter, i) => (
+                  {filteredRecruiters.map((recruiter, index) => (
                     <tr key={recruiter._id}>
-                      <td className={tdClass}>{i + 1}</td>
-                      <td className={tdClass}>{recruiter.name}</td>
-                      <td className={tdClass}>{recruiter.email}</td>
-                      <td className="px-6 py-4 text-sm text-gray-900">{recruiter.keySkills?.join(", ") || "-"}</td>
-                      <td className={tdClass}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {index + 1}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {recruiter.name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {recruiter.email}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-900">
+                        {recruiter.keySkills?.join(", ") || "-"}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex gap-2">
-                          <Btn icon={Edit2} className="text-blue-600 hover:text-blue-800" onClick={() => handleEditRecruiter(recruiter)} />
-                          <Btn icon={Trash2} className="text-red-600 hover:text-red-800" onClick={() => handleDeleteRecruiter(recruiter._id)} />
+                          <Button
+                            icon={Edit2}
+                            className="text-blue-600 hover:text-blue-800"
+                            onClick={() => handleEditRecruiter(recruiter)}
+                          />
+                          <Button
+                            icon={Trash2}
+                            className="text-red-600 hover:text-red-800"
+                            onClick={() => handleDeleteRecruiter(recruiter._id)}
+                          />
                         </div>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </DataTable>
+            </Card>
+          </div>
+        </TabPanel>
+
+        {/* Job Posting Tab */}
+        <TabPanel header="Job Posting">
+          <div className="space-y-6">
+            <Card>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <Briefcase className="w-5 h-5 text-blue-600" />
+                  Create New Job Posting
+                </h3>
+              </div>
+              <CreateJobForm 
+                companyId={getCompanyId()}
+                onSuccess={() => showMessage("success", "Job created successfully!")}
+                onCancel={() => showMessage("info", "Job creation cancelled")}
+              />
             </Card>
           </div>
         </TabPanel>
