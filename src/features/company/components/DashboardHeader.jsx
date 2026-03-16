@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { NAV_ITEMS } from "../constants";
+import { useAuthContext } from "../../../store/context/AuthContext";
 
 export function DashboardHeader({
     activeTab, showCreate, companyUser,
@@ -7,10 +8,23 @@ export function DashboardHeader({
     onRefresh, onPostJob, setShowCreate,
 }) {
     const navigate = useNavigate();
+    const { logout } = useAuthContext();
     const currentNavLabel = NAV_ITEMS.find((n) => n.tab === activeTab)?.label;
 
     const handleChatClick = () => {
         navigate("/company/chat");
+    };
+
+    const handleLogout = async () => {
+        try {
+            await logout();
+            navigate("/company/login");
+        } catch (error) {
+            console.error("Logout failed:", error);
+            // Fallback: clear and redirect
+            localStorage.clear();
+            navigate("/company/login");
+        }
     };
 
     return (
@@ -53,27 +67,43 @@ export function DashboardHeader({
                 >
                     ↻
                 </button>
-                <button
-                    onClick={onPostJob}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors"
-                >
-                    + Post Job
-                </button>
+                {companyUser?.role !== "hiring_manager" && (
+                    <button
+                        onClick={onPostJob}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors"
+                    >
+                        + Post Job
+                    </button>
+                )}
                 {/* Chat option */}
+                {/* Chat */}
                 <button
                     onClick={handleChatClick}
                     title="Chat"
-                    className="text-slate-400 hover:text-emerald-600 transition-colors text-base font-bold cursor-pointer"
+                    className="relative group w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all duration-150"
                 >
-                    💬
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                    </svg>
+                    <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-[10px] font-medium bg-slate-800 text-white px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                        Chat
+                    </span>
                 </button>
-                {/* Avatar */}
-                <div className="relative">
-                    <div className="w-8 h-8 bg-gradient-to-br from-indigo-400 to-violet-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                        {(companyUser?.companyName || "C")[0].toUpperCase()}
-                    </div>
-                    <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-white" />
-                </div>
+                {/* Logout */}
+                <button
+                    onClick={handleLogout}
+                    title="Logout"
+                    className="relative group w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all duration-150"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                    <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-[10px] font-medium bg-slate-800 text-white px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                        Logout
+                    </span>
+                </button>
             </div>
         </header>
     );

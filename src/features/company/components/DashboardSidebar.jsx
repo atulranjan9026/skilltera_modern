@@ -2,10 +2,18 @@ import { NAV_ITEMS } from "../constants";
 
 export function DashboardSidebar({ companyUser, activeTab, showCreate, goTo, navBadges = [] }) {
     // Merge static nav items with dynamic badge counts from parent
-    const items = NAV_ITEMS.map((item) => {
-        const badgeEntry = navBadges.find((b) => b.tab === item.tab);
-        return { ...item, badge: badgeEntry?.badge ?? null };
-    });
+    // Filter and merge static nav items with dynamic badge counts from parent
+    const items = NAV_ITEMS
+        .filter(item => {
+            if (item.tab === "EnterpriseManagement") {
+                return companyUser?.role === "company";
+            }
+            return true;
+        })
+        .map((item) => {
+            const badgeEntry = navBadges.find((b) => b.tab === item.tab);
+            return { ...item, badge: badgeEntry?.badge ?? null };
+        });
     return (
         <aside className="w-60 bg-slate-900 flex flex-col flex-shrink-0 h-full select-none">
             {/* Logo */}
@@ -53,12 +61,14 @@ export function DashboardSidebar({ companyUser, activeTab, showCreate, goTo, nav
             </nav>
 
             {/* Settings */}
-            <div className="px-3 py-4 border-t border-white/5">
-                <button onClick={() => goTo("CompanyProfile")} className="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-400 hover:text-slate-200 transition-all">
-                    <span>⚙️</span>
-                    <span>Company Profile</span>
-                </button>
-            </div>
+            {companyUser?.role === 'company' && (
+                <div className="px-3 py-4 border-t border-white/5">
+                    <button onClick={() => goTo("CompanyProfile")} className="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-400 hover:text-slate-200 transition-all">
+                        <span>⚙️</span>
+                        <span>Company Profile</span>
+                    </button>
+                </div>
+            )}
         </aside>
     );
 }

@@ -21,6 +21,14 @@ export function getCompanyUser() {
  */
 export function getCompanyId() {
   const user = getCompanyUser();
+  if (user.role === 'company') {
+    return user._id || user.id || "";
+  }
+  // For sub-roles like hiring_manager or interviewer, 
+  // the company reference is in the companyId field.
+  if (user.companyId) {
+    return typeof user.companyId === 'object' ? user.companyId._id : user.companyId;
+  }
   return user._id || user.id || "";
 }
 

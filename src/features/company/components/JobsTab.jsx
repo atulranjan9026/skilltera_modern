@@ -6,6 +6,7 @@ import { JobStatusBadge } from "../ui/JobStatusBadge";
 import { JobTypePill } from "../ui/JobTypePill";
 import { PaginationBar } from "../ui/PaginationBar";
 import { fmtShort, daysLeft } from "../helpers";
+import { getCompanyUser } from "../../../utils/auth";
 
 /* ── default filter state ── */
 const DEFAULT_FILTERS = {
@@ -117,12 +118,14 @@ export function JobsTab({
                         {totalJobs} total · {activeJobs} active · {pendingJobs} pending approval
                     </p>
                 </div>
-                <button
-                    onClick={onPostNew}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors"
-                >
-                    + Post New Job
-                </button>
+                {getCompanyUser()?.role !== "hiring_manager" && (
+                    <button
+                        onClick={onPostNew}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors"
+                    >
+                        + Post New Job
+                    </button>
+                )}
             </div>
 
             {jobsError && <ErrorBanner message={jobsError} onRetry={onRetry} />}

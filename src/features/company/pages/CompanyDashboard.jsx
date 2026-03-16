@@ -306,7 +306,7 @@ export default function CompanyDashboard() {
           )}
 
           {/* CompanyProfile */}
-          {!showCreate && activeTab === "CompanyProfile" && (
+          {!showCreate && activeTab === "CompanyProfile" && companyUser?.role === "company" && (
             <CompanyProfile
               companyUser={companyUser}
               companyId={companyId}
@@ -315,7 +315,7 @@ export default function CompanyDashboard() {
           )}
 
           {/* EnterpriseManagement */}
-          {!showCreate && activeTab === "EnterpriseManagement" && (
+          {!showCreate && activeTab === "EnterpriseManagement" && companyUser?.role === "company" && (
             <EnterpriseManagement />
           )}
 
