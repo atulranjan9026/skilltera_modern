@@ -31,6 +31,33 @@ const DEADLINE_OPTIONS = [
     { label: "Within 30 days", value: "30" },
 ];
 
+function normalizeJob(job) {
+    const title = job?.jobTitle ?? job?.title ?? "";
+    const location = job?.location ?? {};
+    const city = job?.city ?? location.city ?? "";
+    const state = job?.state ?? location.state ?? "";
+    const postedOn = job?.postedOn ?? job?.postedDate ?? null;
+    const lastDate = job?.lastDate ?? job?.applicationDeadline ?? null;
+    const active = job?.active ?? job?.isActive ?? false;
+    const workExperience =
+        job?.workExperience ??
+        (typeof job?.minExperience === "number" ? job.minExperience : undefined) ??
+        0;
+
+    return {
+        ...job,
+        jobTitle: title,
+        city,
+        state,
+        postedOn,
+        lastDate,
+        active,
+        workExperience,
+        jobType: job?.jobType ?? "",
+        status: job?.status ?? "",
+    };
+}
+
 function countActive(f) {
     return (
         f.jobType.length +
@@ -42,7 +69,7 @@ function countActive(f) {
 }
 
 function applyFilters(jobs, search, filters) {
-    return jobs.filter((job) => {
+    return jobs.map(normalizeJob).filter((job) => {
         if (search) {
             const q = search.toLowerCase();
             if (!job.jobTitle?.toLowerCase().includes(q) && !job.city?.toLowerCase().includes(q))
@@ -81,6 +108,8 @@ export function JobsTab({
     const [showFilters, setShowFilters] = useState(false);
     const [filters, setFilters]         = useState(DEFAULT_FILTERS);
     const panelRef = useRef(null);
+    const role = getCompanyUser()?.role;
+    const canEditJobs = role === "company";
 
     /* close panel on outside click */
     useEffect(() => {
@@ -320,10 +349,14 @@ export function JobsTab({
                                                 <button onClick={() => onViewJob?.(job)} className="text-indigo-600 hover:text-indigo-800 text-xs font-semibold whitespace-nowrap">
                                                     View →
                                                 </button>
-                                                <span className="text-slate-200">|</span>
-                                                <button onClick={() => onEditJob?.(job)} className="text-slate-500 hover:text-slate-800 text-xs font-semibold whitespace-nowrap">
-                                                    ✏️ Edit
-                                                </button>
+                                                {canEditJobs && (
+                                                    <>
+                                                        <span className="text-slate-200">|</span>
+                                                        <button onClick={() => onEditJob?.(job)} className="text-slate-500 hover:text-slate-800 text-xs font-semibold whitespace-nowrap">
+                                                            ✏️ Edit
+                                                        </button>
+                                                    </>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>
@@ -336,6 +369,7 @@ export function JobsTab({
                         itemLabel="jobs"
                         onPrev={() => handleJobsPage(jobsPage - 1)}
                         onNext={() => handleJobsPage(jobsPage + 1)}
+                        onPageClick={handleJobsPage}
                         loading={jobsLoading}
                     />
                 </div>

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authService } from '../../services/authService';
+import { clearAuthData } from '../../utils/auth';
 
 /**
  * Auth Context - Global authentication state
@@ -131,10 +132,10 @@ export const AuthProvider = ({ children }) => {
       console.error('Logout error:', err);
       setError(err.message);
     } finally {
-      // Always clear local storage and state
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      // Always clear ALL auth data and state
+      clearAuthData(); // Use enhanced clear function
       setUser(null);
+      console.log('🔒 User logged out, all auth data cleared');
     }
   };
 

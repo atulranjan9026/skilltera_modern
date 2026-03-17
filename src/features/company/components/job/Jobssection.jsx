@@ -3,12 +3,13 @@ import { JobsTab } from "../JobsTab";
 import { JobDetailPage } from "./Jobdetailpage";
 import { JobEditPage } from "./Jobeditpage";
 import { companyService } from "../../../../services/companyService";
-import { getCompanyUser, getCompanyId } from "../../../../utils/auth";
+import { getCompanyUser } from "../../../../utils/auth";
+import { toast } from "../../../../utils/toast";
 
 /**
  * Example parent that manages which "page" is shown.
  * Paste this logic into your existing dashboard/parent component.
-*
+ *
  * view:  "list"   → JobsTab
  *        "detail" → JobDetailPage
  *        "edit"   → JobEditPage
@@ -50,22 +51,19 @@ export function JobsSection(props) {
                 throw new Error("Company ID is required for update");
             }
             
-            console.log("Company user object:", companyUser);
-            console.log("Company ID type:", typeof companyId, companyId);
-            
             // Clean the job object - remove conflicting ID fields
             const jobData = { ...updatedJob };
             delete jobData._id; // Remove _id from data being sent
             delete jobData.jobId; // Remove jobId from data being sent
             delete jobData.companyId; // Remove companyId from data being sent
             
-            console.log("Updating job with details:");
-            console.log("- Company ID:", companyId);
-            console.log("- Job ID:", jobId);
-            console.log("- Full job object:", updatedJob);
-            console.log("- Job data to send:", jobData);
-            
             await companyService.updateJob(companyId, jobId, jobData);
+            
+            // ── Update local state immediately so Detail view reflects changes ──
+            setSelectedJob(updatedJob);
+            
+            // Show success notification
+            toast.success("Job updated successfully!");
             
             // Refresh the jobs list if the refresh function is provided
             if (props.onRetry) {
@@ -76,13 +74,9 @@ export function JobsSection(props) {
             setView("detail");
         } catch (error) {
             console.error("Failed to save job:", error);
-            console.error("Error details:", {
-                message: error.message,
-                status: error.response?.status,
-                statusText: error.response?.statusText,
-                data: error.response?.data
-            });
-            throw error; // Let the JobEditPage handle the error display
+            const errMsg = error.response?.data?.message || error.message || "Failed to update job.";
+            toast.error(errMsg);
+            throw error; // Let the JobEditPage handle its local error state too
         }
     }
 
