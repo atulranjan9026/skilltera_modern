@@ -214,6 +214,12 @@ export default function EnterpriseManagement() {
   const [bulkModeRecruiter, setBulkModeRecruiter] = useState(false);
   const [bulkEntriesRecruiter, setBulkEntriesRecruiter] = useState([{ name: "", email: "", keySkills: "" }]);
 
+  // Interviewer State
+  const [interviewers, setInterviewers] = useState([]);
+  const [editingInterviewer, setEditingInterviewer] = useState(null);
+  const [bulkModeInterviewer, setBulkModeInterviewer] = useState(false);
+  const [bulkEntriesInterviewer, setBulkEntriesInterviewer] = useState([{ name: "", email: "" }]);
+
   // Message State
   const [message, setMessage] = useState({ type: "", text: "" });
 
@@ -234,6 +240,7 @@ export default function EnterpriseManagement() {
         fetchHiringManagers(),
         fetchBackupHiringManagers(),
         fetchRecruiters(),
+        fetchInterviewers(),
       ]);
     } catch (error) {
       showMessage("error", "Failed to load enterprise data");
@@ -298,6 +305,15 @@ export default function EnterpriseManagement() {
       setRecruiters(response.recruiters || []);
     } catch (error) {
       console.error("Failed to fetch recruiters:", error);
+    }
+  };
+
+  const fetchInterviewers = async () => {
+    try {
+      const response = await companyService.getInterviewers();
+      setInterviewers(response.data?.interviewers || []);
+    } catch (error) {
+      console.error("Failed to fetch interviewers:", error);
     }
   };
 
@@ -549,6 +565,64 @@ export default function EnterpriseManagement() {
     }
   };
 
+  // Interviewer Functions
+  const {
+    register: registerInterviewer,
+    handleSubmit: handleSubmitInterviewer,
+    reset: resetInterviewer,
+    control: controlInterviewer,
+    formState: { errors: errorsInterviewer },
+  } = useForm();
+
+  const onSubmitInterviewer = async (data) => {
+    try {
+      if (editingInterviewer) {
+        await companyService.updateInterviewer(editingInterviewer._id, data);
+        showMessage("success", ENTERPRISE_MESSAGES.INTERVIEWER.UPDATE_SUCCESS);
+      } else {
+        await companyService.createInterviewer(data);
+        showMessage("success", ENTERPRISE_MESSAGES.INTERVIEWER.CREATE_SUCCESS);
+      }
+      resetInterviewer();
+      setEditingInterviewer(null);
+      fetchInterviewers();
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || error.response?.data?.message || "Failed to save Interviewer";
+      showMessage("error", errorMessage);
+      console.error("Interviewer creation error:", error);
+    }
+  };
+
+  const handleEditInterviewer = (interviewer) => {
+    setEditingInterviewer(interviewer);
+    resetInterviewer({
+      name: interviewer.name,
+      email: interviewer.email,
+    });
+  };
+
+  const handleDeleteInterviewer = async (interviewerId) => {
+    const isConfirmed = await showConfirmationDialog("Are you sure you want to delete this Interviewer?");
+
+    if (isConfirmed) {
+      try {
+        await companyService.deleteInterviewer(interviewerId);
+        showMessage("success", ENTERPRISE_MESSAGES.INTERVIEWER.DELETE_SUCCESS);
+        fetchInterviewers();
+      } catch (error) {
+        if (error.response?.status === 404) {
+          showMessage("error", "Interviewer not found");
+        } else if (error.response?.status === 403) {
+          showMessage("error", "Insufficient permissions to delete Interviewer");
+        } else {
+          const errorMessage = error.response?.data?.error || error.response?.data?.message || "Failed to delete Interviewer";
+          showMessage("error", errorMessage);
+          console.error("Interviewer deletion error:", error);
+        }
+      }
+    }
+  };
+
   // Helper functions for bulk entry management
   const addBulkRow = (type) => {
     if (type === "lob") {
@@ -586,6 +660,10 @@ export default function EnterpriseManagement() {
       const newEntries = [...bulkEntriesRecruiter];
       newEntries[index][field] = value;
       setBulkEntriesRecruiter(newEntries);
+    } else if (type === "interviewer") {
+      const newEntries = [...bulkEntriesInterviewer];
+      newEntries[index][field] = value;
+      setBulkEntriesInterviewer(newEntries);
     }
   };
 
@@ -612,8 +690,13 @@ export default function EnterpriseManagement() {
     (recruiter.keySkills && recruiter.keySkills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase())))
   );
 
-  const tabHeaders = ["LOBs", "Hiring Managers", "Backup HMs", "Recruiters", "Job Posting"];
-  const tabKeys = ["lob", "hiringManager", "backupHiringManager", "recruiter", "jobPosting"];
+  const filteredInterviewers = interviewers.filter(interviewer =>
+    interviewer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    interviewer.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const tabHeaders = ["LOBs", "Hiring Managers", "Backup HMs", "Recruiters", "Interviewers", "Job Posting"];
+  const tabKeys = ["lob", "hiringManager", "backupHiringManager", "recruiter", "interviewer", "jobPosting"];
 
   return (
     <div className="space-y-6">
@@ -657,10 +740,12 @@ export default function EnterpriseManagement() {
           setEditingHiringManager(null);
           setEditingBackupHiringManager(null);
           setEditingRecruiter(null);
+          setEditingInterviewer(null);
           resetLOB();
           resetHM();
           resetBHM();
           resetRecruiter();
+          resetInterviewer();
           setKeySkills("");
         }}
       >
@@ -1422,6 +1507,216 @@ export default function EnterpriseManagement() {
                             icon={Trash2}
                             className="text-red-600 hover:text-red-800"
                             onClick={() => handleDeleteRecruiter(recruiter._id)}
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </DataTable>
+            </Card>
+          </div>
+        </TabPanel>
+
+        {/* Interviewers Tab */}
+        <TabPanel header="Interviewers">
+          <div className="space-y-6">
+            <Card>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">
+                  {editingInterviewer ? "Edit Interviewer" : bulkModeInterviewer ? "Bulk Create Interviewers" : "Create Interviewer"}
+                </h3>
+                {!editingInterviewer && (
+                  <Button
+                    label={bulkModeInterviewer ? "Single Mode" : "Bulk Mode"}
+                    icon={bulkModeInterviewer ? Users : Plus}
+                    className="px-3 py-1 text-sm border border-gray-300 text-gray-700 hover:bg-gray-50"
+                    onClick={() => {
+                      setBulkModeInterviewer(!bulkModeInterviewer);
+                      if (!bulkModeInterviewer) {
+                        setBulkEntriesInterviewer([{ name: "", email: "" }]);
+                      }
+                    }}
+                  />
+                )}
+              </div>
+
+              {bulkModeInterviewer ? (
+                <div className="space-y-4">
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Name *
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Email *
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {bulkEntriesInterviewer.map((entry, index) => (
+                          <tr key={index}>
+                            <td className="px-6 py-4">
+                              <InputText
+                                value={entry.name}
+                                onChange={(e) => updateBulkEntry("interviewer", index, "name", e.target.value)}
+                                placeholder="Interviewer Name"
+                              />
+                            </td>
+                            <td className="px-6 py-4">
+                              <InputText
+                                value={entry.email}
+                                onChange={(e) => updateBulkEntry("interviewer", index, "email", e.target.value)}
+                                type="email"
+                                placeholder="Email"
+                              />
+                            </td>
+                            <td className="px-6 py-4">
+                              <Button
+                                icon={Trash2}
+                                className="text-red-600 hover:text-red-800"
+                                onClick={() => removeBulkRow("interviewer", index)}
+                                disabled={bulkEntriesInterviewer.length === 1}
+                              />
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      label="Add Row"
+                      icon={Plus}
+                      className="border border-gray-300 text-gray-700 hover:bg-gray-50"
+                      onClick={() => addBulkRow("interviewer")}
+                    />
+                    <Button
+                      label="Create All"
+                      icon={Check}
+                      className="bg-blue-600 text-white hover:bg-blue-700"
+                      onClick={async () => {
+                        const validEntries = bulkEntriesInterviewer.filter(entry => entry.name && entry.email);
+                        if (validEntries.length === 0) {
+                          showMessage("error", "Please add at least one Interviewer with name and email");
+                          return;
+                        }
+                        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                        const invalidEmails = validEntries.filter(entry => !emailRegex.test(entry.email));
+                        if (invalidEmails.length > 0) {
+                          showMessage("error", "Please ensure all emails are valid");
+                          return;
+                        }
+                        try {
+                          await companyService.bulkCreateInterviewers({ interviewers: validEntries });
+                          showMessage("success", ENTERPRISE_MESSAGES.INTERVIEWER.BULK_CREATE_SUCCESS);
+                          setBulkEntriesInterviewer([{ name: "", email: "" }]);
+                          setBulkModeInterviewer(false);
+                          fetchInterviewers();
+                        } catch (error) {
+                          showMessage("error", "Failed to create Interviewers");
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmitInterviewer(onSubmitInterviewer)} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                    <InputText
+                      {...registerInterviewer("name", { required: "Name is required", minLength: { value: 3, message: "Name must be at least 3 characters" } })}
+                      placeholder="Interviewer Name"
+                    />
+                    {errorsInterviewer.name && (
+                      <p className="text-red-500 text-xs mt-1">{errorsInterviewer.name.message}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <InputText
+                      {...registerInterviewer("email", {
+                        required: "Email is required",
+                        pattern: { value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, message: "Valid email is required" }
+                      })}
+                      type="email"
+                      placeholder="Email"
+                    />
+                    {errorsInterviewer.email && (
+                      <p className="text-red-500 text-xs mt-1">{errorsInterviewer.email.message}</p>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      type="submit"
+                      label={editingInterviewer ? "Update" : "Create"}
+                      icon={editingInterviewer ? Check : Plus}
+                      className="bg-blue-600 text-white hover:bg-blue-700"
+                    />
+                    {editingInterviewer && (
+                      <Button
+                        type="button"
+                        label="Cancel"
+                        icon={X}
+                        className="border border-gray-300 text-gray-700 hover:bg-gray-50"
+                        onClick={() => {
+                          setEditingInterviewer(null);
+                          resetInterviewer();
+                        }}
+                      />
+                    )}
+                  </div>
+                </form>
+              )}
+            </Card>
+
+            <Card>
+              <h3 className="text-lg font-semibold mb-4">Interviewers List</h3>
+              <DataTable value={filteredInterviewers} loading={loading}>
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      ID
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Email
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredInterviewers.map((interviewer, index) => (
+                    <tr key={interviewer._id}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {index + 1}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {interviewer.name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {interviewer.email}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex gap-2">
+                          <Button
+                            icon={Edit2}
+                            className="text-blue-600 hover:text-blue-800"
+                            onClick={() => handleEditInterviewer(interviewer)}
+                          />
+                          <Button
+                            icon={Trash2}
+                            className="text-red-600 hover:text-red-800"
+                            onClick={() => handleDeleteInterviewer(interviewer._id)}
                           />
                         </div>
                       </td>

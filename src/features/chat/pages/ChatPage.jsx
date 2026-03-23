@@ -16,8 +16,10 @@ export default function ChatPage() {
     const messageEndRef = useRef(null);
 
     const currentUser = getCurrentUser();
-    const token = localStorage.getItem(getUserType() === 'company' ? 'companyToken' : 'candidateToken');
     const role = getUserType();
+    const token =
+        localStorage.getItem('token') ||
+        localStorage.getItem(role === 'company' ? 'companyToken' : 'candidateToken');
 
     // Fetch conversation list on load
     useEffect(() => {
@@ -99,7 +101,9 @@ export default function ChatPage() {
                     ) : (
                         conversations.map(conv => {
                             const otherPartyName = role === 'company' 
-                                ? `${conv.candidateId?.firstName || ''} ${conv.candidateId?.lastName || ''}`.trim() || 'Candidate'
+                                ? (conv.candidateId?.name ||
+                                    `${conv.candidateId?.firstName || ''} ${conv.candidateId?.lastName || ''}`.trim() ||
+                                    'Candidate')
                                 : conv.companyId?.companyName || 'Company';
                             const unread = role === 'company' 
                                 ? conv.companyUnread 
@@ -108,7 +112,11 @@ export default function ChatPage() {
                             return (
                                 <div key={conv._id} className="border-b border-gray-100 hover:bg-gray-100 transition-colors">
                                     <ChatItem
-                                        avatar={role === 'company' ? conv.candidateId?.imageLink : conv.companyId?.logoUrl}
+                                        avatar={
+                                            role === 'company'
+                                                ? (conv.candidateId?.imageLink || conv.candidateId?.avatar?.url)
+                                                : (conv.companyId?.logoUrl || conv.companyId?.imageLink)
+                                        }
                                         alt={otherPartyName}
                                         title={otherPartyName}
                                         subtitle={conv.jobSubject}
@@ -133,7 +141,8 @@ export default function ChatPage() {
                                 <h4 className="font-semibold text-gray-800 m-0">{activeConv.jobSubject}</h4>
                                 <p className="text-sm text-gray-500 m-0">
                                     {role === 'company' 
-                                        ? `${activeConv.candidateId?.firstName || ''} ${activeConv.candidateId?.lastName || ''}`
+                                        ? (activeConv.candidateId?.name ||
+                                            `${activeConv.candidateId?.firstName || ''} ${activeConv.candidateId?.lastName || ''}`.trim())
                                         : activeConv.companyId?.companyName}
                                 </p>
                             </div>
