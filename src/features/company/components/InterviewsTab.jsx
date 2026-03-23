@@ -4,7 +4,7 @@ import { Avatar } from "../ui/Avatar";
 import { STATUS_CFG } from "../constants";
 import { fmtDate } from "../helpers";
 
-export function InterviewsTab({ appsLoading, interviewApps, handleStatusChange, goTo }) {
+export function InterviewsTab({ appsLoading, interviewApps, handleStatusChange, onViewFeedback, goTo }) {
     return (
         <div className="space-y-5">
             <div>
@@ -62,12 +62,20 @@ export function InterviewsTab({ appsLoading, interviewApps, handleStatusChange, 
                             </div>
 
                             {/* Resume link */}
-                            {app.resume?.url && (
-                                <a href={app.resume.url} target="_blank" rel="noreferrer"
-                                    className="flex items-center gap-1.5 text-xs text-indigo-600 font-semibold hover:underline mb-4">
-                                    📄 View Resume
-                                </a>
-                            )}
+                            <div className="flex items-center justify-between mb-4">
+                                {app.resume?.url && (
+                                    <a href={app.resume.url} target="_blank" rel="noreferrer"
+                                        className="flex items-center gap-1.5 text-xs text-indigo-600 font-semibold hover:underline">
+                                        📄 View Resume
+                                    </a>
+                                )}
+                                <button
+                                    onClick={() => onViewFeedback(app)}
+                                    className="text-xs text-emerald-600 font-bold hover:underline flex items-center gap-1"
+                                >
+                                    💬 View Feedback
+                                </button>
+                            </div>
 
                             {/* Status history */}
                             {app.statusHistory?.length > 1 && (

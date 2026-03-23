@@ -2,6 +2,7 @@
 import { Navigate } from "react-router-dom";
 import CompanyLogin from "../features/company/CompanyAuth/CompanyLogin";
 import CompanyDashboard from "../features/company/pages/CompanyDashboard";
+import InterviewerDashboard from "../features/company/pages/InterviewerDashboard";
 import ChatPage from "../features/chat/pages/ChatPage";
 
 import AuthLayout from "../layouts/AuthLayout";
@@ -30,6 +31,10 @@ const companyRoutes = {
     {
       path: "dashboard",
       element: guarded(<CompanyDashboard />),
+    },
+    {
+      path: "interviewer-dashboard",
+      element: guarded(<InterviewerDashboard />),
     },
     {
       path: "refer",

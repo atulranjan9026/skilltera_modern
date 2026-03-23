@@ -197,4 +197,47 @@ export const companyService = {
     clearCache("GET:/company/recruiters");
     return post("/company/recruiters/bulk", recruiterData);
   },
+
+  // Interviewer Management
+  getInterviewers: async () => {
+    return get("/company/interviewers", false);
+  },
+
+  createInterviewer: async (interviewerData) => {
+    clearCache("GET:/company/interviewers");
+    return post("/company/interviewers", interviewerData);
+  },
+
+  updateInterviewer: async (interviewerId, interviewerData) => {
+    clearCache("GET:/company/interviewers");
+    return put(`/company/interviewers/${interviewerId}`, interviewerData);
+  },
+
+  deleteInterviewer: async (interviewerId) => {
+    clearCache("GET:/company/interviewers");
+    return del(`/company/interviewers/${interviewerId}`);
+  },
+
+  bulkCreateInterviewers: async (interviewerData) => {
+    clearCache("GET:/company/interviewers");
+    return post("/company/interviewers/bulk", interviewerData);
+  },
+
+  assignInterviewers: async (assignmentData) => {
+    // assignmentData: { applicationId: string, interviewerIds: string[] }
+    return post("/company/interviewers/assign", assignmentData);
+  },
+
+  getAssignedCandidates: async () => {
+    return get("/company/interviewer/assigned-candidates", false);
+  },
+
+  submitFeedback: async (feedbackData) => {
+    // feedbackData: { applicationId: string, feedback: string, rating: number, decision: string }
+    return post("/company/interviewer/feedback", feedbackData);
+  },
+
+  getFeedbackForApplication: async (applicationId) => {
+    return get(`/company/interviewer/feedback/${applicationId}`, false);
+  },
 };

@@ -26,6 +26,13 @@ export const ENTERPRISE_API = {
   RECRUITER_UPDATE: '/company/recruiters/',
   RECRUITER_DELETE: '/company/recruiters/',
   RECRUITER_BULK_CREATE: '/company/recruiters/bulk',
+  
+  // Interviewer endpoints
+  INTERVIEWER_GET_ALL: '/company/interviewers',
+  INTERVIEWER_CREATE: '/company/interviewers',
+  INTERVIEWER_UPDATE: '/company/interviewers/',
+  INTERVIEWER_DELETE: '/company/interviewers/',
+  INTERVIEWER_BULK_CREATE: '/company/interviewers/bulk',
 };
 
 // Enterprise Management Messages
@@ -53,6 +60,12 @@ export const ENTERPRISE_MESSAGES = {
     DELETE_SUCCESS: 'Recruiter deleted successfully',
     BULK_CREATE_SUCCESS: 'Recruiters created successfully',
     INVITATION_SENT: 'Invitation sent to existing recruiter',
+  },
+  INTERVIEWER: {
+    CREATE_SUCCESS: 'Interviewer created successfully',
+    UPDATE_SUCCESS: 'Interviewer updated successfully',
+    DELETE_SUCCESS: 'Interviewer deleted successfully',
+    BULK_CREATE_SUCCESS: 'Interviewers created successfully',
   },
   VALIDATION: {
     NAME_REQUIRED: 'Name is required',

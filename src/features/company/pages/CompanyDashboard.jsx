@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { companyService } from "../../../services/companyService";
 import { getCompanyUser, getCompanyId } from "../../../utils/auth";
 import { STATUS_CFG, FUNNEL_COLORS, NAV_ITEMS } from "../constants";
@@ -16,11 +17,21 @@ import { InterviewsTab } from "../components/InterviewsTab";
 import { AnalyticsTab } from "../components/AnalyticsTab";
 import { CompanyProfile } from "../components/CompanyProfile";
 import EnterpriseManagement from "../components/EnterpriseManagement";
+import AssignInterviewerModal from "../components/AssignInterviewerModal";
+import FeedbackReviewModal from "../components/FeedbackReviewModal";
 
 // ─── Main Dashboard ────────────────────────────────────────────────────────────
 export default function CompanyDashboard() {
+  const navigate = useNavigate();
   const companyUser = getCompanyUser();
   const companyId = getCompanyId();
+
+  // ── Role Redirect ─────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (companyUser?.role === "interviewer") {
+      navigate("/company/interviewer-dashboard", { replace: true });
+    }
+  }, [companyUser, navigate]);
 
   // ── UI state ──────────────────────────────────────────────────────────────
   const [activeTab, setActiveTab] = useState("Overview");
@@ -47,6 +58,12 @@ export default function CompanyDashboard() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [appSearch, setAppSearch] = useState("");
   const appFilterMounted = useRef(false);
+
+  // ── Assignment & Review Modal state ──────────────────────────────────────
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [assigningApp, setAssigningApp] = useState(null);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewingApp, setReviewingApp] = useState(null);
 
   // ── Data fetching ─────────────────────────────────────────────────────────
   const fetchJobs = useCallback(async (page = 1, search = "") => {
@@ -127,6 +144,15 @@ export default function CompanyDashboard() {
 
   // ── Application status update ──────────────────────────────────────────────
   const handleStatusChange = async (applicationId, newStatus) => {
+    if (newStatus === "interviewed") {
+      const app = applications.find((a) => a._id === applicationId);
+      if (app) {
+        setAssigningApp(app);
+        setShowAssignModal(true);
+        return;
+      }
+    }
+
     try {
       await companyService.updateApplicationStatus(companyId, applicationId, newStatus);
       setApplications((prev) =>
@@ -135,6 +161,18 @@ export default function CompanyDashboard() {
     } catch {
       alert("Failed to update status. Please try again.");
     }
+  };
+
+  const handleAssignSuccess = (interviewerIds) => {
+    if (!assigningApp) return;
+    setApplications((prev) =>
+      prev.map((a) =>
+        a._id === assigningApp._id
+          ? { ...a, status: "interviewed", assignedInterviewers: interviewerIds }
+          : a
+      )
+    );
+    setAssigningApp(null);
   };
 
   // ── Derived / memoised stats ──────────────────────────────────────────────
@@ -290,6 +328,10 @@ export default function CompanyDashboard() {
               appsLoading={appsLoading}
               interviewApps={interviewApps}
               handleStatusChange={handleStatusChange}
+              onViewFeedback={(app) => {
+                setReviewingApp(app);
+                setShowReviewModal(true);
+              }}
               goTo={goTo}
             />
           )}
@@ -317,6 +359,32 @@ export default function CompanyDashboard() {
           {/* EnterpriseManagement */}
           {!showCreate && activeTab === "EnterpriseManagement" && companyUser?.role === "company" && (
             <EnterpriseManagement />
+          )}
+
+          {/* Assignment Modal */}
+          {showAssignModal && (
+            <AssignInterviewerModal
+              isOpen={showAssignModal}
+              onClose={() => {
+                setShowAssignModal(false);
+                setAssigningApp(null);
+              }}
+              application={assigningApp}
+              onAssign={handleAssignSuccess}
+            />
+          )}
+
+          {/* Feedback Review Modal */}
+          {showReviewModal && (
+            <FeedbackReviewModal
+              isOpen={showReviewModal}
+              onClose={() => {
+                setShowReviewModal(false);
+                setReviewingApp(null);
+              }}
+              application={reviewingApp}
+              onAction={handleStatusChange}
+            />
           )}
 
         </main>
