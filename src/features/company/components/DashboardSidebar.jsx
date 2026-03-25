@@ -43,8 +43,21 @@ export function DashboardSidebar({ companyUser, activeTab, showCreate, goTo, nav
                     <div className="min-w-0">
                         <p className="text-white text-xs font-semibold truncate">{companyUser?.name || companyUser?.companyName || "Your Company"}</p>
                         <p className="text-slate-400 text-[10px] truncate">{companyUser?.email || ""}</p>
-                        <p className="text-slate-400 text-[10px] truncate">{companyUser?.role || ""}</p>
+                        <div className="mt-1.5">
+                            <div className="flex flex-col gap-1.5">
+                                <span className="text-indigo-300 text-[9px] font-extrabold uppercase tracking-widest bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-md self-start shadow-sm">
+                                    {(companyUser?.role || "").replace(/_/g, " ")}
+                                </span>
+                                <p className="text-slate-500 text-[10px] leading-tight pr-2 italic">
+                                    {companyUser?.role === 'company' && "Full access & job management"}
+                                    {(companyUser?.role === 'hiring_manager' || companyUser?.role === 'backup_hiring_manager') && 
+                                        "Manage hiring workflow & assignments"}
+                                    {companyUser?.role === 'interviewer' && "Conduct interviews & message candidates"}
+                                </p>
+                            </div>
+                        </div>
                     </div>
+
                 </div>
             </div>
 
