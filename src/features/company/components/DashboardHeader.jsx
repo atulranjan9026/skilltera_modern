@@ -1,11 +1,12 @@
 import { useNavigate } from "react-router-dom";
 import { NAV_ITEMS } from "../constants";
 import { useAuthContext } from "../../../store/context/AuthContext";
+import { UserPlus } from "lucide-react";
 
 export function DashboardHeader({
     activeTab, showCreate, companyUser,
     sidebarOpen, setSidebarOpen,
-    onRefresh, onPostJob, setShowCreate,
+    onRefresh, onPostJob, setShowCreate, onCreateInterviewer,
 }) {
     const navigate = useNavigate();
     const { logout } = useAuthContext();
@@ -67,12 +68,23 @@ export function DashboardHeader({
                 >
                     ↻
                 </button>
-                {companyUser?.role !== "hiring_manager" && (
+                {companyUser?.role === "company" && (
                     <button
                         onClick={onPostJob}
                         className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors"
                     >
                         + Post Job
+                    </button>
+                )}
+                {/* Create Interviewer Account - Only for Hiring Managers */}
+                {["hiring_manager", "backup_hiring_manager"].includes(companyUser?.role) && (
+
+                    <button
+                        onClick={onCreateInterviewer}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors flex items-center gap-2"
+                    >
+                        <UserPlus className="w-3 h-3" />
+                        Create InterviewerChannel
                     </button>
                 )}
                 {/* Chat option */}

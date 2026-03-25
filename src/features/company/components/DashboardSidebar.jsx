@@ -5,11 +5,20 @@ export function DashboardSidebar({ companyUser, activeTab, showCreate, goTo, nav
     // Filter and merge static nav items with dynamic badge counts from parent
     const items = NAV_ITEMS
         .filter(item => {
+            const role = companyUser?.role;
+            if (role === "interviewer") {
+                return ["candidates", "messages"].includes(item.tab);
+            }
             if (item.tab === "EnterpriseManagement") {
-                return companyUser?.role === "company";
+                return role === "company";
+            }
+            // Hide interviewer-only items from company/hiring_manager
+            if (["candidates", "messages"].includes(item.tab)) {
+                return false;
             }
             return true;
         })
+
         .map((item) => {
             const badgeEntry = navBadges.find((b) => b.tab === item.tab);
             return { ...item, badge: badgeEntry?.badge ?? null };
@@ -29,11 +38,12 @@ export function DashboardSidebar({ companyUser, activeTab, showCreate, goTo, nav
             <div className="px-5 py-4 border-b border-white/5">
                 <div className="flex items-center gap-2.5">
                     <div className="w-9 h-9 bg-gradient-to-br from-indigo-400 to-violet-500 rounded-xl flex items-center justify-center text-white font-black text-sm">
-                        {(companyUser?.companyName || "C")[0].toUpperCase()}
+                        {(companyUser?.name || "C")[0].toUpperCase()}
                     </div>
                     <div className="min-w-0">
-                        <p className="text-white text-xs font-semibold truncate">{companyUser?.companyName || "Your Company"}</p>
+                        <p className="text-white text-xs font-semibold truncate">{companyUser?.name || companyUser?.companyName || "Your Company"}</p>
                         <p className="text-slate-400 text-[10px] truncate">{companyUser?.email || ""}</p>
+                        <p className="text-slate-400 text-[10px] truncate">{companyUser?.role || ""}</p>
                     </div>
                 </div>
             </div>

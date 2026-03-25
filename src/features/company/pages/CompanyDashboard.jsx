@@ -19,6 +19,7 @@ import { CompanyProfile } from "../components/CompanyProfile";
 import EnterpriseManagement from "../components/EnterpriseManagement";
 import AssignInterviewerModal from "../components/AssignInterviewerModal";
 import FeedbackReviewModal from "../components/FeedbackReviewModal";
+import CreateInterviewerModal from "../components/CreateInterviewerModal";
 
 // ─── Main Dashboard ────────────────────────────────────────────────────────────
 export default function CompanyDashboard() {
@@ -64,6 +65,9 @@ export default function CompanyDashboard() {
   const [assigningApp, setAssigningApp] = useState(null);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [reviewingApp, setReviewingApp] = useState(null);
+
+  // ── Create Interviewer Modal state ───────────────────────────────────────────
+  const [showCreateInterviewerModal, setShowCreateInterviewerModal] = useState(false);
 
   // ── Data fetching ─────────────────────────────────────────────────────────
   const fetchJobs = useCallback(async (page = 1, search = "") => {
@@ -137,9 +141,13 @@ export default function CompanyDashboard() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const refreshAll = () => {
-    fetchJobs(jobsPage, jobSearch);
-    fetchApplications(appsPage, appSearch, statusFilter);
+  const handleCreateInterviewer = () => {
+    setShowCreateInterviewerModal(true);
+  };
+
+  const handleInterviewerCreated = () => {
+    // Refresh data or show success message as needed
+    refreshAll();
   };
 
   // ── Application status update ──────────────────────────────────────────────
@@ -163,6 +171,11 @@ export default function CompanyDashboard() {
     }
   };
 
+  const refreshAll = () => {
+    fetchJobs(jobsPage, jobSearch);
+    fetchApplications(appsPage, appSearch, statusFilter);
+  };
+
   const handleAssignSuccess = (interviewerIds) => {
     if (!assigningApp) return;
     setApplications((prev) =>
@@ -174,7 +187,6 @@ export default function CompanyDashboard() {
     );
     setAssigningApp(null);
   };
-
   // ── Derived / memoised stats ──────────────────────────────────────────────
   const activeJobs = useMemo(() => jobs.filter((j) => j.active).length, [jobs]);
   const pendingJobs = useMemo(() => jobs.filter((j) => j.status === "PENDING").length, [jobs]);
@@ -269,6 +281,7 @@ export default function CompanyDashboard() {
           onRefresh={refreshAll}
           onPostJob={() => { setActiveTab("Jobs"); setShowCreate(true); }}
           setShowCreate={setShowCreate}
+          onCreateInterviewer={handleCreateInterviewer}
         />
 
         <main className="flex-1 overflow-y-auto px-6 py-6">
@@ -384,6 +397,15 @@ export default function CompanyDashboard() {
               }}
               application={reviewingApp}
               onAction={handleStatusChange}
+            />
+          )}
+
+          {/* Create Interviewer Modal */}
+          {showCreateInterviewerModal && (
+            <CreateInterviewerModal
+              open={showCreateInterviewerModal}
+              onClose={() => setShowCreateInterviewerModal(false)}
+              onSuccess={handleInterviewerCreated}
             />
           )}
 

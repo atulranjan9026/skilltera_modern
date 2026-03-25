@@ -30,4 +30,9 @@ export const NAV_ITEMS = [
     { icon: "📅", label: "Interviews", tab: "Interviews" },
     { icon: "📊", label: "Analytics", tab: "Analytics" },
     { icon: "🏢", label: "Enterprise", tab: "EnterpriseManagement" },
+    // Interviewer specific
+    { icon: "📅", label: "Interviews", tab: "candidates" },
+
+    { icon: "💬", label: "Messages", tab: "messages" },
 ];
+

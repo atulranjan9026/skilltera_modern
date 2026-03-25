@@ -3,12 +3,14 @@ import { get, post } from "./api";
 
 export const chatService = {
   // Initiate a new conversation
-  initiateConversation: async (participantId, message) => {
+  initiateConversation: async (candidateId, companyId, jobSubject) => {
     return post('/chat/initiate', {
-      participantId,
-      message
+      candidateId,
+      companyId,
+      jobSubject
     });
   },
+
 
   // Get all conversations for current user
   getUserConversations: async () => {

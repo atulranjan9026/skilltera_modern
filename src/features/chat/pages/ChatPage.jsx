@@ -8,7 +8,7 @@ import "react-chat-elements/dist/main.css";
 // Configure axios base url to match API
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
 
-export default function ChatPage() {
+export default function ChatPage({ initialConversationId }) {
     const [conversations, setConversations] = useState([]);
     const [activeConv, setActiveConv] = useState(null);
     const [messages, setMessages] = useState([]);
@@ -39,6 +39,17 @@ export default function ChatPage() {
             fetchConversations();
         }
     }, [token]);
+
+    // Auto-select conversation if initialConversationId is provided
+    useEffect(() => {
+        if (conversations.length > 0 && initialConversationId) {
+            const found = conversations.find(c => c._id === initialConversationId);
+            if (found && activeConv?._id !== initialConversationId) {
+                openConversation(found);
+            }
+        }
+    }, [conversations, initialConversationId]);
+
 
     // Setup real-time Socket.io listener
     const handleNewMessage = (newMessage) => {
