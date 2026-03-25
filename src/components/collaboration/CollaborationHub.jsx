@@ -695,38 +695,27 @@ export const CollaborationHub = ({ user }) => {
   const [meetings, setMeetings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newMessage, setNewMessage] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredMessages, setFilteredMessages] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
   const messagesEndRef = useRef(null);
 
-  // Load initial data
+  // Filter messages based on search term
   useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      try {
-        const [channelsData, membersData, meetingsData] = await Promise.all([
-          collaborationService.getChannels(),
-          collaborationService.getTeamMembers(),
-          collaborationService.getMeetings(),
-        ]);
+    if (searchTerm.trim() === '') {
+      setFilteredMessages(messages);
+    } else {
+      const filtered = messages.filter(message => {
+        const text = message.content.toLowerCase();
+        const searchLower = searchTerm.toLowerCase();
         
-        setChannels(channelsData);
-        setTeamMembers(membersData);
-        setMeetings(meetingsData);
-        
-        // Set first channel as active
-        if (channelsData.length > 0) {
-          setActiveChannel(channelsData[0]);
-          const messagesData = await collaborationService.getMessages(channelsData[0].id);
-          setMessages(messagesData);
-        }
-      } catch (error) {
-        console.error('Failed to load collaboration data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+        return text.includes(searchLower);
+      });
+      setFilteredMessages(filtered);
+    }
+  }, [searchTerm, messages]);
 
-    loadData();
-  }, []);
+  // Load initial data
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -751,6 +740,13 @@ export const CollaborationHub = ({ user }) => {
     });
 
     setMessages(prev => [...prev, newMsg]);
+    setNewMessage('');
+  };
+
+  const handleChannelSelect = async (channel) => {
+    setActiveChannel(channel);
+    const messagesData = await collaborationService.getMessages(channel.id);
+    setMessages(messagesData);
   };
 
   const handleJoinMeeting = (meeting) => {
@@ -973,7 +969,50 @@ export const CollaborationHub = ({ user }) => {
                 </p>
               </div>
               
-              <div style={{ display: 'flex', gap: tokens.spacing[2] }}>
+              <div style={{ display: 'flex', gap: tokens.spacing[2], alignItems: 'center' }}>
+                {/* Search Input */}
+                <div style={{ position: 'relative', marginRight: tokens.spacing[2] }}>
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value);
+                      setIsSearching(e.target.value.length > 0);
+                    }}
+                    onFocus={() => setShowDropdown(true)}
+                    placeholder="Search messages..."
+                    style={{
+                      padding: `${tokens.spacing[2]} ${tokens.spacing[4]}`,
+                      borderRadius: tokens.borderRadius.md,
+                      border: `1px solid ${tokens.colors.secondary[300]}`,
+                      fontSize: tokens.typography.fontSize.sm[0],
+                      color: tokens.colors.secondary[900],
+                      backgroundColor: 'white',
+                      outline: 'none',
+                      width: '200px',
+                    }}
+                  />
+                  {searchTerm && (
+                    <button
+                      onClick={() => setSearchTerm('')}
+                      style={{
+                        position: 'absolute',
+                        right: tokens.spacing[2],
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'none',
+                        border: 'none',
+                        padding: tokens.spacing[1],
+                        borderRadius: tokens.borderRadius.sm,
+                        cursor: 'pointer',
+                        color: tokens.colors.secondary[500],
+                      }}
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
+                
                 <button
                   style={{
                     background: 'none',
@@ -1013,21 +1052,23 @@ export const CollaborationHub = ({ user }) => {
               </div>
             </div>
 
-            {/* Messages */}
+            {/* Message List */}
             <div style={{ 
               flex: 1, 
               overflowY: 'auto', 
               padding: tokens.spacing[4],
               backgroundColor: tokens.colors.secondary[50],
             }}>
-              {messages.map((message) => (
-                <Message
-                  key={message.id}
-                  message={message}
-                  isOwn={message.senderId === user?.id}
-                />
-              ))}
-              <div ref={messagesEndRef} />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[2] }}>
+                {filteredMessages.map((message) => (
+                  <Message
+                    key={message.id}
+                    message={message}
+                    isOwn={message.senderId === user?.id}
+                  />
+                ))}
+                <div ref={messagesEndRef} />
+              </div>
             </div>
 
             {/* Input */}

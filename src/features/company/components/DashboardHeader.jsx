@@ -88,7 +88,7 @@ export function DashboardHeader({
                         className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors flex items-center gap-2"
                     >
                         <UserPlus className="w-3 h-3" />
-                        Create InterviewerChannel
+                        Create Interviewer 
                     </button>
                 )}
                 {/* Chat option */}
