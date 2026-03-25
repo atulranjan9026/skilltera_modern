@@ -20,6 +20,8 @@ import EnterpriseManagement from "../components/EnterpriseManagement";
 import AssignInterviewerModal from "../components/AssignInterviewerModal";
 import FeedbackReviewModal from "../components/FeedbackReviewModal";
 import CreateInterviewerModal from "../components/CreateInterviewerModal";
+import ChatPage from "../../chat/pages/ChatPage";
+
 
 // ─── Main Dashboard ────────────────────────────────────────────────────────────
 export default function CompanyDashboard() {
@@ -282,6 +284,7 @@ export default function CompanyDashboard() {
           onPostJob={() => { setActiveTab("Jobs"); setShowCreate(true); }}
           setShowCreate={setShowCreate}
           onCreateInterviewer={handleCreateInterviewer}
+          goTo={goTo}
         />
 
         <main className="flex-1 overflow-y-auto px-6 py-6">
@@ -372,6 +375,15 @@ export default function CompanyDashboard() {
           {/* EnterpriseManagement */}
           {!showCreate && activeTab === "EnterpriseManagement" && companyUser?.role === "company" && (
             <EnterpriseManagement />
+          )}
+
+          {/* Messages */}
+          {!showCreate && activeTab === "messages" && (
+            <div className="h-full flex flex-col -mt-6 -mx-6 relative">
+               <div className="flex-1 overflow-auto bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100">
+                  <ChatPage />
+               </div>
+            </div>
           )}
 
           {/* Assignment Modal */}

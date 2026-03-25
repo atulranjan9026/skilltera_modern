@@ -6,14 +6,18 @@ import { UserPlus } from "lucide-react";
 export function DashboardHeader({
     activeTab, showCreate, companyUser,
     sidebarOpen, setSidebarOpen,
-    onRefresh, onPostJob, setShowCreate, onCreateInterviewer,
+    onRefresh, onPostJob, setShowCreate, onCreateInterviewer, goTo
 }) {
     const navigate = useNavigate();
     const { logout } = useAuthContext();
     const currentNavLabel = NAV_ITEMS.find((n) => n.tab === activeTab)?.label;
 
     const handleChatClick = () => {
-        navigate("/company/chat");
+        if (goTo) {
+            goTo("messages");
+        } else {
+            navigate("/company/chat");
+        }
     };
 
     const handleLogout = async () => {

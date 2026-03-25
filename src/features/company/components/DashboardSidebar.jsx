@@ -13,7 +13,7 @@ export function DashboardSidebar({ companyUser, activeTab, showCreate, goTo, nav
                 return role === "company";
             }
             // Hide interviewer-only items from company/hiring_manager
-            if (["candidates", "messages"].includes(item.tab)) {
+            if (["candidates"].includes(item.tab)) {
                 return false;
             }
             return true;

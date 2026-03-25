@@ -184,6 +184,11 @@ export const batchRequests = (requests) => {
   return Promise.allSettled(requests.map((req) => api(req)));
 };
 
+/** Simple GET request (wrapper around api.get) */
+export const fetch = async (endpoint, config) => {
+  return api.get(endpoint, config);
+};
+
 /** Clear cache for a specific key or all */
 export const clearCache = (key) => {
   key ? cache.delete(key) : cache.clear();

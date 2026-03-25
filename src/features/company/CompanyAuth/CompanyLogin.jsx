@@ -1,20 +1,68 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { User, Building2 } from 'lucide-react';
-import { post, setAuthToken } from '../../../services/api';
+import { User, Building2, ChevronDown } from 'lucide-react';
+import { post, setAuthToken, fetch } from '../../../services/api';
 
 export default function CompanyLogin() {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
+    const [companies, setCompanies] = useState([]);
+    const [selectedCompany, setSelectedCompany] = useState('');
+    const [showDropdown, setShowDropdown] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filteredCompanies, setFilteredCompanies] = useState([]);
+    const dropdownRef = useRef(null);
 
     const {
         register,
         handleSubmit,
         formState: { errors },
         setError: setFormError,
+        setValue,
     } = useForm();
+
+    // Fetch companies on component mount
+    useEffect(() => {
+        const fetchCompanies = async () => {
+            try {
+                const response = await fetch('/company/list'); // Use public endpoint
+                if (response.data?.companies) {
+                    setCompanies(response.data.companies);
+                    setFilteredCompanies(response.data.companies);
+                }
+            } catch (error) {
+                console.error('Failed to fetch companies:', error);
+            }
+        };
+
+        fetchCompanies();
+    }, []);
+
+    // Filter companies based on search term
+    useEffect(() => {
+        if (searchTerm.trim() === '') {
+            setFilteredCompanies(companies);
+        } else {
+            const filtered = companies.filter(company =>
+                company.companyName.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            setFilteredCompanies(filtered);
+        }
+    }, [searchTerm, companies]);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setShowDropdown(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const onSubmit = async (data) => {
         setIsLoading(true);
@@ -97,17 +145,49 @@ export default function CompanyLogin() {
                     <label htmlFor="companyName" className="block text-xs font-medium text-slate-700 mb-0.5">
                         Company Name
                     </label>
+                    <div className="relative" ref={dropdownRef}>
+                        <input
+                            type="text"
+                            className={`w-full px-3 py-2 rounded-lg border text-sm border-slate-200 bg-white focus:ring-2 focus:ring-primary-300 focus:border-primary-400 outline-none transition-all text-left pr-10`}
+                            placeholder="Type to search companies..."
+                            value={searchTerm}
+                            onChange={(e) => {
+                                setSearchTerm(e.target.value);
+                                setSelectedCompany(e.target.value);
+                                setShowDropdown(true);
+                            }}
+                            onFocus={() => setShowDropdown(true)}
+                        />
+                        <ChevronDown className="absolute right-3 top-3 h-4 text-slate-400" />
+                        
+                        {showDropdown && filteredCompanies.length > 0 && (
+                            <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                {filteredCompanies.map((company, index) => (
+                                    <div
+                                        key={index}
+                                        className="px-3 py-2 hover:bg-slate-50 cursor-pointer transition-colors"
+                                        onClick={() => {
+                                            setSelectedCompany(company.companyName);
+                                            setSearchTerm(company.companyName);
+                                            setValue('companyName', company.companyName);
+                                            setShowDropdown(false);
+                                        }}
+                                    >
+                                        {company.companyName}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                     <input
-                        type="text"
+                        type="hidden"
                         id="companyName"
-                        className={`w-full px-3 py-2 rounded-lg border text-sm
-                            ${errors.companyName ? 'border-red-300 bg-red-50' : 'border-slate-200'}
-                            focus:ring-2 focus:ring-primary-300 focus:border-primary-400 outline-none transition-all`}
-                        placeholder="Acme Corporation"
                         {...register('companyName', {
                             required: 'Company name is required',
                             minLength: { value: 2, message: 'Must be at least 2 characters' },
                         })}
+                        value={selectedCompany}
+                        readOnly
                     />
                     {errors.companyName && (
                         <p className="text-red-500 text-xs mt-0.5">{errors.companyName.message}</p>
