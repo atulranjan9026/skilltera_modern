@@ -7,7 +7,7 @@ import { Avatar } from "../ui/Avatar";
 import { PaginationBar } from "../ui/PaginationBar";
 import { STATUS_CFG } from "../constants";
 import { fmtDate } from "../helpers";
-import { CandidateDetailsModal } from "./CandidateDetailsModal";
+import { CandidateDetailsView } from "./CandidateDetailsView";
 
 const STATUS_FILTERS = ["all", "applied", "shortlisted", "interviewed", "selected", "rejected"];
 
@@ -19,7 +19,6 @@ export function ApplicationsTab({
     onRetry, handleAppsPage, handleStatusChange,
 }) {
     const [selectedCandidate, setSelectedCandidate] = useState(null);
-    const [showDetailModal, setShowDetailModal] = useState(false);
     const [advancedFilters, setAdvancedFilters] = useState({
         status: [],
         jobType: [],
@@ -104,11 +103,11 @@ export function ApplicationsTab({
 
     const handleOpenDetails = (app) => {
         setSelectedCandidate(app);
-        setShowDetailModal(true);
+        // Scroll to top of the tab
+        window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
     const handleCloseDetails = () => {
-        setShowDetailModal(false);
         setSelectedCandidate(null);
     };
 
@@ -131,6 +130,22 @@ export function ApplicationsTab({
         advancedFilters.jobType.length > 0 ||
         advancedFilters.appliedDateRange !== null ||
         advancedFilters.sortBy !== "recent";
+
+    if (selectedCandidate) {
+        return (
+            <div className="h-full">
+                <CandidateDetailsView
+                    application={selectedCandidate}
+                    onBack={handleCloseDetails}
+                    onStatusChange={(status) => {
+                        handleStatusChange(selectedCandidate._id, status);
+                        // Update the selected candidate's status in the view immediately
+                        setSelectedCandidate(prev => ({ ...prev, status }));
+                    }}
+                />
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-5">
@@ -314,7 +329,11 @@ export function ApplicationsTab({
                             </thead>
                             <tbody className="divide-y divide-slate-50">
                                 {filteredApplications.map((app) => (
-                                    <tr key={app._id} className="hover:bg-slate-50 transition-colors">
+                                    <tr 
+                                        key={app._id} 
+                                        className="hover:bg-indigo-50/50 transition-colors cursor-pointer group"
+                                        onClick={() => handleOpenDetails(app)}
+                                    >
                                         <td className="px-5 py-3.5">
                                             <div className="flex items-center gap-3">
                                                 <Avatar name={app.candidate?.name || "?"} />
@@ -357,14 +376,8 @@ export function ApplicationsTab({
                                             )}
                                         </td>
 
-                                        <td className="px-5 py-3.5">
-                                            <div className="flex items-center justify-center gap-1">
-                                                <button
-                                                    onClick={() => handleOpenDetails(app)}
-                                                    className="text-[10px] bg-blue-50 hover:bg-blue-100 text-blue-700 px-2 py-1 rounded-lg font-semibold transition-colors"
-                                                >
-                                                    View
-                                                </button>
+                                        <td className="px-5 py-3.5" onClick={(e) => e.stopPropagation()}>
+                                            <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <button
                                                     onClick={() => handleStatusChange(app._id, "shortlisted")}
                                                     disabled={app.status === "shortlisted"}
@@ -403,18 +416,6 @@ export function ApplicationsTab({
                         loading={appsLoading}
                     />
                 </div>
-            )}
-
-            {/* Candidate Details Modal */}
-            {showDetailModal && selectedCandidate && (
-                <CandidateDetailsModal
-                    application={selectedCandidate}
-                    onClose={handleCloseDetails}
-                    onStatusChange={(status) => {
-                        handleStatusChange(selectedCandidate._id, status);
-                        handleCloseDetails();
-                    }}
-                />
             )}
         </div>
     );
