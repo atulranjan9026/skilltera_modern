@@ -32,15 +32,7 @@ export default function ChatPage({ initialConversationId }) {
         localStorage.getItem('token') ||
         localStorage.getItem(role === 'company' ? 'companyToken' : 'candidateToken');
 
-    // Debug authentication state
     useEffect(() => {
-        console.log('Auth Debug:', {
-            hasUser: !!currentUser,
-            hasUserId: !!(currentUser?._id || currentUser?.id),
-            role,
-            hasToken: !!token,
-            currentUser: currentUser
-        });
     }, [currentUser, role, token]);
 
     // Fetch conversation list on load
@@ -57,11 +49,9 @@ export default function ChatPage({ initialConversationId }) {
             }
 
             try {
-                console.log('Fetching conversations with token:', token.substring(0, 20) + '...');
                 const res = await axios.get(getApiUrl('chat/conversations'), {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                console.log('Conversations response:', res.data);
 
                 if (res.data?.success) {
                     setConversations(res.data.conversations);

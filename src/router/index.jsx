@@ -1,5 +1,4 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
-// import RootLayout from '../layouts/RootLayout';
 
 // Import modular routes
 import authRoutes from './authRoutes';

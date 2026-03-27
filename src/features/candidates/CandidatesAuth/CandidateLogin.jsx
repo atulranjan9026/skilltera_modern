@@ -1,10 +1,10 @@
 import React from 'react';
 import { GoogleLogin } from '@react-oauth/google';
-import Button from '@/components/ui/Button';
+import Button from '../../../components/ui/Button';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useAuthContext } from '../../../store/context/AuthContext';
-import { cn } from '@/utils/cn';
+import { cn } from '../../../utils/cn';
 
 export default function Login() {
   const navigate = useNavigate();

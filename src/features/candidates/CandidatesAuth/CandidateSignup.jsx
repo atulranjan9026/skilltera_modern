@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
-import Button from '@/components/ui/Button';
+import Button from '../../../components/ui/Button';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { UploadCloud, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthContext } from '../../../store/context/AuthContext';
-import { cn } from '@/utils/cn';
+import { cn } from '../../../utils/cn';
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2 MB
 

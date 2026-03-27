@@ -172,12 +172,7 @@ export function clearAuthData() {
       }
     }
     
-    // Remove any additional auth-related keys
-    keysToRemove.forEach(key => localStorage.removeItem(key));
-    
-    console.log('✅ All authentication data cleared successfully');
   } catch (error) {
-    console.warn('⚠️ Error clearing auth data:', error);
     // Continue even if some cleanup fails
   }
 }

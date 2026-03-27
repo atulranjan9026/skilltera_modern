@@ -9,9 +9,12 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/
 const cache = new Map();
 const pendingRequests = new Map();
 
+// Normalize baseURL to ensure it doesn't end with a slash (avoid double-slashes with endpoints)
+const normalizedBaseURL = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+
 // ─── Axios Instance ───────────────────────────────────────────────────────
 export const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: normalizedBaseURL,
   timeout: 30000,
   withCredentials: true,
   headers: { 'Content-Type': 'application/json' },

@@ -60,6 +60,27 @@ export class S3Uploader {
   }
 
   /**
+   * Directly upload a File or Blob
+   */
+  async uploadFile(file, { label } = {}) {
+    this.chunks = [];
+    this.multipart = { uploadId: null, key: null, parts: [], partNumber: 1 };
+
+    // Initiate S3 multipart upload
+    const ext = file.name ? file.name.split('.').pop() : 'bin';
+    const res = await sessionUploadService.initiate({
+      type: this.type,
+      label,
+      contentType: file.type,
+      extension: ext,
+    });
+    this.multipart.uploadId = res.uploadId;
+    this.multipart.key = res.key;
+
+    return this._performMultipartUpload(file);
+  }
+
+  /**
    * Stop recording and upload all chunks to S3
    * Returns { s3Location, key }
    */
@@ -78,9 +99,17 @@ export class S3Uploader {
       return { s3Location: '', key: '' };
     }
 
-    // Combine chunks into a single blob, then slice into S3 parts
+    // Combine chunks into a single blob
     const fullBlob = new Blob(this.chunks, { type: this.selectedMimeType });
-    const totalSize = fullBlob.size;
+    return this._performMultipartUpload(fullBlob);
+  }
+
+  /**
+   * Internal method to perform multipart upload of a Blob/File
+   */
+  async _performMultipartUpload(blob) {
+    const totalSize = blob.size;
+    const contentType = blob.type || this.selectedMimeType;
 
     if (totalSize === 0) {
       return { s3Location: '', key: '' };
@@ -90,7 +119,7 @@ export class S3Uploader {
     let offset = 0;
     while (offset < totalSize) {
       const end = Math.min(offset + Math.max(MIN_PART_SIZE, totalSize), totalSize);
-      const partBlob = fullBlob.slice(offset, end);
+      const partBlob = blob.slice(offset, end);
 
       // Get presigned URL
       const { url } = await sessionUploadService.sign({
@@ -103,7 +132,6 @@ export class S3Uploader {
       const response = await fetch(url, {
         method: 'PUT',
         body: partBlob,
-        headers: { 'Content-Type': this.selectedMimeType },
       });
 
       const etag = response.headers.get('ETag');

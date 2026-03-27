@@ -25,8 +25,6 @@ export function JobsSection(props) {
     }
 
     function handleEditJob(job) {
-        console.log("handleEditJob called with job:", job);
-        console.log("Job ID in handleEditJob:", job._id || job.jobId);
         setSelectedJob(job);
         setView("edit");
     }

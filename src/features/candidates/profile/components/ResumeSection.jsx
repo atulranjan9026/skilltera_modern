@@ -64,7 +64,7 @@ export const ResumeSection = ({ resume, onResumeUpdate }) => {
         setConfirmingDelete(false);
         setUploadError(null);
         try {
-            await candidateService.deleteResume();
+            await candidateService.deleteResume(resume);
             await refreshUser();
             onResumeUpdate?.();
             toast.success('Resume deleted successfully!');

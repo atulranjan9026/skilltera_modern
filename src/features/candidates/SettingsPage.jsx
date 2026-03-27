@@ -236,7 +236,7 @@ export default function SettingsPage() {
                 </p>
               </div>
               <button
-                onClick={() => window.confirm('Log out?') && console.log('logout')}
+                onClick={() => window.confirm('Log out?') && logout()}
                 className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-amber-600 hover:bg-amber-50 transition-colors border-b border-red-50"
               >
                 <div className="w-7 h-7 rounded-lg bg-amber-50 flex items-center justify-center">
@@ -245,7 +245,7 @@ export default function SettingsPage() {
                 Logout
               </button>
               <button
-                onClick={() => window.confirm('Delete account? This cannot be undone.') && console.log('delete')}
+                onClick={() => window.confirm('Delete account? This cannot be undone.') && deleteAccount()}
                 className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
               >
                 <div className="w-7 h-7 rounded-lg bg-red-50 flex items-center justify-center">

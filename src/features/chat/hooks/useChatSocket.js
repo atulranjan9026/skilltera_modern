@@ -13,7 +13,7 @@ const useChatSocket = (conversationId, onMessageReceived) => {
                      localStorage.getItem(role === 'company' ? 'companyToken' : 'candidateToken');
 
         // Temporarily disable WebSocket until backend Socket.IO is properly configured
-        console.log('WebSocket temporarily disabled - backend Socket.IO not configured');
+        // Temporarily disable WebSocket until backend Socket.IO is properly configured
         return;
 
         if (!token || !user) {
@@ -37,7 +37,7 @@ const useChatSocket = (conversationId, onMessageReceived) => {
 
         // Connection established
         socketRef.current.on('connect', () => {
-            console.log('WebSocket connected successfully');
+            // Connection established
             
             if (conversationId) {
                 socketRef.current.emit('join_conversation', {
@@ -55,7 +55,7 @@ const useChatSocket = (conversationId, onMessageReceived) => {
 
         // Handle disconnection
         socketRef.current.on('disconnect', (reason) => {
-            console.log('WebSocket disconnected:', reason);
+            // Handle disconnection
         });
 
         if (conversationId) {
@@ -73,7 +73,7 @@ const useChatSocket = (conversationId, onMessageReceived) => {
 
     const sendMessage = (messageData) => {
         // Temporarily disable sending messages via WebSocket
-        console.log('WebSocket temporarily disabled - message not sent:', messageData);
+        // Temporarily disable sending messages via WebSocket
         
         if (socketRef.current && socketRef.current.connected) {
             socketRef.current.emit('send_message', messageData);

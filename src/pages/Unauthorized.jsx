@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Home, ShieldX } from 'lucide-react';
-import Button from '@/components/ui/Button';
+import { Button } from '../../../components/ui/Button';
 
 export default function Unauthorized() {
   return (

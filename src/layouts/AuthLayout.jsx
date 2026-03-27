@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import { Briefcase, Users, TrendingUp, Shield, CheckCircle } from 'lucide-react';
-import Navbar from '@/components/common/Navbar';
+import Navbar from '../components/common/Navbar';
 
 const features = [
   {

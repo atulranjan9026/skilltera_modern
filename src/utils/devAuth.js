@@ -8,17 +8,6 @@ import { authService } from '../services/authService';
  * 1. Add VITE_JWT_TOKEN to your .env file
  * 2. Call initDevAuth() in your App.jsx or main.jsx
  */
-// export const initDevAuth = () => {
-//     const devToken = import.meta.env.VITE_JWT_TOKEN;
-
-//     if (devToken) {
-//         console.log('🔐 Initializing development authentication...');
-//         authService.setJWTToken(devToken);
-//         console.log('✅ Development token set successfully');
-//     } else {
-//         console.log('ℹ️ No development token found in environment variables');
-//     }
-// };
 
 /**
  * Check if user is authenticated (has token in localStorage)

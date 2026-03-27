@@ -36,7 +36,6 @@ export const useProfileData = () => {
 
             if (response?.success && response?.data) {
                 const profile = response.data;
-                console.log('profile loaded:', profile);
                 setEditedData({
                     name: profile.name,
                     email: profile.email,
@@ -71,7 +70,6 @@ export const useProfileData = () => {
 
     // Load profile when component mounts or route changes
     useEffect(() => {
-        console.log('Route changed to:', location.pathname);
         if (location.pathname.includes('/profile')) {
             loadProfile();
         }

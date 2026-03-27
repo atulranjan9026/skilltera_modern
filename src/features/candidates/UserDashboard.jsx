@@ -257,9 +257,6 @@ const ErrorBlock = ({ message, onRetry }) => (
 const StatusFilterChips = ({ activeFilter, onChange, counts }) => {
   const total = Object.values(counts).reduce((a, b) => a + b, 0);
   
-  // Debug log
-  // console.log('StatusFilterChips - counts:', counts, 'activeFilter:', activeFilter);
-  
   return (
     <div className="flex gap-2 flex-wrap mb-5" style={{ opacity: 0, animation: 'fadeSlideUp 0.4s ease 0ms forwards' }}>
       {['all', ...Object.keys(STATUS_CONFIG)].map((key) => {
@@ -273,7 +270,6 @@ const StatusFilterChips = ({ activeFilter, onChange, counts }) => {
           <button
             key={key}
             onClick={() => {
-              // console.log('Clicked status:', key);
               onChange(key);
             }}
             className={`

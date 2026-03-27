@@ -41,7 +41,7 @@ class WebSocketManager {
 
         // Connection opened
         this.socket.onopen = () => {
-          console.log('WebSocket connected');
+          // WebSocket connected
           this.isConnected = true;
           this.reconnectAttempts = 0;
           this.startHeartbeat();
@@ -50,7 +50,7 @@ class WebSocketManager {
 
         // Connection closed
         this.socket.onclose = (event) => {
-          console.log('WebSocket disconnected:', event);
+          // WebSocket disconnected
           this.isConnected = false;
           this.stopHeartbeat();
           this.handleReconnect(url, token);

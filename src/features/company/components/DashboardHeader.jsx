@@ -82,17 +82,15 @@ export function DashboardHeader({
                 )}
                 {/* Create Interviewer Account - Only for Hiring Managers */}
                 {["hiring_manager", "backup_hiring_manager"].includes(companyUser?.role) && (
-
                     <button
                         onClick={onCreateInterviewer}
                         className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors flex items-center gap-2"
                     >
                         <UserPlus className="w-3 h-3" />
-                        Create Interviewer 
+                        Create Interviewer
                     </button>
                 )}
                 {/* Chat option */}
-                {/* Chat */}
                 <button
                     onClick={handleChatClick}
                     title="Chat"

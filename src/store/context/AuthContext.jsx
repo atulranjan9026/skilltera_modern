@@ -12,7 +12,6 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // console.log('AuthContext mounted', user);
 
   // Check if user is logged in on mount
   useEffect(() => {
@@ -25,16 +24,12 @@ export const AuthProvider = ({ children }) => {
           try {
             // Restore user from localStorage
             const parsedUser = JSON.parse(storedUser);
-            // console.log('Restoring user from storage:', parsedUser);
             setUser(parsedUser);
 
             // Verify token and get fresh user data
-            // console.log('Fetching fresh user data...');
             const response = await authService.getCurrentUser();
-            // console.log('Fresh user response:', response);
 
             if (response.data) {
-              // console.log('Updating user with fresh data:', response.data);
               setUser(response.data);
               localStorage.setItem('user', JSON.stringify(response.data));
             }
@@ -46,7 +41,6 @@ export const AuthProvider = ({ children }) => {
             setUser(null);
           }
         } else {
-          console.log('No stored session found');
         }
       } catch (err) {
         console.error('Auth check failed:', err);
@@ -62,34 +56,6 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  // const login = async (email, password) => {
-  //   setIsLoading(true);
-  //   setError(null);
-  //   try {
-  //     const response = await authService.login(email, password);
-
-  //     // Backend returns: { success, data: { candidate, accessToken }, message }
-  //     if (response.data) {
-  //       const { candidate, accessToken } = response.data;
-
-  //       // Store token (authService.login already stores it in localStorage)
-  //       // Store user data in state
-  //       setUser(candidate);
-
-  //       // Also store user in localStorage for persistence
-  //       localStorage.setItem('user', JSON.stringify(candidate));
-  //     }
-
-  //     return response;
-  //   } catch (err) {
-  //     const errorMessage = err.response?.data?.message || err.message || 'Login failed';
-  //     setError(errorMessage);
-  //     throw err;
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
   const loginWithGoogle = async (credential) => {
     setIsLoading(true);
     setError(null);
@@ -98,7 +64,6 @@ export const AuthProvider = ({ children }) => {
 
       if (response.data) {
         const { candidate } = response.data;
-        console.log('Google login response:', response.data);
         setUser(candidate);
         localStorage.setItem('user', JSON.stringify(candidate));
       }
@@ -135,7 +100,6 @@ export const AuthProvider = ({ children }) => {
       // Always clear ALL auth data and state
       clearAuthData(); // Use enhanced clear function
       setUser(null);
-      console.log('🔒 User logged out, all auth data cleared');
     }
   };
 

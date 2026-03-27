@@ -605,11 +605,11 @@ export const useServiceWorker = () => {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js')
         .then((registration) => {
-          console.log('SW registered: ', registration);
+          // SW registered
           setIsRegistered(true);
         })
         .catch((error) => {
-          console.log('SW registration failed: ', error);
+          // SW registration failed
         });
     }
   }, []);

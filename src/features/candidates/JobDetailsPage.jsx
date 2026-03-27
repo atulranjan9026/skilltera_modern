@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { useAuthContext } from '../../store/context/AuthContext';
 import { candidateService } from '../../services/candidateService';
-import Button from '@/components/ui/Button';
+import Button from '../../components/ui/Button';
 
 export default function JobDetailsPage() {
   const { jobId } = useParams();

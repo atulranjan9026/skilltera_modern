@@ -19,31 +19,65 @@ export const profileService = {
     },
 
     /**
-     * Upload profile avatar
+     * Upload profile avatar via backend session upload
      */
     uploadAvatar: async (file) => {
-        const formData = new FormData();
-        formData.append('avatar', file);
-        clearCache('GET:/api/candidate'); // Legacy cache key just in case
-        clearCache('GET:/candidates/profile');
-        return post('/candidates/profile/avatar', formData);
+        try {
+            const formData = new FormData();
+            formData.append('avatar', file);
+
+            // Using plural as main endpoint (now correctly joined in api.js)
+            const response = await post('/candidates/profile/avatar', formData);
+            
+            return {
+                success: true,
+                data: response.data,
+                message: 'Avatar uploaded successfully',
+            };
+        } catch (error) {
+            console.error('Avatar upload error:', error.response?.data || error.message);
+            throw error;
+        }
     },
 
     /**
-     * Upload resume
+     * Upload resume via backend (handles S3/Cloudinary internally)
      */
     uploadResume: async (file) => {
-        const formData = new FormData();
-        formData.append('resume', file);
-        clearCache('GET:/candidates/profile');
-        return post('/candidates/profile/resume', formData);
+        try {
+            const formData = new FormData();
+            formData.append('resume', file);
+
+            // Using plural as main endpoint (now correctly joined in api.js)
+            const response = await post('/candidates/profile/resume', formData);
+            
+            return {
+                success: true,
+                data: response.data,
+                message: 'Resume uploaded successfully',
+            };
+        } catch (error) {
+            console.error('Resume upload error:', error.response?.data || error.message);
+            throw error;
+        }
     },
 
     /**
-     * Delete resume
+     * Delete resume via backend
      */
-    deleteResume: async () => {
-        clearCache('GET:/candidates/profile');
-        return del('/candidates/profile/resume');
-    }
+    deleteResume: async (currentResume) => {
+        try {
+            // Use DELETE endpoint as defined in backend routes
+            clearCache('GET:/candidates/profile');
+            const response = await del('/candidates/profile/resume');
+            
+            return {
+                success: true,
+                message: 'Resume deleted successfully',
+            };
+        } catch (error) {
+            console.error('Resume deletion error:', error.response?.data || error.message);
+            throw error;
+        }
+    },
 };
