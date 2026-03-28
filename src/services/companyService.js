@@ -240,4 +240,10 @@ export const companyService = {
   getFeedbackForApplication: async (applicationId) => {
     return get(`/company/interviewer/feedback/${applicationId}`, false);
   },
+
+  // ─── Test Results ───────────────────────────────────────────────────────
+
+  getCandidateTestResults: async (companyId, candidateId) => {
+    return get(`/company/${companyId}/test-results/${candidateId}`, false, 60_000);
+  },
 };

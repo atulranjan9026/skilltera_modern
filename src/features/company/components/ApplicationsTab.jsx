@@ -7,7 +7,7 @@ import { Avatar } from "../ui/Avatar";
 import { PaginationBar } from "../ui/PaginationBar";
 import { STATUS_CFG } from "../constants";
 import { fmtDate } from "../helpers";
-import { CandidateDetailsView } from "./CandidateDetailsView";
+import CandidateDetailsView from "./CandidateDetailsView";
 
 const STATUS_FILTERS = ["all", "applied", "shortlisted", "interviewed", "selected", "rejected"];
 
@@ -19,6 +19,7 @@ export function ApplicationsTab({
     onRetry, handleAppsPage, handleStatusChange,
 }) {
     const [selectedCandidate, setSelectedCandidate] = useState(null);
+    const [showFilters, setShowFilters] = useState(false);
     const [advancedFilters, setAdvancedFilters] = useState({
         status: [],
         jobType: [],
@@ -120,6 +121,7 @@ export function ApplicationsTab({
             appliedDateRange: null,
             sortBy: "recent",
         });
+        setShowFilters(false);
     };
 
     // Check if any filters are active
@@ -170,8 +172,8 @@ export function ApplicationsTab({
 
             {appsError && <ErrorBanner message={appsError} onRetry={onRetry} />}
 
-            {/* Filters Section */}
-            <div className="flex flex-wrap items-center gap-3">
+            {/* Status Filters Section */}
+            <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex gap-1.5 flex-wrap">
                     {STATUS_FILTERS.map((s) => {
                         const count = s === "all" ? totalApps : applications.filter((a) => a.status === s).length;
@@ -194,7 +196,124 @@ export function ApplicationsTab({
                         className="bg-white border border-slate-200 rounded-xl pl-8 pr-4 py-2 text-xs text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 w-64"
                     />
                 </div>
+                {/* Filter Button */}
+                <button
+                    onClick={() => setShowFilters(!showFilters)}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all whitespace-nowrap ${showFilters || hasActiveFilters
+                        ? "bg-indigo-600 text-white border-indigo-600"
+                        : "bg-white text-slate-600 border-slate-200 hover:border-indigo-300"
+                        }`}
+                >
+                    <span>⚙️</span>
+                    Filter
+                    {hasActiveFilters && (
+                        <span className="ml-1 inline-flex items-center justify-center w-4 h-4 text-[10px] bg-white text-indigo-600 rounded-full font-bold">
+                            ✓
+                        </span>
+                    )}
+                </button>
+
             </div>
+
+            {/* Advanced Filters Panel */}
+            {showFilters && (
+                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 space-y-4">
+
+
+                    {/* Grid of Filters */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {/* Position Filter */}
+                        <div>
+                            <label className="block text-xs font-semibold text-slate-600 mb-2">
+                                Position
+                            </label>
+                            <select
+                                value={advancedFilters.jobType.length > 0 ? advancedFilters.jobType[0] : ""}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    setAdvancedFilters(prev => ({
+                                        ...prev,
+                                        jobType: val ? [val] : []
+                                    }));
+                                }}
+                                className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-600 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-300 focus:bg-white"
+                            >
+                                <option value="">All Types</option>
+                                {uniqueJobTypes.map(jt => (
+                                    <option key={jt} value={jt}>{jt}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* Sort By */}
+                        <div>
+                            <label className="block text-xs font-semibold text-slate-600 mb-2">
+                                Sort by
+                            </label>
+                            <select
+                                value={advancedFilters.sortBy}
+                                onChange={(e) => setAdvancedFilters(prev => ({ ...prev, sortBy: e.target.value }))}
+                                className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-600 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-300 focus:bg-white"
+                            >
+                                <option value="recent">Recent First</option>
+                                <option value="oldest">Oldest First</option>
+                                <option value="name-asc">Name (A to Z)</option>
+                                <option value="name-desc">Name (Z to A)</option>
+                            </select>
+                        </div>
+
+                        {/* Start Date */}
+                        <div>
+                            <label className="block text-xs font-semibold text-slate-600 mb-2">
+                                From Date
+                            </label>
+                            <input
+                                type="date"
+                                value={advancedFilters.appliedDateRange?.start?.toISOString().split("T")[0] || ""}
+                                onChange={(e) => {
+                                    const end = advancedFilters.appliedDateRange?.end;
+                                    const start = e.target.value ? new Date(e.target.value) : null;
+                                    setAdvancedFilters(prev => ({
+                                        ...prev,
+                                        appliedDateRange: (start || end) ? { start, end } : null
+                                    }));
+                                }}
+                                className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-600 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-300 focus:bg-white"
+                            />
+                        </div>
+
+                        {/* End Date */}
+                        <div>
+                            <label className="block text-xs font-semibold text-slate-600 mb-2">
+                                To Date
+                            </label>
+                            <input
+                                type="date"
+                                value={advancedFilters.appliedDateRange?.end?.toISOString().split("T")[0] || ""}
+                                onChange={(e) => {
+                                    const start = advancedFilters.appliedDateRange?.start;
+                                    const end = e.target.value ? new Date(e.target.value) : null;
+                                    setAdvancedFilters(prev => ({
+                                        ...prev,
+                                        appliedDateRange: (start || end) ? { start, end } : null
+                                    }));
+                                }}
+                                className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-600 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-300 focus:bg-white"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Close Button */}
+                    <div className="flex justify-end pt-2">
+                        <button
+                            onClick={() => setShowFilters(false)}
+                            className="text-xs font-semibold text-slate-600 hover:text-slate-800 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors"
+                        >
+                            Done
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Applications Table */}
             {appsLoading ? (
@@ -211,109 +330,22 @@ export function ApplicationsTab({
                                 <tr className="bg-slate-50 border-b border-slate-100 align-top">
                                     {/* Candidate */}
                                     <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500">
-                                        <div className="flex flex-col gap-1.5 min-w-[120px]">
-                                            <span>Candidate</span>
-                                            <select
-                                                value={advancedFilters.sortBy.startsWith("name") ? advancedFilters.sortBy : ""}
-                                                onChange={(e) => {
-                                                    const val = e.target.value;
-                                                    if (val) setAdvancedFilters(prev => ({ ...prev, sortBy: val }));
-                                                }}
-                                                className="text-[10px] bg-white border border-slate-200 rounded px-1.5 py-1 text-slate-600 outline-none focus:border-indigo-400 font-normal w-full"
-                                            >
-                                                <option value="" disabled>Sort by name</option>
-                                                <option value="name-asc">A to Z</option>
-                                                <option value="name-desc">Z to A</option>
-                                            </select>
-                                        </div>
+                                        <span>Candidate</span>
                                     </th>
 
                                     {/* Position */}
                                     <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500">
-                                        <div className="flex flex-col gap-1.5 min-w-[120px]">
-                                            <span>Position</span>
-                                            <select
-                                                value={advancedFilters.jobType.length > 0 ? advancedFilters.jobType[0] : ""}
-                                                onChange={(e) => {
-                                                    const val = e.target.value;
-                                                    setAdvancedFilters(prev => ({
-                                                        ...prev,
-                                                        jobType: val ? [val] : []
-                                                    }));
-                                                }}
-                                                className="text-[10px] bg-white border border-slate-200 rounded px-1.5 py-1 text-slate-600 outline-none focus:border-indigo-400 font-normal w-full"
-                                            >
-                                                <option value="">All Types</option>
-                                                {uniqueJobTypes.map(jt => (
-                                                    <option key={jt} value={jt}>{jt}</option>
-                                                ))}
-                                            </select>
-                                        </div>
+                                        <span>Position</span>
                                     </th>
 
                                     {/* Applied On */}
                                     <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500">
-                                        <div className="flex flex-col gap-1.5">
-                                            <div className="flex items-center justify-between">
-                                                <span>Applied On</span>
-                                                <select
-                                                    value={["recent", "oldest"].includes(advancedFilters.sortBy) ? advancedFilters.sortBy : "recent"}
-                                                    onChange={(e) => setAdvancedFilters(prev => ({ ...prev, sortBy: e.target.value }))}
-                                                    className="text-[9px] bg-white border border-slate-200 rounded px-1 py-0.5 text-slate-600 outline-none focus:border-indigo-400 font-normal"
-                                                >
-                                                    <option value="recent">Recent First</option>
-                                                    <option value="oldest">Oldest First</option>
-                                                </select>
-                                            </div>
-                                            <div className="flex items-center gap-1">
-                                                <input
-                                                    type="date"
-                                                    value={advancedFilters.appliedDateRange?.start?.toISOString().split("T")[0] || ""}
-                                                    onChange={(e) => {
-                                                        const end = advancedFilters.appliedDateRange?.end;
-                                                        const start = e.target.value ? new Date(e.target.value) : null;
-                                                        setAdvancedFilters(prev => ({
-                                                            ...prev,
-                                                            appliedDateRange: (start || end) ? { start, end } : null
-                                                        }));
-                                                    }}
-                                                    className="text-[9px] px-1 py-1 rounded border border-slate-200 focus:outline-none focus:border-indigo-400 font-normal w-[90px]"
-                                                />
-                                                <span className="text-[9px] text-slate-400">to</span>
-                                                <input
-                                                    type="date"
-                                                    value={advancedFilters.appliedDateRange?.end?.toISOString().split("T")[0] || ""}
-                                                    onChange={(e) => {
-                                                        const start = advancedFilters.appliedDateRange?.start;
-                                                        const end = e.target.value ? new Date(e.target.value) : null;
-                                                        setAdvancedFilters(prev => ({
-                                                            ...prev,
-                                                            appliedDateRange: (start || end) ? { start, end } : null
-                                                        }));
-                                                    }}
-                                                    className="text-[9px] px-1 py-1 rounded border border-slate-200 focus:outline-none focus:border-indigo-400 font-normal w-[90px]"
-                                                />
-                                            </div>
-                                        </div>
+                                        <span>Applied On</span>
                                     </th>
 
                                     {/* Status */}
                                     <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500">
-                                        <div className="flex flex-col gap-1.5 min-w-[120px]">
-                                            <span>Status</span>
-                                            <select
-                                                value={statusFilter}
-                                                onChange={(e) => {
-                                                    setStatusFilter(e.target.value);
-                                                    handleAppsPage(1);
-                                                }}
-                                                className="text-[10px] bg-white border border-slate-200 rounded px-1.5 py-1 text-slate-600 outline-none focus:border-indigo-400 font-normal w-full capitalize"
-                                            >
-                                                {STATUS_FILTERS.map(s => (
-                                                    <option key={s} value={s}>{s === "all" ? "All Statuses" : STATUS_CFG[s]?.label}</option>
-                                                ))}
-                                            </select>
-                                        </div>
+                                        <span>Status</span>
                                     </th>
 
                                     {/* Resume */}
@@ -329,8 +361,8 @@ export function ApplicationsTab({
                             </thead>
                             <tbody className="divide-y divide-slate-50">
                                 {filteredApplications.map((app) => (
-                                    <tr 
-                                        key={app._id} 
+                                    <tr
+                                        key={app._id}
                                         className="hover:bg-indigo-50/50 transition-colors cursor-pointer group"
                                         onClick={() => handleOpenDetails(app)}
                                     >
@@ -377,7 +409,7 @@ export function ApplicationsTab({
                                         </td>
 
                                         <td className="px-5 py-3.5" onClick={(e) => e.stopPropagation()}>
-                                            <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div className="flex items-center justify-center gap-1 transition-opacity">
                                                 <button
                                                     onClick={() => handleStatusChange(app._id, "shortlisted")}
                                                     disabled={app.status === "shortlisted"}
