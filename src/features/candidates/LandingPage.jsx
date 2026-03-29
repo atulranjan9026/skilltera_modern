@@ -21,22 +21,22 @@ export default function LandingPage() {
     {
       icon: '🎯',
       title: 'Smart Job Matching',
-      description: 'Find jobs that match your skills and preferences',
+      jobDescription: 'Find jobs that match your skills and preferences',
     },
     {
       icon: '⚡',
       title: 'Quick Application',
-      description: 'Apply to jobs in seconds with your saved profile',
+      jobDescription: 'Apply to jobs in seconds with your saved profile',
     },
     {
       icon: '📊',
       title: 'Track Your Progress',
-      description: 'Keep track of all your applications and saved jobs',
+      jobDescription: 'Keep track of all your applications and saved jobs',
     },
     {
       icon: '🔔',
       title: 'Job Alerts',
-      description: 'Get notified when jobs matching your preferences are posted',
+      jobDescription: 'Get notified when jobs matching your preferences are posted',
     },
   ];
 
@@ -104,7 +104,7 @@ export default function LandingPage() {
                 <h3 className="text-xl font-semibold text-slate-900 mb-2">
                   {feature.title}
                 </h3>
-                <p className="text-slate-600">{feature.description}</p>
+                <p className="text-slate-600">{feature.jobDescription}</p>
               </div>
             ))}
           </div>

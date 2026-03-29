@@ -51,22 +51,23 @@ export default function JobSearchPage() {
     }
   };
 
- 
+
   /**
    * Transform backend job data to frontend format
    */
   const transformJobData = (backendJobs) => {
+    console.log(backendJobs);
     return backendJobs.map(job => ({
       id: job._id || job.jobId,
       title: job.jobTitle,
       company: job.companyName || 'Unknown Company',
       logo: '🏢',
       location: [job.city, job.state, job.country].filter(Boolean).join(', ') || 'Location not specified',
-      salary: 'Competitive',
+      salary: job.salary ? `${job.salary.currency} ${job.salary.min?.toLocaleString() || 'N/A'} - ${job.salary.max?.toLocaleString() || 'N/A'} ${job.salary.period || ''}`.trim() : 'Competitive',
       jobType: job.jobType === 'Fulltime' ? 'Full-time' : job.jobType || 'Full-time',
       experience: job.workExperience !== undefined ? `${job.workExperience} years` : 'Not specified',
       postedTime: job.postedOn ? new Date(job.postedOn).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently',
-      description: job.jobDescription || '',
+      jobDescription: job.jobDescription || '',
       skills: job.skillDetails?.map(s => ({
         name: s.skill || 'Unknown Skill',
         rating: s.rating || 0,
@@ -237,7 +238,7 @@ export default function JobSearchPage() {
       const applicationData = {}; // Backend uses jobId from URL params
 
       const response = await candidateService.applyForJob(user._id, jobId, applicationData);
-      
+
       if (response?.success) {
         toast.success('Job application submitted successfully!');
       } else {
@@ -378,7 +379,7 @@ export default function JobSearchPage() {
         ) : (
           <EmptyState
             title="No jobs found"
-            description="Try adjusting your search or filters to find more jobs"
+            jobDescription="Try adjusting your search or filters to find more jobs"
           />
         )}
       </div>

@@ -393,11 +393,11 @@ export default function InterviewerDashboard() {
                              </div>
                           </div>
                           
-                          {app.job?.description && (
+                          {app.job?.jobDescription && (
                             <div className="pt-2 px-2">
                               <span className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Key Requirements</span>
                               <p className="text-[11px] font-medium text-slate-500 leading-relaxed line-clamp-2 italic">
-                                "{app.job.description}"
+                                "{app.job.jobDescription}"
                               </p>
                             </div>
                           )}

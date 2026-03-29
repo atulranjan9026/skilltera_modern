@@ -119,7 +119,7 @@ export default function CodeEditor({ state }) {
         {problem.estimatedSolveTime ? ` • ~${problem.estimatedSolveTime} min` : ''}
       </div>
       <div className="mb-4 p-4 bg-slate-50 rounded-lg text-sm text-slate-700 whitespace-pre-wrap">
-        {problem.description}
+        {problem.jobDescription}
       </div>
       <div className="mb-4">
         <label className="block text-sm font-medium text-slate-700 mb-2">Your solution</label>

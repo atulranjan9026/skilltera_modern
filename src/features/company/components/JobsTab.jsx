@@ -69,6 +69,8 @@ function countActive(f) {
 }
 
 function applyFilters(jobs, search, filters) {
+    console.log("jobs", jobs);
+    // console.log("filters", filters);
     return jobs.map(normalizeJob).filter((job) => {
         if (search) {
             const q = search.toLowerCase();
@@ -343,7 +345,8 @@ export function JobsTab({
                                                 {dl !== null && dl <= 0 && <span className="text-[10px] ml-1 text-rose-400">(expired)</span>}
                                             </span>
                                         </td>
-                                        <td className="px-5 py-3.5"><JobStatusBadge status={job.status} active={job.active} /></td>
+                                        <td className="px-5 py-3.5"><JobStatusBadge status={job.status} /></td>
+                                        {/* <td className="px-5 py-3.5">{job.status }</td> */}
                                         <td className="px-5 py-3.5">
                                             <div className="flex items-center gap-2">
                                                 <button onClick={() => onViewJob?.(job)} className="text-indigo-600 hover:text-indigo-800 text-xs font-semibold whitespace-nowrap">

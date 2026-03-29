@@ -360,7 +360,7 @@ export const AccessibleModal = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
-        aria-describedby="modal-description"
+        aria-describedby="modal-jobDescription"
         className={`accessible-modal ${className}`}
         style={{
           backgroundColor: 'white',
@@ -405,7 +405,7 @@ export const AccessibleModal = ({
         </div>
 
         {/* Content */}
-        <div id="modal-description" style={{ marginBottom: tokens.spacing[4] }}>
+        <div id="modal-jobDescription" style={{ marginBottom: tokens.spacing[4] }}>
           {children}
         </div>
 

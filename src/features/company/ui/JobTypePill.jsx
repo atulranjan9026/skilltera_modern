@@ -1,9 +1,7 @@
 export function JobTypePill({ type }) {
     const map = {
         "Full Time": "bg-sky-50 text-sky-700",
-        "full-time": "bg-sky-50 text-sky-700",
         "Part Time": "bg-purple-50 text-purple-700",
-        "part-time": "bg-purple-50 text-purple-700",
         Contract: "bg-orange-50 text-orange-700",
         Internship: "bg-teal-50 text-teal-700",
     };

@@ -51,7 +51,7 @@ export default function CandidateSignup() {
 
   const showPasswordHint = () => {
     toast.info('Password Requirements', {
-      description: PASSWORD_REQUIREMENTS.join(' • '),
+      jobDescription: PASSWORD_REQUIREMENTS.join(' • '),
       duration: 6000,
     });
   };
@@ -66,7 +66,7 @@ export default function CandidateSignup() {
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
       toast.success('Registration Successful!', {
-        description: 'Please check your inbox and verify your email.',
+        jobDescription: 'Please check your inbox and verify your email.',
       });
 
       reset();

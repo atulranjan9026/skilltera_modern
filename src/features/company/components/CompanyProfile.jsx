@@ -50,7 +50,7 @@ export function CompanyProfile({ companyUser: propCompanyUser, companyId: propCo
           website: profile.website || "",
           location: profile.location || "",
           industry: profile.industry || "",
-          description: profile.description || "",
+          jobDescription: profile.jobDescription || "",
           imageLink: profile.imageLink || "",
         });
         if (profile.imageLink) setLogoPreview(profile.imageLink);
@@ -63,7 +63,7 @@ export function CompanyProfile({ companyUser: propCompanyUser, companyId: propCo
           website: companyUser?.website || "",
           location: companyUser?.location || "",
           industry: companyUser?.industry || "",
-          description: companyUser?.description || "",
+          jobDescription: companyUser?.jobDescription || "",
           imageLink: companyUser?.imageLink || "",
         });
       } finally {
@@ -242,7 +242,7 @@ export function CompanyProfile({ companyUser: propCompanyUser, companyId: propCo
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Company Description</label>
             <textarea
-              {...register("description")}
+              {...register("jobDescription")}
               rows={4}
               placeholder="Tell candidates about your company, culture, and mission…"
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"

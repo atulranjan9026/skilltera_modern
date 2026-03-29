@@ -14,7 +14,7 @@ const lbl =
     "block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide";
 
 const INITIAL_FORM = {
-    title: "", description: "", jobType: "Full-time", experienceLevel: "Mid-level",
+    title: "", jobDescription: "", jobType: "Full-time", experienceLevel: "Mid-level",
     minExperience: "", maxExperience: "", category: "", openings: 1, deadline: "",
     benefits: "", responsibilities: "", qualifications: "", tags: "",
     country: "", state: "", city: "", isRemote: false, remoteType: "On-site",
@@ -111,7 +111,7 @@ export function CreateJobForm({ companyId, onSuccess, onCancel }) {
     const validate = () => {
         const e = {};
         if (!form.title.trim()) e.title = "Job title is required";
-        if (!form.description.trim()) e.description = "Description is required";
+        if (!form.jobDescription.trim()) e.jobDescription = "Description is required";
         if (skills.length === 0) e.skills = "Add at least one required skill";
         setErrors(e);
         return Object.keys(e).length === 0;
@@ -124,14 +124,14 @@ export function CreateJobForm({ companyId, onSuccess, onCancel }) {
         setApiError(null);
         try {
             const csv = (str) => (str || "").split(",").map((s) => s.trim()).filter(Boolean);
-            const mapType = { "Full-time": "full-time", "Part-time": "part-time", Contract: "contract", Internship: "internship" };
+            const mapType = { "Full Time": "Full Time", "Part Time": "Part Time", Contract: "contract", Internship: "internship" };
             const mapLevel = { "Entry-level": "entry", "Mid-level": "mid", Senior: "senior", Lead: "lead", Executive: "executive" };
             const mapRemote = { "On-site": "on-site", Hybrid: "hybrid", "Fully-remote": "fully-remote" };
 
             await companyService.postJob(companyId, {
                 title: form.title.trim(),
-                description: form.description.trim(),
-                jobType: mapType[form.jobType] || "full-time",
+                jobDescription: form.jobDescription.trim(),
+                jobType: mapType[form.jobType] || "Full Time",
                 experienceLevel: mapLevel[form.experienceLevel] || "mid",
                 minExperience: parseInt(form.minExperience) || 0,
                 maxExperience: parseInt(form.maxExperience) || parseInt(form.minExperience) + 5 || 5,
@@ -243,14 +243,29 @@ export function CreateJobForm({ companyId, onSuccess, onCancel }) {
                     </div>
                     <div>
                         <label className={lbl}>Job Description <span className="text-rose-500">*</span></label>
-                        <textarea value={form.description} onChange={(e) => setField("description", e.target.value)}
+                        <textarea value={form.jobDescription} onChange={(e) => setField("jobDescription", e.target.value)}
                             rows={5} placeholder="Describe the role, responsibilities…" className={`${inp} resize-none`} />
-                        {errors.description && <p className="text-rose-500 text-xs mt-1">{errors.description}</p>}
+                        {errors.jobDescription && <p className="text-rose-500 text-xs mt-1">{errors.jobDescription}</p>}
                     </div>
                 </FormSection>
 
                 {/* ── Enterprise Assignment ────────────────────────────────────────── */}
                 <FormSection title="Enterprise Assignment" subtitle="Assign this job to a specific business unit or manager">
+                    <div className="mb-4 flex justify-end">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setField("lobId", "");
+                                setField("hiringManagerId", "");
+                                setField("backupHiringManagerId", "");
+                                setField("recruiterIds", []);
+                                setRecruiterInput("");
+                            }}
+                            className="text-xs text-slate-500 hover:text-slate-700 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors"
+                        >
+                            Clear Assignment
+                        </button>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div>
                             <label className={lbl}>Line of Business</label>

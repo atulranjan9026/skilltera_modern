@@ -7,7 +7,7 @@ import { Search } from 'lucide-react';
 export default function EmptyState({
   icon: Icon = Search,
   title = 'No results found',
-  description = 'Try adjusting your filters or search terms',
+  jobDescription = 'Try adjusting your filters or search terms',
   action,
 }) {
   return (
@@ -16,7 +16,7 @@ export default function EmptyState({
         <Icon size={26} className="text-slate-300" />
       </div>
       <h3 className="text-base font-semibold text-slate-700 mb-1">{title}</h3>
-      <p className="text-slate-400 text-sm max-w-xs leading-relaxed">{description}</p>
+      <p className="text-slate-400 text-sm max-w-xs leading-relaxed">{jobDescription}</p>
       {action && <div className="mt-4">{action}</div>}
     </div>
   );

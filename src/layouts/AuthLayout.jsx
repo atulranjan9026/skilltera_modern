@@ -7,22 +7,22 @@ const features = [
   {
     icon: <Briefcase className="w-6 h-6" />,
     title: 'Find Your Dream Job',
-    description: 'Access thousands of job opportunities from top companies',
+    jobDescription: 'Access thousands of job opportunities from top companies',
   },
   {
     icon: <Users className="w-6 h-6" />,
     title: 'Connect with Talents',
-    description: 'Build your team with the best professionals in your industry',
+    jobDescription: 'Build your team with the best professionals in your industry',
   },
   {
     icon: <TrendingUp className="w-6 h-6" />,
     title: 'Grow Your Career',
-    description: 'Develop skills and advance your professional journey',
+    jobDescription: 'Develop skills and advance your professional journey',
   },
   {
     icon: <Shield className="w-6 h-6" />,
     title: 'Secure & Trusted',
-    description: 'Safe platform with verified employers and candidates',
+    jobDescription: 'Safe platform with verified employers and candidates',
   },
 ];
 
@@ -63,7 +63,7 @@ export default function AuthLayout() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-slate-900 mb-1">{feature.title}</h3>
-                    <p className="text-slate-600 text-sm">{feature.description}</p>
+                    <p className="text-slate-600 text-sm">{feature.jobDescription}</p>
                   </div>
                 </div>
               ))}

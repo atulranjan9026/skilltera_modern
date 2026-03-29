@@ -43,7 +43,7 @@ const searchService = {
             type: SEARCH_TYPES.JOB,
             title: 'Senior Frontend Developer',
             subtitle: 'Engineering Department',
-            description: 'Looking for an experienced frontend developer with React expertise',
+            jobDescription: 'Looking for an experienced frontend developer with React expertise',
             relevance: 95,
             metadata: {
               status: 'active',
@@ -56,7 +56,7 @@ const searchService = {
             type: SEARCH_TYPES.JOB,
             title: 'Product Manager',
             subtitle: 'Product Team',
-            description: 'Strategic product manager for our core platform',
+            jobDescription: 'Strategic product manager for our core platform',
             relevance: 85,
             metadata: {
               status: 'active',
@@ -75,7 +75,7 @@ const searchService = {
             type: SEARCH_TYPES.APPLICATION,
             title: 'John Doe',
             subtitle: 'Senior Frontend Developer',
-            description: '5+ years of React experience, previously at Google',
+            jobDescription: '5+ years of React experience, previously at Google',
             relevance: 90,
             metadata: {
               status: 'shortlisted',
@@ -88,7 +88,7 @@ const searchService = {
             type: SEARCH_TYPES.APPLICATION,
             title: 'Jane Smith',
             subtitle: 'Product Manager',
-            description: '8 years of product management experience',
+            jobDescription: '8 years of product management experience',
             relevance: 88,
             metadata: {
               status: 'interview',
@@ -107,7 +107,7 @@ const searchService = {
             type: SEARCH_TYPES.TEAM_MEMBER,
             title: 'Sarah Johnson',
             subtitle: 'Senior HR Manager',
-            description: 'Leading the recruitment team',
+            jobDescription: 'Leading the recruitment team',
             relevance: 80,
             metadata: {
               role: 'hiring_manager',
@@ -245,7 +245,7 @@ const SearchResult = ({ result, onSelect, isSelected }) => {
           </p>
           
           <p
-            className="description"
+            className="jobDescription"
             style={{
               fontSize: tokens.typography.fontSize.xs[0],
               color: tokens.colors.secondary[500],
@@ -253,7 +253,7 @@ const SearchResult = ({ result, onSelect, isSelected }) => {
               lineHeight: tokens.typography.fontSize.sm[1],
             }}
           >
-            {result.description}
+            {result.jobDescription}
           </p>
           
           {result.metadata && (

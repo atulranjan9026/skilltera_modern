@@ -138,7 +138,7 @@ export default function CandidateDetailsView({ application, onBack, onStatusChan
         @keyframes fadein { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
       `}</style>
 
-            <div style={{ maxWidth: 980, margin: "0 auto" }}>
+            <div style={{  margin: "0 auto" }}>
 
                 {/* ── TOP HEADER ── */}
                 <div style={{ background: "#fff", borderRadius: 20, border: "1.5px solid #f1f5f9", padding: "24px 28px", marginBottom: 20, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
@@ -338,7 +338,7 @@ export default function CandidateDetailsView({ application, onBack, onStatusChan
                                                         {q.skill && <span style={{ fontSize: 10, background: "#f0f4ff", color: "#6366f1", borderRadius: 6, padding: "2px 8px", fontWeight: 700 }}>{q.skill}</span>}
                                                         {q.questionType && <span style={{ fontSize: 10, background: "#f8fafc", color: "#64748b", borderRadius: 6, padding: "2px 8px", fontWeight: 700 }}>{q.questionType}</span>}
                                                     </div>
-                                                    <p style={{ fontSize: 12, color: "#475569", lineHeight: 1.6 }}>{q.description}</p>
+                                                    <p style={{ fontSize: 12, color: "#475569", lineHeight: 1.6 }}>{q.jobDescription}</p>
                                                     {q.timeSpent != null && <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 6 }}>⏱ {q.timeSpent}s spent</div>}
                                                 </div>
                                             ))}

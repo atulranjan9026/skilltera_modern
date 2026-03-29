@@ -11,7 +11,7 @@ import { companyService } from "../../../../services/companyService";
  */
 export function JobEditPage({ job, onBack, onSave }) {
     const location = job?.location ?? {};
-    const initialJobType = job?.jobType ?? "full-time";
+    const initialJobType = job?.jobType ?? "Full Time";
     const initialSalaryEnabled = Boolean(job?.salary?.min ?? job?.salaryMin);
     const initialRequiredSkills = Array.isArray(job?.requiredSkills)
         ? job.requiredSkills
@@ -36,7 +36,7 @@ export function JobEditPage({ job, onBack, onSave }) {
         maxExperience: typeof job?.maxExperience === "number" ? job.maxExperience : (typeof job?.minExperience === "number" ? job.minExperience + 2 : (job?.workExperience ?? 0) + 2),
         openings: typeof job?.openings === "number" ? job.openings : 1,
         applicationDeadline: (job?.applicationDeadline ?? job?.lastDate) ? (job?.applicationDeadline ?? job?.lastDate).slice(0, 10) : "",  // yyyy-mm-dd
-        description: job?.description ?? job?.jobDescription ?? "",
+        jobDescription: job?.jobDescription,
 
         category: job?.category ?? "",
         tags: csvFromArr(job?.tags),
@@ -139,8 +139,8 @@ export function JobEditPage({ job, onBack, onSave }) {
     }
 
     const jobTypeOptions = useMemo(() => ([
-        { label: "Full-time", value: "full-time" },
-        { label: "Part-time", value: "part-time" },
+        { label: "Full Time", value: "Full Time" },
+        { label: "Part Time", value: "Part Time" },
         { label: "Contract", value: "contract" },
         { label: "Internship", value: "internship" },
         { label: "Freelance", value: "freelance" },
@@ -183,7 +183,7 @@ export function JobEditPage({ job, onBack, onSave }) {
             await onSave({
                 ...job,
                 title: form.title,
-                description: form.description,
+                jobDescription: form.jobDescription,
                 jobType: form.jobType,
                 experienceLevel: form.experienceLevel,
                 minExperience,
@@ -215,23 +215,6 @@ export function JobEditPage({ job, onBack, onSave }) {
                     isRemote: Boolean(form.isRemote),
                     remoteType: Boolean(form.isRemote) ? form.remoteType : "on-site",
                 },
-
-                // Keep legacy fields for any older UI pieces that still read them
-                jobTitle: form.title,
-                jobDescription: form.description,
-                lastDate: form.applicationDeadline ? new Date(form.applicationDeadline).toISOString() : null,
-                city: form.city,
-                state: form.state,
-                country: form.country,
-                workExperience: minExperience,
-                active: Boolean(form.isActive),
-                skillRequired: requiredSkills
-                    .filter((s) => String(s.skillId || "").trim() !== "")
-                    .map((s) => ({
-                        skillId: s.skillId,
-                        requiredExperience: Number(s.experience) || 0,
-                        rating: Number(s.rating) || 3,
-                    })),
             });
             onBack(); // return to list / detail after save
         } catch (err) {
@@ -285,8 +268,8 @@ export function JobEditPage({ job, onBack, onSave }) {
                             </Field>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <Field label="Category">
-                                    <input value={form.category} onChange={set("category")} className={inputCls} placeholder="e.g. Engineering" />
+                                <Field label="Category" required>
+                                    <input value={form.category} onChange={set("category")} required className={inputCls} placeholder="e.g. Engineering" />
                                 </Field>
                                 <Field label="Experience Level">
                                     <select value={form.experienceLevel} onChange={set("experienceLevel")} className={inputCls}>
@@ -334,8 +317,8 @@ export function JobEditPage({ job, onBack, onSave }) {
 
                             <Field label="Job Description">
                                 <textarea
-                                    value={form.description}
-                                    onChange={set("description")}
+                                    value={form.jobDescription}
+                                    onChange={set("jobDescription")}
                                     rows={10}
                                     className={`${inputCls} resize-y leading-relaxed`}
                                     placeholder="Describe the role, responsibilities, and requirements..."

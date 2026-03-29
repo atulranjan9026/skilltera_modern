@@ -29,11 +29,11 @@ export const ExperienceSection = ({
         setNewExperience({
             position: '',
             company: '',
-            employmentType: 'full-time',
+            employmentType: '',
             startDate: '',
             endDate: '',
             isCurrentlyWorking: false,
-            description: ''
+            jobDescription: ''
         });
     };
 
@@ -86,7 +86,7 @@ export const ExperienceSection = ({
                                 </div>
                             )}
                         </div>
-                        <p className="text-slate-600">{exp.description}</p>
+                        <p className="text-slate-600">{exp.jobDescription}</p>
                     </div>
                 ))}
             </div>
@@ -121,12 +121,12 @@ export const ExperienceSection = ({
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-2">Employment Type</label>
                             <select
-                                value={newExperience.employmentType || 'full-time'}
+                                value={newExperience.employmentType || 'Full Time'}
                                 onChange={(e) => setNewExperience({ ...newExperience, employmentType: e.target.value })}
                                 className={THEME_CLASSES.inputs}
                             >
-                                <option value="full-time">Full-time</option>
-                                <option value="part-time">Part-time</option>
+                                <option value="Full Time">Full Time</option>
+                                <option value="Part Time">Part Time</option>
                                 <option value="contract">Contract</option>
                                 <option value="internship">Internship</option>
                                 <option value="freelance">Freelance</option>
@@ -171,8 +171,8 @@ export const ExperienceSection = ({
                         <div className="md:col-span-2">
                             <label className="block text-sm font-medium text-slate-700 mb-2">Description</label>
                             <textarea
-                                value={newExperience.description}
-                                onChange={(e) => setNewExperience({ ...newExperience, description: e.target.value })}
+                                value={newExperience.jobDescription}
+                                onChange={(e) => setNewExperience({ ...newExperience, jobDescription: e.target.value })}
                                 rows={3}
                                 placeholder="Describe your responsibilities and achievements"
                                 className={THEME_CLASSES.inputs}

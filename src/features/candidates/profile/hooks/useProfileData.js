@@ -8,14 +8,14 @@ export const useProfileData = () => {
     const [newExperience, setNewExperience] = useState({
         position: '',
         company: '',
-        employmentType: 'full-time',
+        employmentType: 'Full Time',
         startDate: '',
         endDate: '',
         isCurrentlyWorking: false,
-        description: ''
+        jobDescription: ''
     });
     const [newEducation, setNewEducation] = useState({
-        degree: '', institution: '', startDate: '', endDate: '', fieldOfStudy: '', isCurrentlyStudying: false, description: ''
+        degree: '', institution: '', startDate: '', endDate: '', fieldOfStudy: '', isCurrentlyStudying: false, jobDescription: ''
     });
     const [newCertificate, setNewCertificate] = useState({
         name: '',
@@ -24,7 +24,7 @@ export const useProfileData = () => {
         expiryDate: '',
         credentialId: '',
         credentialUrl: '',
-        description: '',
+        jobDescription: '',
         skills: '',
     });
     const [profileLoading, setProfileLoading] = useState(false);

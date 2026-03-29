@@ -229,7 +229,7 @@ export default function ProfileEditor() {
                     _id: exp._id,
                     position: exp.position,
                     company: exp.company,
-                    employmentType: exp.employmentType || "full-time",
+                    employmentType: exp.employmentType,
                     startDate: exp.startDate
                       ? new Date(exp.startDate).toISOString().split("T")[0]
                       : "",
@@ -237,7 +237,7 @@ export default function ProfileEditor() {
                       ? new Date(exp.endDate).toISOString().split("T")[0]
                       : "",
                     isCurrentlyWorking: exp.isCurrentlyWorking,
-                    description: exp.description || "",
+                    jobDescription: exp.jobDescription || "",
                   });
                   window.scrollTo({
                     top: document.body.scrollHeight,
@@ -300,11 +300,11 @@ export default function ProfileEditor() {
                       setNewExperience({
                         company: "",
                         position: "",
-                        employmentType: "full-time",
+                        employmentType: "",
                         startDate: "",
                         endDate: "",
                         isCurrentlyWorking: false,
-                        description: "",
+                        jobDescription: "",
                       });
                     }
                     return response;
@@ -359,7 +359,7 @@ export default function ProfileEditor() {
                       ? new Date(edu.endDate).toISOString().split("T")[0]
                       : "",
                     isCurrentlyStudying: edu.isCurrentlyStudying,
-                    description: edu.description || "",
+                    jobDescription: edu.jobDescription || "",
                   });
                   window.scrollTo({
                     top: document.body.scrollHeight,
@@ -427,7 +427,7 @@ export default function ProfileEditor() {
                         startDate: "",
                         endDate: "",
                         isCurrentlyStudying: false,
-                        description: "",
+                        jobDescription: "",
                       });
                     }
                     return response;
@@ -481,7 +481,7 @@ export default function ProfileEditor() {
                       : "",
                     credentialId: cert.credentialId || "",
                     credentialUrl: cert.credentialUrl || "",
-                    description: cert.description || "",
+                    jobDescription: cert.jobDescription || "",
                     skills: Array.isArray(cert.skills)
                       ? cert.skills.join(", ")
                       : cert.skills || "",
@@ -517,10 +517,10 @@ export default function ProfileEditor() {
                     )
                       delete payload.credentialId;
                     if (
-                      typeof payload.description === "string" &&
-                      !payload.description.trim()
+                      typeof payload.jobDescription === "string" &&
+                      !payload.jobDescription.trim()
                     )
-                      delete payload.description;
+                      delete payload.jobDescription;
 
                     if (typeof payload.skills === "string") {
                       const skillsArray = payload.skills
@@ -565,7 +565,7 @@ export default function ProfileEditor() {
                         expiryDate: "",
                         credentialId: "",
                         credentialUrl: "",
-                        description: "",
+                        jobDescription: "",
                         skills: "",
                       });
                     }

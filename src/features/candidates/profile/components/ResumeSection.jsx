@@ -50,7 +50,7 @@ export const ResumeSection = ({ resume, onResumeUpdate }) => {
             toast(
                 'Resume will be deleted',
                 {
-                    description: 'Click the Delete button again to confirm',
+                    jobDescription: 'Click the Delete button again to confirm',
                     duration: 5000,
                 }
             );

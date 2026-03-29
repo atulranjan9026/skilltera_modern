@@ -8,7 +8,7 @@ function normalizeJob(job) {
     return {
         ...job,
         jobTitle: job?.jobTitle ?? job?.title ?? "—",
-        descriptionHtml: job?.jobDescription ?? job?.description ?? "",
+        descriptionHtml: job?.jobDescription ?? job?.jobDescription ?? "",
         city: job?.city ?? location.city ?? "",
         state: job?.state ?? location.state ?? "",
         country: job?.country ?? location.country ?? "",

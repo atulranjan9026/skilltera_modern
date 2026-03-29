@@ -5,9 +5,9 @@ import { useState } from 'react';
 import { THEME_CLASSES } from '../../../theme';
 
 const AREAS = [
-  { id: 'desk', label: 'Desk surface', description: 'Show your desk/work area' },
-  { id: 'left', label: 'Left side', description: 'Pan to your left' },
-  { id: 'right', label: 'Right side', description: 'Pan to your right' },
+  { id: 'desk', label: 'Desk surface', jobDescription: 'Show your desk/work area' },
+  { id: 'left', label: 'Left side', jobDescription: 'Pan to your left' },
+  { id: 'right', label: 'Right side', jobDescription: 'Pan to your right' },
 ];
 
 export default function RoomCheck({ state }) {
@@ -54,7 +54,7 @@ export default function RoomCheck({ state }) {
             <div className="flex justify-between items-center">
               <div>
                 <span className="font-medium">{area.label}</span>
-                <p className="text-sm text-slate-500">{area.description}</p>
+                <p className="text-sm text-slate-500">{area.jobDescription}</p>
               </div>
               {completed.includes(area.id) ? (
                 <span className="text-green-600 text-sm">Done</span>

@@ -178,9 +178,9 @@ export default function JobDescription({ job, onClose, onApply, onSave, isSaved,
           <section>
             <SectionHeading icon={Building} title="Job Description" />
             <div
-              className="prose prose-sm max-w-none text-slate-600 leading-relaxed job-description-content"
+              className="prose prose-sm max-w-none text-slate-600 leading-relaxed job-jobDescription-content"
               dangerouslySetInnerHTML={{
-                __html: job.description ||
+                __html: job.jobDescription ||
                   `<p>We are seeking a talented <strong>${job.title}</strong> to join our dynamic team at ${job.company}.
                   This is an excellent opportunity for someone passionate about technology and innovation.</p>`
               }}

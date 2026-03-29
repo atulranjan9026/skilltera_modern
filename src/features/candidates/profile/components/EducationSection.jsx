@@ -145,8 +145,8 @@ export const EducationSection = ({
                             <label className="block text-sm font-medium text-slate-700 mb-2">Description</label>
                             <input
                                 type="text"
-                                value={newEducation.description}
-                                onChange={(e) => setNewEducation({ ...newEducation, description: e.target.value })}
+                                value={newEducation.jobDescription}
+                                onChange={(e) => setNewEducation({ ...newEducation, jobDescription: e.target.value })}
                                 placeholder="e.g., Honors, achievements"
                                 className={THEME_CLASSES.inputs}
                             />
@@ -163,7 +163,7 @@ export const EducationSection = ({
                         {newEducation._id && (
                             <button
                                 onClick={() => setNewEducation({
-                                    degree: '', institution: '', startDate: '', endDate: '', fieldOfStudy: '', isCurrentlyStudying: false, description: ''
+                                    degree: '', institution: '', startDate: '', endDate: '', fieldOfStudy: '', isCurrentlyStudying: false, jobDescription: ''
                                 })}
                                 className="px-6 py-2 bg-slate-200 text-slate-700 rounded-lg font-semibold hover:bg-slate-300 transition-all flex items-center gap-2"
                             >

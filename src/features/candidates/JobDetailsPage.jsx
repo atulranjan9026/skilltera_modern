@@ -212,17 +212,17 @@ export default function JobDetailsPage() {
             </div>
           )}
 
-          {/* Job description */}
+          {/* Job jobDescription */}
           <div className="mb-8">
             <h2 className="text-lg font-bold text-slate-900 mb-4">About the Job</h2>
             <div className="prose prose-sm max-w-none text-slate-600">
-              {job.description ? (
+              {job.jobDescription ? (
                 <div 
                   className="whitespace-pre-wrap leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: job.description }}
+                  dangerouslySetInnerHTML={{ __html: job.jobDescription }}
                 />
               ) : (
-                <p className="text-slate-400">No description provided</p>
+                <p className="text-slate-400">No jobDescription provided</p>
               )}
             </div>
           </div>
@@ -241,10 +241,10 @@ export default function JobDetailsPage() {
           )}
 
           {/* About company */}
-          {job.companyId?.description && (
+          {job.companyId?.jobDescription && (
             <div className="mb-8">
               <h2 className="text-lg font-bold text-slate-900 mb-4">About the Company</h2>
-              <p className="text-slate-600 leading-relaxed">{job.companyId.description}</p>
+              <p className="text-slate-600 leading-relaxed">{job.companyId.jobDescription}</p>
             </div>
           )}
 

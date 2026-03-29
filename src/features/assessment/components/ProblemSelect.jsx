@@ -91,7 +91,7 @@ export default function ProblemSelect({ state }) {
               {p.skill || p.language} • {p.difficulty}
               {p.estimatedSolveTime ? ` • ~${p.estimatedSolveTime} min` : ''}
             </p>
-            <p className="text-slate-600 text-sm mt-2 line-clamp-2">{p.description}</p>
+            <p className="text-slate-600 text-sm mt-2 line-clamp-2">{p.jobDescription}</p>
           </div>
         ))}
       </div>

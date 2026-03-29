@@ -13,12 +13,12 @@ import { useAuthContext } from '../../store/context/AuthContext';
 // STATUS CONFIG — keys match Mongoose enum exactly
 // ─────────────────────────────────────────────────────────────────────────────
 const STATUS_CONFIG = {
-  applied:     { label: 'Applied',     color: 'bg-blue-50 text-blue-700 border-blue-200',        dot: 'bg-blue-500',    icon: FileText,    description: 'Application submitted' },
-  shortlisted: { label: 'Shortlisted', color: 'bg-amber-50 text-amber-700 border-amber-200',     dot: 'bg-amber-500',   icon: Star,        description: 'Shortlisted by recruiter' },
-  interviewed: { label: 'Interviewed', color: 'bg-violet-50 text-violet-700 border-violet-200',  dot: 'bg-violet-500',  icon: UserCheck,   description: 'Interview completed' },
-  selected:    { label: 'Selected',    color: 'bg-emerald-50 text-emerald-700 border-emerald-200',dot: 'bg-emerald-500', icon: CheckCircle, description: 'Congratulations! Selected' },
-  rejected:    { label: 'Rejected',    color: 'bg-red-50 text-red-700 border-red-200',            dot: 'bg-red-400',     icon: XCircle,     description: 'Not selected' },
-  withdrawn:   { label: 'Withdrawn',   color: 'bg-slate-100 text-slate-500 border-slate-200',    dot: 'bg-slate-400',   icon: RefreshCw,   description: 'You withdrew' },
+  applied:     { label: 'Applied',     color: 'bg-blue-50 text-blue-700 border-blue-200',        dot: 'bg-blue-500',    icon: FileText,    jobDescription: 'Application submitted' },
+  shortlisted: { label: 'Shortlisted', color: 'bg-amber-50 text-amber-700 border-amber-200',     dot: 'bg-amber-500',   icon: Star,        jobDescription: 'Shortlisted by recruiter' },
+  interviewed: { label: 'Interviewed', color: 'bg-violet-50 text-violet-700 border-violet-200',  dot: 'bg-violet-500',  icon: UserCheck,   jobDescription: 'Interview completed' },
+  selected:    { label: 'Selected',    color: 'bg-emerald-50 text-emerald-700 border-emerald-200',dot: 'bg-emerald-500', icon: CheckCircle, jobDescription: 'Congratulations! Selected' },
+  rejected:    { label: 'Rejected',    color: 'bg-red-50 text-red-700 border-red-200',            dot: 'bg-red-400',     icon: XCircle,     jobDescription: 'Not selected' },
+  withdrawn:   { label: 'Withdrawn',   color: 'bg-slate-100 text-slate-500 border-slate-200',    dot: 'bg-slate-400',   icon: RefreshCw,   jobDescription: 'You withdrew' },
 };
 
 const ACTIVE_STATUSES = ['applied', 'shortlisted', 'interviewed', 'selected'];
@@ -349,7 +349,7 @@ export const StatusTimeline = ({ history = [] }) => (
                   })
                 : '—'}
             </p>
-            <p className="text-xs text-slate-400">{cfg.description}</p>
+            <p className="text-xs text-slate-400">{cfg.jobDescription}</p>
           </div>
         </div>
       );

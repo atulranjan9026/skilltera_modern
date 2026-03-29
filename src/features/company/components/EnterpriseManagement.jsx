@@ -196,7 +196,7 @@ export default function EnterpriseManagement() {
   const [lobs, setLobs] = useState([]);
   const [editingLOB, setEditingLOB] = useState(null);
   const [bulkModeLOB, setBulkModeLOB] = useState(false);
-  const [bulkEntriesLOB, setBulkEntriesLOB] = useState([{ name: "", description: "" }]);
+  const [bulkEntriesLOB, setBulkEntriesLOB] = useState([{ name: "", jobDescription: "" }]);
 
   // Hiring Manager State
   const [hiringManagers, setHiringManagers] = useState([]);
@@ -335,7 +335,7 @@ export default function EnterpriseManagement() {
     setEditingLOB(lob);
     resetLOB({
       name: lob.name,
-      description: lob.description || "",
+      jobDescription: lob.jobDescription || "",
     });
   };
 
@@ -555,7 +555,7 @@ export default function EnterpriseManagement() {
   // Helper functions for bulk entry management
   const addBulkRow = (type) => {
     if (type === "lob") {
-      setBulkEntriesLOB([...bulkEntriesLOB, { name: "", description: "" }]);
+      setBulkEntriesLOB([...bulkEntriesLOB, { name: "", jobDescription: "" }]);
     } else if (type === "hm") {
       setBulkEntriesHM([...bulkEntriesHM, { name: "", email: "" }]);
     } else if (type === "recruiter") {
@@ -566,7 +566,7 @@ export default function EnterpriseManagement() {
   const removeBulkRow = (type, index) => {
     if (type === "lob") {
       const newEntries = bulkEntriesLOB.filter((_, i) => i !== index);
-      setBulkEntriesLOB(newEntries.length > 0 ? newEntries : [{ name: "", description: "" }]);
+      setBulkEntriesLOB(newEntries.length > 0 ? newEntries : [{ name: "", jobDescription: "" }]);
     } else if (type === "hm") {
       const newEntries = bulkEntriesHM.filter((_, i) => i !== index);
       setBulkEntriesHM(newEntries.length > 0 ? newEntries : [{ name: "", email: "" }]);
@@ -595,7 +595,7 @@ export default function EnterpriseManagement() {
   // Filtered Data
   const filteredLobs = lobs.filter(lob =>
     lob.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (lob.description && lob.description.toLowerCase().includes(searchTerm.toLowerCase()))
+    (lob.jobDescription && lob.jobDescription.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const filteredHMs = hiringManagers.filter(hm =>
@@ -684,7 +684,7 @@ export default function EnterpriseManagement() {
                     onClick={() => {
                       setBulkModeLOB(!bulkModeLOB);
                       if (!bulkModeLOB) {
-                        setBulkEntriesLOB([{ name: "", description: "" }]);
+                        setBulkEntriesLOB([{ name: "", jobDescription: "" }]);
                       }
                     }}
                   />
@@ -720,8 +720,8 @@ export default function EnterpriseManagement() {
                             </td>
                             <td className="px-6 py-4">
                               <InputText
-                                value={entry.description || ""}
-                                onChange={(e) => updateBulkEntry("lob", index, "description", e.target.value)}
+                                value={entry.jobDescription || ""}
+                                onChange={(e) => updateBulkEntry("lob", index, "jobDescription", e.target.value)}
                                 placeholder="Description (Optional)"
                               />
                             </td>
@@ -758,7 +758,7 @@ export default function EnterpriseManagement() {
                         try {
                           await companyService.bulkCreateLOBs({ items: validEntries });
                           showMessage("success", ENTERPRISE_MESSAGES.LOB.BULK_CREATE_SUCCESS);
-                          setBulkEntriesLOB([{ name: "", description: "" }]);
+                          setBulkEntriesLOB([{ name: "", jobDescription: "" }]);
                           setBulkModeLOB(false);
                           fetchLOBs();
                         } catch (error) {
@@ -783,7 +783,7 @@ export default function EnterpriseManagement() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Description (Optional)</label>
                     <InputTextarea
-                      {...registerLOB("description")}
+                      {...registerLOB("jobDescription")}
                       placeholder="Description"
                       rows={3}
                     />
@@ -841,7 +841,7 @@ export default function EnterpriseManagement() {
                         {lob.name}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900">
-                        {lob.description || "-"}
+                        {lob.jobDescription || "-"}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex gap-2">

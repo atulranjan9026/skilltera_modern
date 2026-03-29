@@ -85,8 +85,8 @@ export const CertificatesSection = ({
                                 </div>
                             )}
                         </div>
-                        {certificate.description && (
-                            <p className="text-sm text-slate-600">{certificate.description}</p>
+                        {certificate.jobDescription && (
+                            <p className="text-sm text-slate-600">{certificate.jobDescription}</p>
                         )}
                     </div>
                 ))}
@@ -160,8 +160,8 @@ export const CertificatesSection = ({
                         <div className="md:col-span-2">
                             <label className="block text-sm font-medium text-slate-700 mb-2">Description</label>
                             <textarea
-                                value={newCertificate?.description || ''}
-                                onChange={(e) => setNewCertificate?.({ ...newCertificate, description: e.target.value })}
+                                value={newCertificate?.jobDescription || ''}
+                                onChange={(e) => setNewCertificate?.({ ...newCertificate, jobDescription: e.target.value })}
                                 rows={3}
                                 placeholder="Optional details"
                                 className={THEME_CLASSES.inputs}
@@ -196,7 +196,7 @@ export const CertificatesSection = ({
                                     expiryDate: '',
                                     credentialId: '',
                                     credentialUrl: '',
-                                    description: '',
+                                    jobDescription: '',
                                     skills: '',
                                 })}
                                 className="px-6 py-2 bg-slate-200 text-slate-700 rounded-lg font-semibold hover:bg-slate-300 transition-all flex items-center gap-2"

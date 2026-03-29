@@ -134,7 +134,7 @@ const collaborationService = {
         id: 'general',
         name: 'General',
         type: 'public',
-        description: 'Team-wide discussions',
+        jobDescription: 'Team-wide discussions',
         memberCount: 12,
         unreadCount: 3,
         lastActivity: new Date(Date.now() - 5 * 60 * 1000),
@@ -143,7 +143,7 @@ const collaborationService = {
         id: 'hiring',
         name: 'Hiring Team',
         type: 'private',
-        description: 'Hiring strategy and coordination',
+        jobDescription: 'Hiring strategy and coordination',
         memberCount: 8,
         unreadCount: 0,
         lastActivity: new Date(Date.now() - 2 * 60 * 1000),
@@ -152,7 +152,7 @@ const collaborationService = {
         id: 'engineering',
         name: 'Engineering Interviews',
         type: 'private',
-        description: 'Technical interview discussions',
+        jobDescription: 'Technical interview discussions',
         memberCount: 6,
         unreadCount: 1,
         lastActivity: new Date(Date.now() - 15 * 60 * 1000),
@@ -483,7 +483,7 @@ const ChannelList = ({ channels, activeChannel, onChannelSelect }) => {
               fontSize: tokens.typography.fontSize.xs[0], 
               color: tokens.colors.secondary[600],
             }}>
-              {channel.description}
+              {channel.jobDescription}
             </div>
           </div>
           
@@ -965,7 +965,7 @@ export const CollaborationHub = ({ user }) => {
                   fontSize: tokens.typography.fontSize.sm[0], 
                   color: tokens.colors.secondary[600],
                 }}>
-                  {activeChannel.description}
+                  {activeChannel.jobDescription}
                 </p>
               </div>
               
