@@ -56,7 +56,6 @@ export default function JobSearchPage() {
    * Transform backend job data to frontend format
    */
   const transformJobData = (backendJobs) => {
-    console.log(backendJobs);
     return backendJobs.map(job => ({
       id: job._id || job.jobId,
       title: job.jobTitle,

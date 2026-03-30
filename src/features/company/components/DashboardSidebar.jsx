@@ -6,6 +6,7 @@ export function DashboardSidebar({ companyUser, activeTab, showCreate, goTo, nav
     const items = NAV_ITEMS
         .filter(item => {
             const role = companyUser?.role;
+            // console.log("Filtering nav item:", item.tab, "for role:", role);
             if (role === "interviewer") {
                 return ["candidates", "messages"].includes(item.tab);
             }
@@ -13,7 +14,7 @@ export function DashboardSidebar({ companyUser, activeTab, showCreate, goTo, nav
                 return role === "company";
             }
             // Hide interviewer-only items from company/hiring_manager
-            if (["candidates"].includes(item.tab)) {
+            if (["candidates", "messages"].includes(item.tab)) {
                 return false;
             }
             return true;

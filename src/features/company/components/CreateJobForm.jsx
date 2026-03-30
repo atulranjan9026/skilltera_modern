@@ -14,7 +14,7 @@ const lbl =
     "block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide";
 
 const INITIAL_FORM = {
-    title: "", jobDescription: "", jobType: "Full-time", experienceLevel: "Mid-level",
+    jobTitle: "", jobDescription: "", jobType: "Full-time", experienceLevel: "Mid-level",
     minExperience: "", maxExperience: "", category: "", openings: 1, deadline: "",
     benefits: "", responsibilities: "", qualifications: "", tags: "",
     country: "", state: "", city: "", isRemote: false, remoteType: "On-site",
@@ -110,7 +110,7 @@ export function CreateJobForm({ companyId, onSuccess, onCancel }) {
 
     const validate = () => {
         const e = {};
-        if (!form.title.trim()) e.title = "Job title is required";
+        if (!form.jobTitle.trim()) e.jobTitle = "Job title is required";
         if (!form.jobDescription.trim()) e.jobDescription = "Description is required";
         if (skills.length === 0) e.skills = "Add at least one required skill";
         setErrors(e);
@@ -129,7 +129,7 @@ export function CreateJobForm({ companyId, onSuccess, onCancel }) {
             const mapRemote = { "On-site": "on-site", Hybrid: "hybrid", "Fully-remote": "fully-remote" };
 
             await companyService.postJob(companyId, {
-                title: form.title.trim(),
+                jobTitle: form.jobTitle.trim(),
                 jobDescription: form.jobDescription.trim(),
                 jobType: mapType[form.jobType] || "Full Time",
                 experienceLevel: mapLevel[form.experienceLevel] || "mid",
@@ -217,9 +217,9 @@ export function CreateJobForm({ companyId, onSuccess, onCancel }) {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div>
                             <label className={lbl}>Job Title <span className="text-rose-500">*</span></label>
-                            <input value={form.title} onChange={(e) => setField("title", e.target.value)}
+                            <input value={form.jobTitle} onChange={(e) => setField("jobTitle", e.target.value)}
                                 placeholder="e.g. Senior Frontend Developer" className={inp} />
-                            {errors.title && <p className="text-rose-500 text-xs mt-1">{errors.title}</p>}
+                            {errors.jobTitle && <p className="text-rose-500 text-xs mt-1">{errors.jobTitle}</p>}
                         </div>
                         <div>
                             <label className={lbl}>Job Type</label>

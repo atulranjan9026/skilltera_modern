@@ -9,14 +9,17 @@ const useChatSocket = (conversationId, onMessageReceived) => {
         // Get user authentication info
         const user = getCurrentUser();
         const role = getUserType();
+        console.log('useChatSocket - Initializing socket with user:', user, 'role:', role);
+        
+        // Extract token from localStorage (standardized with ChatPage)
         const token = localStorage.getItem('token') || 
+                     localStorage.getItem('candidateToken') ||
+                     localStorage.getItem('companyToken') ||
                      localStorage.getItem(role === 'company' ? 'companyToken' : 'candidateToken');
 
-        // Temporarily disable WebSocket until backend Socket.IO is properly configured
-        // Temporarily disable WebSocket until backend Socket.IO is properly configured
-        return;
+        // console.log('useChatSocket - User:', user, 'Role:', role, 'Token exists:', !!token, 'Token value:', token ? 'present' : 'null');
 
-        if (!token || !user) {
+        if (!token || !user?._id) {
             console.warn('No authentication token found for WebSocket connection');
             return;
         }
@@ -72,9 +75,6 @@ const useChatSocket = (conversationId, onMessageReceived) => {
     }, [conversationId, onMessageReceived]);
 
     const sendMessage = (messageData) => {
-        // Temporarily disable sending messages via WebSocket
-        // Temporarily disable sending messages via WebSocket
-        
         if (socketRef.current && socketRef.current.connected) {
             socketRef.current.emit('send_message', messageData);
         } else {

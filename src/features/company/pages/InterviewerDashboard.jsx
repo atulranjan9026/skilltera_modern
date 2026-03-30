@@ -227,6 +227,7 @@ export default function InterviewerDashboard() {
       const res = await chatService.initiateConversation(
         app.candidate._id,
         companyId,
+        app.job._id,
         app.job?.jobTitle || "Interview Discussion"
       );
       

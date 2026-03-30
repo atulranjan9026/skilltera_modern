@@ -1,20 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
 import { X } from 'lucide-react';
-import { getCurrentUser, getUserType } from '../../../utils/auth';
+import { getCurrentUser, getUserType, getCompanyId } from '../../../utils/auth';
 import useChatSocket from '../hooks/useChatSocket';
 import { ChatItem, MessageBox } from "react-chat-elements";
 import "react-chat-elements/dist/main.css";
+import { chatService } from '../../../services/chatService';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
-const getApiUrl = (path) => {
-    const base = (API_URL || '').replace(/\/+$/, '');
-    const hasV1 = /\/api\/v1$/.test(base);
-    const v1Base = hasV1 ? base : `${base}/api/v1`;
-    const cleanPath = `/${String(path || '').replace(/^\/+/, '')}`;
-    return `${v1Base}${cleanPath}`;
-};
 
 export default function ChatPage({ initialConversationId }) {
     const [conversations, setConversations] = useState([]);
@@ -30,14 +21,17 @@ export default function ChatPage({ initialConversationId }) {
     const role = getUserType();
     const token =
         localStorage.getItem('token') ||
-        localStorage.getItem(role === 'company' ? 'companyToken' : 'candidateToken');
+        localStorage.getItem('candidateToken') ||
+        localStorage.getItem('companyToken') ||
+        (role === 'company' ? localStorage.getItem('companyToken') : localStorage.getItem('candidateToken'));
 
     useEffect(() => {
     }, [currentUser, role, token]);
 
-    // Fetch conversation list on load
+    // Fetch conversation list on load (use shared service and normalized token)
     useEffect(() => {
         const fetchConversations = async () => {
+            // console.log("Fetching conversations for user:", currentUser, "with token:", token);
             if (!currentUser || (!currentUser._id && !currentUser.id)) {
                 console.warn('User not authenticated, skipping conversation fetch');
                 return;
@@ -48,33 +42,32 @@ export default function ChatPage({ initialConversationId }) {
                 return;
             }
 
-            try {
-                const res = await axios.get(getApiUrl('chat/conversations'), {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+            // Ensure app-wide Axios instance has auth token (also supports candidateToken/companyToken fallback)
+            if (!localStorage.getItem('token')) {
+                localStorage.setItem('token', token);
+            }
 
-                if (res.data?.success) {
-                    setConversations(res.data.conversations);
-                    setFilteredConversations(res.data.conversations);
+            try {
+                const res = await chatService.getUserConversations();
+
+                if (res?.success) {
+                    setConversations(res.conversations);
+                    setFilteredConversations(res.conversations);
                 } else {
-                    console.warn('Failed to fetch conversations:', res.data?.message);
+                    console.warn('Failed to fetch conversations:', res?.message);
                 }
             } catch (err) {
-                console.error("Error fetching conversations:", err);
-                if (err.response?.status === 401) {
-                    console.error('Authentication expired, please login again');
-                } else if (err.response?.status === 403) {
-                    console.error('Access denied, check permissions');
-                } else if (err.response?.status === 404) {
-                    console.error('Chat service not available');
-                }
+                console.error('Error fetching conversations:', err);
+                // Set empty conversations on error
+                setConversations([]);
+                setFilteredConversations([]);
             }
         };
 
         if (token) {
             fetchConversations();
         }
-    }, [token]);
+    }, [token, currentUser]);
 
     // Filter conversations based on search term
     useEffect(() => {
@@ -112,6 +105,25 @@ export default function ChatPage({ initialConversationId }) {
     // Setup real-time Socket.io listener
     const handleNewMessage = (newMessage) => {
         setMessages((prev) => [...prev, newMessage]);
+
+        // Update unread count for the conversation if it's not the active one
+        if (activeConv && newMessage.conversationId === activeConv._id) {
+            // If this is the active conversation, mark as read
+            const isCompanySide = ['company', 'hiring_manager', 'backup_hiring_manager', 'interviewer'].includes(role);
+            setConversations(prev => prev.map(c =>
+                c._id === newMessage.conversationId
+                    ? { ...c, [isCompanySide ? 'companyUnread' : 'candidateUnread']: 0 }
+                    : c
+            ));
+        } else {
+            // Increment unread for other conversations
+            const isCompanySide = ['company', 'hiring_manager', 'backup_hiring_manager', 'interviewer'].includes(role);
+            setConversations(prev => prev.map(c =>
+                c._id === newMessage.conversationId
+                    ? { ...c, [isCompanySide ? 'candidateUnread' : 'companyUnread']: (c[isCompanySide ? 'candidateUnread' : 'companyUnread'] || 0) + 1 }
+                    : c
+            ));
+        }
     };
 
     const { sendMessage } = useChatSocket(activeConv?._id, handleNewMessage);
@@ -124,11 +136,9 @@ export default function ChatPage({ initialConversationId }) {
     const openConversation = async (conv) => {
         setActiveConv(conv);
         try {
-            const res = await axios.get(getApiUrl(`chat/messages/${conv._id}`), {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            if (res.data?.success) {
-                setMessages(res.data.messages);
+            const res = await chatService.getMessages(conv._id);
+            if (res?.success) {
+                setMessages(res.messages);
 
                 const isCompanySide = ['company', 'hiring_manager', 'backup_hiring_manager', 'interviewer'].includes(role);
                 setConversations(prev => prev.map(c =>
@@ -138,7 +148,7 @@ export default function ChatPage({ initialConversationId }) {
                 ));
             }
         } catch (err) {
-            console.error("Error fetching messages", err);
+            console.error('Error fetching messages', err);
         }
     };
 
@@ -150,25 +160,20 @@ export default function ChatPage({ initialConversationId }) {
 
         setInputText("");
 
-        try {
-            const res = await axios.post(
-                getApiUrl('chat/messages'),
-                { conversationId: activeConv._id, text },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-
-            if (res.data?.success && res.data?.message) {
-                setMessages((prev) => [...prev, res.data.message]);
-            } else {
-                console.warn('Failed to send message:', res.data?.message || res.data);
-            }
-        } catch (err) {
-            console.error('Error sending message:', err);
-        }
+        // Send via Socket.io
+        const receiverRole = role === 'candidate' ? 'company' : 'candidate';
+        sendMessage({
+            conversationId: activeConv._id,
+            senderId: userId,
+            text,
+            receiverRole
+        });
     };
 
     const userId = currentUser?._id || currentUser?.id;
     const isAuthenticated = !!currentUser && !!userId;
+    console.log("Rendering ChatPage with conversations:", conversations, "activeConv:", activeConv, "messages:", messages);
+    // console.log("Current user:", currentUser, "Role:", role, "Token exists:", !!token);
 
     return (
         <div className="flex h-[calc(100vh-80px)] w-full max-w-6xl mx-auto border border-gray-200 rounded-lg overflow-hidden bg-white shadow-md my-4">
@@ -202,7 +207,6 @@ export default function ChatPage({ initialConversationId }) {
                         )}
                     </div>
                 </div>
-
                 <div className="flex-1 overflow-y-auto">
                     {filteredConversations.length === 0 ? (
                         <div className="p-4 text-center text-gray-500">
@@ -218,8 +222,8 @@ export default function ChatPage({ initialConversationId }) {
                                 : conv.companyId?.companyName || 'Company';
 
                             const unread = isCompanySide
-                                ? conv.companyUnread
-                                : conv.candidateUnread;
+                                ? conv.candidateUnread
+                                : conv.companyUnread;
 
                             return (
                                 <div key={conv._id} className="border-b border-gray-100 hover:bg-gray-100 transition-colors">
@@ -231,7 +235,7 @@ export default function ChatPage({ initialConversationId }) {
                                         }
                                         alt={otherPartyName}
                                         title={otherPartyName}
-                                        subtitle={conv.jobSubject}
+                                        subtitle={conv.jobId?.jobTitle || conv.jobSubject}
                                         unread={unread}
                                         onClick={() => openConversation(conv)}
                                         className={activeConv?._id === conv._id ? "bg-blue-50" : ""}

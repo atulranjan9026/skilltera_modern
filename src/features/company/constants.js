@@ -47,8 +47,7 @@ export const NAV_ITEMS = [
     { icon: "📊", label: "Analytics", tab: "Analytics" },
     { icon: "🏢", label: "Enterprise", tab: "EnterpriseManagement" },
     // Interviewer specific
-    { icon: "📅", label: "Interviews", tab: "candidates" },
-
-    { icon: "💬", label: "Messages", tab: "messages" },
+    { icon: "�", label: "Candidates", tab: "candidates", role: "interviewer" },
+    { icon: "💬", label: "Messages", tab: "messages", role: "interviewer" },
 ];
 

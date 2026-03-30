@@ -12,13 +12,13 @@ export function DashboardHeader({
     const { logout } = useAuthContext();
     const currentNavLabel = NAV_ITEMS.find((n) => n.tab === activeTab)?.label;
 
-    const handleChatClick = () => {
-        if (goTo) {
-            goTo("messages");
-        } else {
-            navigate("/company/chat");
-        }
-    };
+    // const handleChatClick = () => {
+    //     if (goTo) {
+    //         goTo("messages");
+    //     } else {
+    //         navigate("/company/chat");
+    //     }
+    // };
 
     const handleLogout = async () => {
         try {
@@ -91,7 +91,7 @@ export function DashboardHeader({
                     </button>
                 )}
                 {/* Chat option */}
-                <button
+                {/* <button
                     onClick={handleChatClick}
                     title="Chat"
                     className="relative group w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all duration-150"
@@ -102,7 +102,7 @@ export function DashboardHeader({
                     <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-[10px] font-medium bg-slate-800 text-white px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
                         Chat
                     </span>
-                </button>
+                </button> */}
                 {/* Logout */}
                 <button
                     onClick={handleLogout}

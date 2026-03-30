@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authService } from '../../services/authService';
-import { clearAuthData } from '../../utils/auth';
+import { clearAuthData, saveCandidateUser } from '../../utils/auth';
 
 /**
  * Auth Context - Global authentication state
@@ -19,11 +19,14 @@ export const AuthProvider = ({ children }) => {
       try {
         const token = localStorage.getItem('token');
         const storedUser = localStorage.getItem('user');
+        const storedCandidateUser = localStorage.getItem('candidateUser');
 
-        if (token && storedUser) {
+        if (token && (storedUser || storedCandidateUser)) {
           try {
-            // Restore user from localStorage
-            const parsedUser = JSON.parse(storedUser);
+            // Restore user from localStorage (prefer candidateUser if available)
+            const parsedUser = storedCandidateUser 
+              ? JSON.parse(storedCandidateUser) 
+              : JSON.parse(storedUser);
             setUser(parsedUser);
 
             // Verify token and get fresh user data
@@ -31,13 +34,14 @@ export const AuthProvider = ({ children }) => {
 
             if (response.data) {
               setUser(response.data);
+              // Store to BOTH keys for compatibility
               localStorage.setItem('user', JSON.stringify(response.data));
+              localStorage.setItem('candidateUser', JSON.stringify(response.data));
             }
           } catch (e) {
             console.error('Failed to refresh user data', e);
             // Clear invalid session
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
+            clearAuthData();
             setUser(null);
           }
         } else {
@@ -45,8 +49,7 @@ export const AuthProvider = ({ children }) => {
       } catch (err) {
         console.error('Auth check failed:', err);
         // Clear invalid session
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        clearAuthData();
         setError(err.message);
       } finally {
         setIsLoading(false);
@@ -55,6 +58,30 @@ export const AuthProvider = ({ children }) => {
 
     checkAuth();
   }, []);
+
+  const login = async (email, password) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await authService.login(email, password);
+
+      if (response.data?.candidate) {
+        const { candidate } = response.data;
+        setUser(candidate);
+        // Store to BOTH keys for compatibility with auth.js utilities
+        localStorage.setItem('user', JSON.stringify(candidate));
+        saveCandidateUser(candidate);
+      }
+
+      return response;
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || err.message || 'Login failed';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const loginWithGoogle = async (credential) => {
     setIsLoading(true);
@@ -65,7 +92,9 @@ export const AuthProvider = ({ children }) => {
       if (response.data) {
         const { candidate } = response.data;
         setUser(candidate);
+        // Store to BOTH keys for compatibility with auth.js utilities
         localStorage.setItem('user', JSON.stringify(candidate));
+        saveCandidateUser(candidate);
       }
 
       return response;
@@ -83,7 +112,9 @@ export const AuthProvider = ({ children }) => {
       const response = await authService.getCurrentUser();
       if (response.data) {
         setUser(response.data);
+        // Store to BOTH keys for compatibility
         localStorage.setItem('user', JSON.stringify(response.data));
+        saveCandidateUser(response.data);
       }
     } catch (err) {
       console.error('Failed to refresh user', err);
@@ -124,7 +155,7 @@ export const AuthProvider = ({ children }) => {
     user,
     isLoading,
     error,
-    // login,
+    login,
     loginWithGoogle,
     logout,
     signup,

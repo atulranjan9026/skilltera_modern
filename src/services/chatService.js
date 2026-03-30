@@ -3,10 +3,11 @@ import { get, post } from "./api";
 
 export const chatService = {
   // Initiate a new conversation
-  initiateConversation: async (candidateId, companyId, jobSubject) => {
+  initiateConversation: async (candidateId, companyId, jobId, jobSubject) => {
     return post('/chat/initiate', {
       candidateId,
       companyId,
+      jobId,
       jobSubject
     });
   },
@@ -24,6 +25,6 @@ export const chatService = {
 
   // Send a message in a conversation
   sendMessage: async (conversationId, message) => {
-    return post(`/chat/messages/${conversationId}`, { message });
+    return post('/chat/messages', { conversationId, text: message });
   }
 };
