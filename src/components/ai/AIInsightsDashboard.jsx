@@ -374,7 +374,7 @@ const PredictiveAnalytics = ({ data }) => {
               fontWeight: tokens.typography.fontWeight.bold,
               color: tokens.colors.primary[600],
             }}>
-              {data.nextQuarterHiring.forecast}
+              {insights.nextQuarterHiring.forecast}
             </div>
             <div style={{ 
               fontSize: tokens.typography.fontSize.sm[0], 
@@ -405,7 +405,7 @@ const PredictiveAnalytics = ({ data }) => {
                 overflow: 'hidden',
               }}>
                 <div style={{ 
-                  width: `${data.nextQuarterHiring.confidence}%`,
+                  width: insights.nextQuarterHiring.confidence + '%',
                   height: '100%',
                   backgroundColor: tokens.colors.primary[500],
                 }} />
@@ -415,7 +415,7 @@ const PredictiveAnalytics = ({ data }) => {
                 fontWeight: tokens.typography.fontWeight.medium,
                 color: tokens.colors.secondary[700],
               }}>
-                {data.nextQuarterHiring.confidence}%
+                {insights.nextQuarterHiring.confidence}%
               </span>
             </div>
           </div>
@@ -423,7 +423,7 @@ const PredictiveAnalytics = ({ data }) => {
 
         {/* Department breakdown */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: tokens.spacing[3] }}>
-          {Object.entries(data.nextQuarterHiring.departments).map(([dept, count]) => (
+          {Object.entries(insights.nextQuarterHiring.departments).map(([dept, count]) => (
             <div key={dept} style={{ 
               textAlign: 'center',
               padding: tokens.spacing[3],
@@ -461,7 +461,7 @@ const PredictiveAnalytics = ({ data }) => {
         </h4>
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacing[2] }}>
-          {data.skillGaps.map((skill, index) => (
+          {insights.skillGaps.map((skill, index) => (
             <div key={index} style={{ 
               display: 'flex', 
               alignItems: 'center', 
@@ -541,7 +541,7 @@ const PredictiveAnalytics = ({ data }) => {
               fontWeight: tokens.typography.fontWeight.bold,
               color: tokens.colors.semantic.success[700],
             }}>
-              {data.marketTrends.demandIncrease}
+              {insights.marketTrends.demandIncrease}
             </div>
             <div style={{ 
               fontSize: tokens.typography.fontSize.xs[0], 
@@ -566,7 +566,7 @@ const PredictiveAnalytics = ({ data }) => {
               fontWeight: tokens.typography.fontWeight.bold,
               color: tokens.colors.semantic.warning[700],
             }}>
-              {data.marketTrends.salaryInflation}
+              {insights.marketTrends.salaryInflation}
             </div>
             <div style={{ 
               fontSize: tokens.typography.fontSize.xs[0], 
@@ -592,7 +592,7 @@ const PredictiveAnalytics = ({ data }) => {
               color: tokens.colors.semantic.error[700],
               textTransform: 'capitalize',
             }}>
-              {data.marketTrends.competitionLevel}
+              {insights.marketTrends.competitionLevel}
             </div>
             <div style={{ 
               fontSize: tokens.typography.fontSize.xs[0], 
@@ -647,7 +647,7 @@ export const AIInsightsDashboard = ({ companyData }) => {
       }}>
         <div style={{ textAlign: 'center' }}>
           <Brain className="w-8 h-8 animate-pulse" style={{ margin: '0 auto', marginBottom: tokens.spacing[3] }} />
-          <p style={{ fontSize: tokens.typography.fontSize.sm[0] }}>AI is analyzing your data...</p>
+          <p style={{ fontSize: tokens.typography.fontSize.sm[0] }}>AI is analyzing your insights...</p>
         </div>
       </div>
     );

@@ -2,83 +2,101 @@ import { useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { getCurrentUser, getUserType } from '../../../utils/auth';
 
+const decodeJWT = (token) => {
+    try {
+        const payload = token.split('.')[1];
+        return JSON.parse(atob(payload));
+    } catch {
+        return null;
+    }
+};
+
+// ✅ FIX 10: mirrors COMPANY_ROLES from backend — hiring_manager etc. are all valid
+const COMPANY_ROLES = ['interviewer', 'hiring_manager', 'backup_hiring_manager'];
+
 const useChatSocket = (conversationId, onMessageReceived) => {
-    const socketRef = useRef();
+    const socketRef = useRef(null);
 
     useEffect(() => {
-        // Get user authentication info
-        const user = getCurrentUser();
-        const role = getUserType();
-        console.log('useChatSocket - Initializing socket with user:', user, 'role:', role);
-        
-        // Extract token from localStorage (standardized with ChatPage)
-        const token = localStorage.getItem('token') || 
-                     localStorage.getItem('candidateToken') ||
-                     localStorage.getItem('companyToken') ||
-                     localStorage.getItem(role === 'company' ? 'companyToken' : 'candidateToken');
+        const user  = getCurrentUser();
+        const token = localStorage.getItem('token')          ||
+                      localStorage.getItem('candidateToken') ||
+                      localStorage.getItem('companyToken');
 
-        // console.log('useChatSocket - User:', user, 'Role:', role, 'Token exists:', !!token, 'Token value:', token ? 'present' : 'null');
-
-        if (!token || !user?._id) {
-            console.warn('No authentication token found for WebSocket connection');
+        if (!token) {
+            console.warn('[useChatSocket] Skipped: No token found');
             return;
         }
 
-        // Connect to your backend socket endpoint with authentication
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        
-        socketRef.current = io(API_URL, {
-            auth: {
-                token: token,
-                userId: user._id,
-                role: role
-            },
-            query: {
-                token: token
-            }
+        const decoded = decodeJWT(token);
+        // ✅ FIX 11: role must come from the JWT, not the client-side getUserType()
+        //            (getUserType() can return 'company' which the backend rejects)
+        const role = decoded?.role || getUserType();
+
+        if (!user?._id) {
+            console.warn('[useChatSocket] Skipped: No user ID');
+            return;
+        }
+
+        const API_URL   = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const socketUrl = API_URL.endsWith('/api/v1/') ? API_URL.slice(0, -8) : API_URL;
+
+        console.log('[useChatSocket] Connecting to:', socketUrl, '| role:', role);
+
+        socketRef.current = io(socketUrl, {
+            reconnection: true,
+            reconnectionDelay: 1000,
+            reconnectionDelayMax: 5000,
+            reconnectionAttempts: 5,
+            auth:  { token, userId: user._id, role },
+            query: { token },
         });
 
-        // Connection established
         socketRef.current.on('connect', () => {
-            // Connection established
-            
+            console.log('[useChatSocket] ✓ Connected - ID:', socketRef.current.id);
+
             if (conversationId) {
+                console.log('[useChatSocket] Joining conversation:', conversationId);
                 socketRef.current.emit('join_conversation', {
                     conversationId,
                     userId: user._id,
-                    role: role
+                    role,
                 });
             }
         });
 
-        // Handle connection errors
-        socketRef.current.on('connect_error', (error) => {
-            console.error('WebSocket connection error:', error);
+        socketRef.current.on('connect_error', (err) => {
+            console.error('[useChatSocket] ✗ Connection error:', err?.message || err);
         });
 
-        // Handle disconnection
         socketRef.current.on('disconnect', (reason) => {
-            // Handle disconnection
+            console.log('[useChatSocket] Disconnected:', reason);
+        });
+
+        socketRef.current.on('error', (err) => {
+            console.error('[useChatSocket] Server error:', err);
         });
 
         if (conversationId) {
-            socketRef.current.on('receive_message', (newMessage) => {
-                onMessageReceived(newMessage);
+            socketRef.current.on('receive_message', (msg) => {
+                console.log('[useChatSocket] Message received:', msg?._id);
+                onMessageReceived(msg);
             });
         }
 
         return () => {
-            if (socketRef.current) {
-                socketRef.current.disconnect();
-            }
+            socketRef.current?.disconnect();
         };
-    }, [conversationId, onMessageReceived]);
+        // onMessageReceived intentionally omitted — wrap in useCallback at call site
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [conversationId]);
 
     const sendMessage = (messageData) => {
-        if (socketRef.current && socketRef.current.connected) {
+        if (socketRef.current?.connected) {
+            console.log('[useChatSocket] Sending:', messageData.conversationId);
             socketRef.current.emit('send_message', messageData);
         } else {
-            console.warn('WebSocket not connected, cannot send message');
+            console.error('[useChatSocket] ✗ Not connected — cannot send');
         }
     };
 

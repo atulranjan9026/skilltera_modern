@@ -314,7 +314,7 @@ export const EnhancedChatComponent = ({ user, initialMessages = [] }) => {
             position: 'relative',
             backgroundColor: tokens.colors.secondary[100],
             borderRadius: tokens.borderRadius.lg,
-            padding: tokens.spacing[2),
+            padding: tokens.spacing[2],
           }}>
             <textarea
               value={inputText}

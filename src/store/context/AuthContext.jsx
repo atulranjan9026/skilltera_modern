@@ -64,13 +64,25 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const response = await authService.login(email, password);
+      console.log('[AuthContext] Login response:', {
+        hasData: !!response.data,
+        hasCandidate: !!response.data?.candidate,
+        candidateId: response.data?.candidate?._id,
+        accessToken: response.data?.accessToken ? 'Present' : 'Missing'
+      });
 
       if (response.data?.candidate) {
         const { candidate } = response.data;
+        console.log('[AuthContext] Setting user:', candidate._id);
         setUser(candidate);
         // Store to BOTH keys for compatibility with auth.js utilities
         localStorage.setItem('user', JSON.stringify(candidate));
         saveCandidateUser(candidate);
+        console.log('[AuthContext] Stored to localStorage:', {
+          candidateUser: localStorage.getItem('candidateUser') ? 'Saved' : 'Failed',
+          user: localStorage.getItem('user') ? 'Saved' : 'Failed',
+          token: localStorage.getItem('token') ? 'Saved' : 'Missing'
+        });
       }
 
       return response;

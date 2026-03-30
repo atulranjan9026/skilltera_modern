@@ -118,8 +118,19 @@ export function isCandidateLoggedIn() {
  * @returns {string} 'company' | 'candidate' | null
  */
 export function getUserType() {
-  if (isCompanyLoggedIn()) return "company";
-  if (isCandidateLoggedIn()) return "candidate";
+  const isCompany = isCompanyLoggedIn();
+  const isCandidate = isCandidateLoggedIn();
+  
+  if (isCompany) return "company";
+  if (isCandidate) return "candidate";
+  
+  console.log('[auth.js] getUserType - No user logged in:', {
+    isCompanyLoggedIn: isCompany,
+    isCandidateLoggedIn: isCandidate,
+    candidateData: getCandidateUser(),
+    companyData: getCompanyUser()
+  });
+  
   return null;
 }
 
@@ -129,7 +140,18 @@ export function getUserType() {
  */
 export function getCurrentUser() {
   const userType = getUserType();
-  return userType === "company" ? getCompanyUser() : getCandidateUser();
+  const user = userType === "company" ? getCompanyUser() : getCandidateUser();
+  
+  if (!user?._id && !user?.id) {
+    console.log('[auth.js] getCurrentUser - Empty user object:', {
+      userType,
+      isEmpty: true,
+      candidateUserStorage: localStorage.getItem('candidateUser') ? 'exists' : 'missing',
+      companyUserStorage: localStorage.getItem('companyUser') ? 'exists' : 'missing'
+    });
+  }
+  
+  return user;
 }
 
 /**

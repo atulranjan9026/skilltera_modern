@@ -25,6 +25,17 @@ export default function ChatPage({ initialConversationId }) {
         localStorage.getItem('companyToken') ||
         (role === 'company' ? localStorage.getItem('companyToken') : localStorage.getItem('candidateToken'));
 
+    console.log('[ChatPage] Auth status:', {
+        user: currentUser?._id ? `User(${currentUser._id})` : 'Empty',
+        role: role || 'None',
+        token: token ? `${token.substring(0, 20)}...` : 'None',
+        rawLocalStorage: {
+            token: localStorage.getItem('token') ? 'exists' : 'missing',
+            candidateUser: localStorage.getItem('candidateUser') ? 'exists' : 'missing',
+            candidateToken: localStorage.getItem('candidateToken') ? 'exists' : 'missing'
+        }
+    });
+
     useEffect(() => {
     }, [currentUser, role, token]);
 
@@ -160,10 +171,11 @@ export default function ChatPage({ initialConversationId }) {
 
         setInputText("");
 
-        // Send via Socket.io
+        // Send via Socket.io with all required fields
         const receiverRole = role === 'candidate' ? 'company' : 'candidate';
         sendMessage({
             conversationId: activeConv._id,
+            jobId: activeConv.jobId || activeConv.jobId?._id,
             senderId: userId,
             text,
             receiverRole
