@@ -8,8 +8,9 @@ import { SkillsSection } from "./profile/components/SkillsSection";
 import { ExperienceSection } from "./profile/components/ExperienceSection";
 import { EducationSection } from "./profile/components/EducationSection";
 import { PersonalInfoSection } from "./profile/components/PersonalInfoSection";
-import { ResumeSection } from "./profile/components/ResumeSection";
+import { EnhancedResumeSection } from "./profile/components/EnhancedResumeSection";
 import { candidateService } from "../../services/candidateService";
+import resumeUploadService from "../../services/resumeUploadService";
 import { CertificatesSection } from "./profile/components/CertificatesSection";
 
 export default function ProfileEditor() {
@@ -32,15 +33,17 @@ export default function ProfileEditor() {
 
   const handleResumeUpdate = async () => {
     try {
-      const response = await candidateService.getProfile();
-      if (response?.success && response?.data) {
+      const response = await resumeUploadService.getCurrentResume();
+      if (response) {
         setEditedData((prev) => ({
           ...prev,
-          resume: response.data.resume,
+          resume: response,
         }));
+        toast.success('Resume updated successfully!');
       }
     } catch (error) {
       console.error("Failed to refresh resume data:", error);
+      toast.error('Failed to update resume data');
     }
   };
 
@@ -172,7 +175,7 @@ export default function ProfileEditor() {
           {/* ── RIGHT PANEL (7/10) ── Tab Content */}
           <div style={{ flex: "7" }}>
             {activeTab === "resume" && (
-              <ResumeSection
+              <EnhancedResumeSection
                 resume={editedData?.resume}
                 onResumeUpdate={handleResumeUpdate}
               />
