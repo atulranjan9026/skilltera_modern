@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Edit3, Save, X, Loader, User } from "lucide-react";
 import { useAuthContext } from "../../store/context/AuthContext";
 import { THEME_CLASSES } from "../../theme";
@@ -17,6 +17,8 @@ export default function ProfileEditor() {
   const { user, isLoading } = useAuthContext();
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const avatarInputRef = useRef(null);
 
   const {
     editedData,
@@ -60,6 +62,42 @@ export default function ProfileEditor() {
       <div className="text-center p-8">Please log in to view your profile.</div>
     );
   }
+
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select a valid image file (JPEG, PNG, etc.)');
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Avatar image size must be less than 2MB');
+      return;
+    }
+
+    setAvatarUploading(true);
+
+    try {
+      const response = await candidateService.uploadAvatar(file);
+      if (response?.success && response?.data) {
+        setEditedData((prev) => ({
+          ...prev,
+          ...response.data,
+        }));
+        toast.success('Profile avatar updated successfully!');
+      } else {
+        throw new Error(response?.message || 'Avatar upload failed');
+      }
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      toast.error(error.response?.data?.message || error.message || 'Failed to upload avatar');
+    } finally {
+      setAvatarUploading(false);
+      e.target.value = '';
+    }
+  };
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -109,14 +147,47 @@ export default function ProfileEditor() {
           {/* ── LEFT PANEL (3/10) ── Profile Header */}
           <div className="w-3/10 sticky top-12" style={{ flex: "3" }}>
             <div className={`${THEME_CLASSES.cards} p-6 shadow-xl`}>
-              {editedData?.avatar?.url && (
-                <img
-                  src={editedData.avatar.url}
-                  alt="Profile Avatar"
-                  referrerPolicy="no-referrer" // ← add this
-                  className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg mx-auto mb-4"
-                />
+              {editedData?.avatar?.url ? (
+                <div className="relative mx-auto mb-4 w-24 h-24">
+                  <img
+                    src={editedData.avatar.url}
+                    alt="Profile Avatar"
+                    referrerPolicy="no-referrer"
+                    className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => avatarInputRef.current?.click()}
+                    className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary-500 text-white flex items-center justify-center shadow-lg hover:bg-primary-600"
+                    disabled={avatarUploading}
+                  >
+                    {avatarUploading ? <Loader size={14} className="animate-spin" /> : <Edit3 size={14} />}
+                  </button>
+                </div>
+              ) : (
+                <div className="text-center mb-4">
+                  <div className="mx-auto w-24 h-24 rounded-full bg-slate-200 border-4 border-white shadow-lg flex items-center justify-center text-slate-500">
+                    <User size={36} />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => avatarInputRef.current?.click()}
+                    className="mt-2 text-sm font-medium text-primary-600 hover:text-primary-800"
+                    disabled={avatarUploading}
+                  >
+                    {avatarUploading ? 'Uploading...' : 'Upload Avatar'}
+                  </button>
+                </div>
               )}
+
+              <input
+                type="file"
+                ref={avatarInputRef}
+                className="hidden"
+                accept="image/*"
+                onChange={handleAvatarChange}
+                disabled={avatarUploading}
+              />
               <div className="text-center">
                 <h1 className="text-2xl font-bold text-slate-900 mb-1">
                   {editedData?.name}
