@@ -82,5 +82,9 @@ export const jobService = {
     getLocationSuggestions: async (query, limit = 8) => {
         const params = new URLSearchParams({ q: query, limit });
         return get(`/candidates/job/location-suggestions?${params.toString()}`, false, 0);
+    },
+
+    getJobById: async (jobId) => {
+        return get(`/candidates/job/${jobId}`, true, 0);
     }
 };

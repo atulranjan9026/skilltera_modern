@@ -131,6 +131,7 @@ const formatSalary = (salary) => {
 
 const transformApp = (app) => ({
   id: app._id,
+  jobId: app.job?._id?.toString(),
   title: app.job?.jobTitle || app.job?.title || 'Job Title',
   company: app.job?.companyId?.companyName || null,
   location: [app.job?.city, app.job?.state, app.job?.country].filter(Boolean).join(', ') || null,
@@ -366,7 +367,7 @@ const JobCard = ({ job, isApplied, index = 0, onJobClick }) => (
       hover:shadow-md hover:-translate-y-0.5 hover:border-slate-200
       transition-all duration-200 cursor-pointer"
     style={{ opacity: 0, animation: `fadeSlideUp 0.4s ease ${index * 55}ms forwards` }}
-    onClick={() => onJobClick?.(job.id)}
+    onClick={() => onJobClick?.(job.jobId ?? job.id)}
   >
     {/* Avatar */}
     <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary-50 to-primary-100
@@ -431,7 +432,7 @@ const JobCard = ({ job, isApplied, index = 0, onJobClick }) => (
     <button
       onClick={(e) => {
         e.stopPropagation();
-        onJobClick?.(job.id);
+        onJobClick?.(job.jobId ?? job.id);
       }}
       className="shrink-0 w-8 h-8 rounded-xl bg-slate-50 border border-slate-100
         hover:bg-primary-50 hover:border-primary-100 hover:text-primary-600
@@ -558,7 +559,7 @@ export default function UserDashboard() {
         <div className="mb-9" style={{ opacity: 0, animation: 'fadeSlideUp 0.5s ease 0ms forwards' }}>
           <p className="text-[11px] font-bold text-primary-500 uppercase tracking-[0.14em] mb-1.5">Dashboard</p>
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 leading-tight">
-            Hey, {user.fullname || user.name || 'there'} 👋
+            Hey, { user.name || 'there'} 👋
           </h1>
           <p className="text-slate-400 text-sm mt-1">Track your applications and saved jobs</p>
         </div>

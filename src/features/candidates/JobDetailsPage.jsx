@@ -27,31 +27,48 @@ export default function JobDetailsPage() {
         setLoading(true);
         setError(null);
 
-        // Try to get from applications first
+        let foundJob = null;
+
+        // Try to get from applications first (match by job ID or application ID)
         const res = await candidateService.getApplications(user?._id);
         if (res?.success) {
           const applications = res.data?.applications || [];
-          const application = applications.find(app => app.job?._id === jobId);
-          
+          const application = applications.find(app => 
+            app.job?._id?.toString() === jobId || app._id?.toString() === jobId
+          );
+
           if (application) {
-            setJob(application.job);
+            foundJob = application.job;
             setIsApplied(true);
             setApplicationStatus(application.status);
-          } else {
-            // Try to get from saved jobs
-            const savedRes = await candidateService.getSavedJobs(user?._id);
-            if (savedRes?.success) {
-              const savedJobs = savedRes.data?.jobs || [];
-              const savedJob = savedJobs.find(j => j._id === jobId);
-              if (savedJob) {
-                setJob(savedJob);
-                setIsSaved(true);
-              }
+          }
+        }
+
+        if (!foundJob) {
+          // Try to get from saved jobs
+          const savedRes = await candidateService.getSavedJobs(user?._id);
+          if (savedRes?.success) {
+            const savedJobs = savedRes.data?.jobs || [];
+            const savedJob = savedJobs.find(j => j._id?.toString() === jobId);
+            if (savedJob) {
+              foundJob = savedJob;
+              setIsSaved(true);
             }
           }
         }
 
-        if (!job) {
+        if (!foundJob) {
+          // Fallback: query API for a single job by ID
+          const jobDetailRes = await candidateService.getJobById(jobId);
+          if (jobDetailRes?.success && jobDetailRes.data) {
+            foundJob = jobDetailRes.data;
+          }
+        }
+
+        if (foundJob) {
+          setJob(foundJob);
+          setError(null);
+        } else {
           setError('Job not found');
         }
       } catch (err) {
@@ -60,7 +77,6 @@ export default function JobDetailsPage() {
         setLoading(false);
       }
     };
-
     if (user?._id) {
       fetchJobDetails();
     }
