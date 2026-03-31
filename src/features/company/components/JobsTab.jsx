@@ -11,22 +11,22 @@ import { getCompanyUser } from "../../../utils/auth";
 /* ── default filter state ── */
 const DEFAULT_FILTERS = {
     jobType: [],          // ["Full Time", "Part Time", …]
-    status: [],           // ["active", "pending", "closed"]
+    status: [],           // ["APPROVED", "Pending", "Closed", "Draft"]
     experience: "",       // "0-2" | "3-5" | "6-10" | "10+"
     deadlineWithin: "",   // "7" | "14" | "30" days
     state: "",            // free-text state filter
 };
 
-const JOB_TYPES   = ["Full Time", "Part Time", "Contract", "Internship", "Remote"];
-const STATUSES    = ["active", "pending", "closed"];
-const EXP_RANGES  = [
-    { label: "0 – 2 yrs",  value: "0-2"  },
-    { label: "3 – 5 yrs",  value: "3-5"  },
+const JOB_TYPES = ["Full Time", "Part Time", "Contract", "Internship", "Remote"];
+const STATUSES = ["APPROVED", "Pending", "Closed", "Draft"];
+const EXP_RANGES = [
+    { label: "0 – 2 yrs", value: "0-2" },
+    { label: "3 – 5 yrs", value: "3-5" },
     { label: "6 – 10 yrs", value: "6-10" },
-    { label: "10+ yrs",    value: "10+"  },
+    { label: "10+ yrs", value: "10+" },
 ];
 const DEADLINE_OPTIONS = [
-    { label: "Within 7 days",  value: "7"  },
+    { label: "Within 7 days", value: "7" },
     { label: "Within 14 days", value: "14" },
     { label: "Within 30 days", value: "30" },
 ];
@@ -78,13 +78,13 @@ function applyFilters(jobs, search, filters) {
                 return false;
         }
         if (filters.jobType.length && !filters.jobType.includes(job.jobType)) return false;
-        if (filters.status.length  && !filters.status.includes(job.status))   return false;
+        if (filters.status.length && !filters.status.includes(job.status)) return false;
         if (filters.experience) {
             const exp = Number(job.workExperience ?? 0);
-            if (filters.experience === "0-2"  && (exp < 0  || exp > 2))  return false;
-            if (filters.experience === "3-5"  && (exp < 3  || exp > 5))  return false;
-            if (filters.experience === "6-10" && (exp < 6  || exp > 10)) return false;
-            if (filters.experience === "10+"  && exp < 10)               return false;
+            if (filters.experience === "0-2" && (exp < 0 || exp > 2)) return false;
+            if (filters.experience === "3-5" && (exp < 3 || exp > 5)) return false;
+            if (filters.experience === "6-10" && (exp < 6 || exp > 10)) return false;
+            if (filters.experience === "10+" && exp < 10) return false;
         }
         if (filters.deadlineWithin) {
             const dl = daysLeft(job.lastDate);
@@ -106,9 +106,10 @@ export function JobsTab({
     handleJobsPage,
     onViewJob,
     onEditJob,
+    onDeleteJob,
 }) {
     const [showFilters, setShowFilters] = useState(false);
-    const [filters, setFilters]         = useState(DEFAULT_FILTERS);
+    const [filters, setFilters] = useState(DEFAULT_FILTERS);
     const panelRef = useRef(null);
     const role = getCompanyUser()?.role;
     const canEditJobs = role === "company";
@@ -123,7 +124,7 @@ export function JobsTab({
         return () => document.removeEventListener("mousedown", handler);
     }, [showFilters]);
 
-    const activeCount  = countActive(filters);
+    const activeCount = countActive(filters);
     const filteredJobs = applyFilters(jobs, jobSearch, filters);
 
     function toggleArr(field, val) {
@@ -355,8 +356,15 @@ export function JobsTab({
                                                 {canEditJobs && (
                                                     <>
                                                         <span className="text-slate-200">|</span>
-                                                        <button onClick={() => onEditJob?.(job)} className="text-slate-500 hover:text-slate-800 text-xs font-semibold whitespace-nowrap">
-                                                            ✏️ Edit
+                                                        <button
+                                                            onClick={() => {
+                                                                if (window.confirm("Are you sure you want to delete this job?")) {
+                                                                    onDeleteJob?.(job);
+                                                                }
+                                                            }}
+                                                            className="text-rose-500 hover:text-rose-700 text-xs font-semibold whitespace-nowrap"
+                                                        >
+                                                            🗑️ Delete
                                                         </button>
                                                     </>
                                                 )}

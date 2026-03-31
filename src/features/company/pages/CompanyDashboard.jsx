@@ -190,7 +190,7 @@ export default function CompanyDashboard() {
     setAssigningApp(null);
   };
   // ── Derived / memoised stats ──────────────────────────────────────────────
-  const activeJobs = useMemo(() => jobs.filter((j) => j.status === 'active').length, [jobs]);
+  const activeJobs = useMemo(() => jobs.filter((j) => j.status === 'APPROVED').length, [jobs]);
   const pendingJobs = useMemo(() => jobs.filter((j) => j.status === "Pending").length, [jobs]);
   const byStatus = useCallback((s) => applications.filter((a) => a.status === s).length, [applications]);
 
@@ -380,9 +380,9 @@ export default function CompanyDashboard() {
           {/* Messages */}
           {!showCreate && activeTab === "messages" && (
             <div className="h-full flex flex-col -mt-6 -mx-6 relative">
-               <div className="flex-1 overflow-auto bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100">
-                  <ChatPage />
-               </div>
+              <div className="flex-1 overflow-auto bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100">
+                <ChatPage />
+              </div>
             </div>
           )}
 

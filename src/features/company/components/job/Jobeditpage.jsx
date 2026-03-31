@@ -155,9 +155,9 @@ export function JobEditPage({ job, onBack, onSave }) {
     ]), []);
 
     const statusOptions = useMemo(() => ([
-        { label: "Active", value: "active" },
-        { label: "Draft", value: "draft" },
-        { label: "Closed", value: "closed" },
+        { label: "APPROVED", value: "APPROVED" },
+        { label: "Draft", value: "Draft" },
+        { label: "Closed", value: "Closed" },
         { label: "Pending", value: "Pending" },
     ]), []);
 
@@ -249,12 +249,12 @@ export function JobEditPage({ job, onBack, onSave }) {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-8">
-                
+
                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
-                    
+
                     {/* ── Left/Main Column: Primary Info ── */}
                     <div className="xl:col-span-2 space-y-8">
-                        
+
                         {/* Section: General Information */}
                         <FormSection title="General Information" icon="📝">
                             <Field label="Job Title" required>
@@ -436,7 +436,7 @@ export function JobEditPage({ job, onBack, onSave }) {
 
                     {/* ── Right Column: Sidebar Settings ── */}
                     <div className="space-y-8">
-                        
+
                         {/* Section: Location */}
                         <FormSection title="Work Location" icon="📍">
                             <div className="space-y-5">
@@ -542,17 +542,17 @@ export function JobEditPage({ job, onBack, onSave }) {
                                 <Field label="Application Deadline">
                                     <input type="date" value={form.applicationDeadline} onChange={set("applicationDeadline")} className={inputCls} />
                                 </Field>
-                                
+
                                 <div className="h-px bg-slate-100 my-2" />
-                                
+
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className={`p-4 rounded-2xl border transition-all flex flex-col items-center text-center gap-2 cursor-pointer ${form.isActive ? 'bg-indigo-50 border-indigo-200' : 'bg-slate-50 border-slate-100'}`}
-                                         onClick={() => setForm(f => ({...f, isActive: !f.isActive}))}>
+                                        onClick={() => setForm(f => ({ ...f, isActive: !f.isActive }))}>
                                         <span className="text-lg">{form.isActive ? '✅' : '⏸️'}</span>
                                         <span className="text-xs font-black text-slate-800 uppercase tracking-tighter">Active</span>
                                     </div>
                                     <div className={`p-4 rounded-2xl border transition-all flex flex-col items-center text-center gap-2 cursor-pointer ${form.isFeatured ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-100'}`}
-                                         onClick={() => setForm(f => ({...f, isFeatured: !f.isFeatured}))}>
+                                        onClick={() => setForm(f => ({ ...f, isFeatured: !f.isFeatured }))}>
                                         <span className="text-lg">{form.isFeatured ? '⭐' : '☆'}</span>
                                         <span className="text-xs font-black text-slate-800 uppercase tracking-tighter">Featured</span>
                                     </div>

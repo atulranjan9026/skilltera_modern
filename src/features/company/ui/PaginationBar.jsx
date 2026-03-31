@@ -11,8 +11,8 @@ export function PaginationBar({ currentPage, totalPages, totalItems, itemLabel =
     // Generate page numbers to show
     const getPageNumbers = () => {
         const pages = [];
-        const maxVisible = 5; // Show max 5 page numbers
-        
+        const maxVisible = 10; // Show max 5 page numbers
+
         if (totalPages <= maxVisible) {
             // Show all pages if total is small
             for (let i = 1; i <= totalPages; i++) {
@@ -23,17 +23,17 @@ export function PaginationBar({ currentPage, totalPages, totalItems, itemLabel =
             const half = Math.floor(maxVisible / 2);
             let start = Math.max(1, currentPage - half);
             let end = Math.min(totalPages, start + maxVisible - 1);
-            
+
             // Adjust if we're near the end
             if (end - start + 1 < maxVisible) {
                 start = Math.max(1, end - maxVisible + 1);
             }
-            
+
             for (let i = start; i <= end; i++) {
                 pages.push(i);
             }
         }
-        
+
         return pages;
     };
 
@@ -56,7 +56,7 @@ export function PaginationBar({ currentPage, totalPages, totalItems, itemLabel =
                 >
                     ← Prev
                 </button>
-                
+
                 {/* Page number buttons */}
                 <div className="flex items-center gap-1">
                     {pageNumbers.map((pageNum) => (
@@ -64,17 +64,16 @@ export function PaginationBar({ currentPage, totalPages, totalItems, itemLabel =
                             key={pageNum}
                             onClick={() => onPageClick?.(pageNum)}
                             disabled={loading}
-                            className={`${btnPage} ${
-                                pageNum === currentPage 
-                                    ? btnPageActive 
-                                    : btnPageNormal
-                            } ${loading ? 'cursor-not-allowed opacity-50' : ''}`}
+                            className={`${btnPage} ${pageNum === currentPage
+                                ? btnPageActive
+                                : btnPageNormal
+                                } ${loading ? 'cursor-not-allowed opacity-50' : ''}`}
                         >
                             {pageNum}
                         </button>
                     ))}
                 </div>
-                
+
                 <button
                     onClick={onNext}
                     disabled={currentPage >= totalPages || loading}
