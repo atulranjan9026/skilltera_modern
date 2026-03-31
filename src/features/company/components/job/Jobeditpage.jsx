@@ -158,7 +158,7 @@ export function JobEditPage({ job, onBack, onSave }) {
         { label: "Active", value: "active" },
         { label: "Draft", value: "draft" },
         { label: "Closed", value: "closed" },
-        { label: "On-hold", value: "on-hold" },
+        { label: "Pending", value: "Pending" },
     ]), []);
 
     async function handleSubmit(e) {

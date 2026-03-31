@@ -18,7 +18,7 @@ export const STATUS_CFG = {
     draft: { label: "Draft", bg: "bg-slate-100", text: "text-slate-700", dot: "bg-slate-500" },
     active: { label: "Active", bg: "bg-emerald-100", text: "text-emerald-700", dot: "bg-emerald-500" },
     closed: { label: "Closed", bg: "bg-gray-100", text: "text-gray-700", dot: "bg-gray-500" },
-    "on-hold": { label: "On Hold", bg: "bg-orange-100", text: "text-orange-700", dot: "bg-orange-500" },
+    "Pending": { label: "Pending", bg: "bg-orange-100", text: "text-orange-700", dot: "bg-orange-500" },
     APPROVED: { label: "Approved", bg: "bg-green-100", text: "text-green-700", dot: "bg-green-500" },
 };
 
@@ -34,7 +34,7 @@ export const FUNNEL_COLORS = {
     draft: "#64748b",
     active: "#10b981",
     closed: "#6b7280",
-    "on-hold": "#f97316",
+    "Pending": "#f97316",
     APPROVED: "#059669",
 };
 

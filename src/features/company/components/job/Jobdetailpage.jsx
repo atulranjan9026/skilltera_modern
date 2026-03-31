@@ -48,29 +48,32 @@ export function JobDetailPage({ job, onBack, onEdit }) {
     }, []);
 
     return (
-        <div className="w-full space-y-8 pb-12">
+        <div className="w-full space-y-4 pb-12">
             {/* ── Top bar ── */}
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+            <div className="sticky top-0 z-50 bg-white border-b p-4">
+                <div className="flex items-center justify-between border-slate-300">
+
                 <button
                     onClick={onBack}
                     className="group text-sm text-slate-500 hover:text-indigo-600 font-medium flex items-center gap-2 transition-colors"
-                >
+                    >
                     <span className="transition-transform group-hover:-translate-x-1">←</span> Back to Jobs
                 </button>
                 {canEditJobs && (
                     <button
-                        onClick={() => onEdit(job)}
-                        className="bg-white border border-indigo-100 text-indigo-600 hover:bg-indigo-50 text-xs font-bold px-6 py-2.5 rounded-xl transition-all shadow-sm hover:shadow-md flex items-center gap-2"
+                    onClick={() => onEdit(job)}
+                    className="bg-white border border-indigo-100 text-indigo-600 hover:bg-indigo-50 text-xs font-bold px-6 py-2.5 rounded-xl transition-all shadow-sm hover:shadow-md flex items-center gap-2"
                     >
                         <span>✏️</span> Edit Job Info
                     </button>
                 )}
+                </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                 
                 {/* ── Main Content (Left Column) ── */}
-                <div className="lg:col-span-2 space-y-8">
+                <div className="lg:col-span-2 space-y-4">
                     
                     {/* ── Header card ── */}
                     <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
@@ -98,7 +101,7 @@ export function JobDetailPage({ job, onBack, onEdit }) {
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <JobTypePill type={j.jobType} />
-                                    <JobStatusBadge status={j.status} active={j.active} />
+                                    <JobStatusBadge status={j.status} />
                                 </div>
                             </div>
 

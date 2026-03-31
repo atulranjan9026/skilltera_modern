@@ -190,8 +190,8 @@ export default function CompanyDashboard() {
     setAssigningApp(null);
   };
   // ── Derived / memoised stats ──────────────────────────────────────────────
-  const activeJobs = useMemo(() => jobs.filter((j) => j.active).length, [jobs]);
-  const pendingJobs = useMemo(() => jobs.filter((j) => j.status === "PENDING").length, [jobs]);
+  const activeJobs = useMemo(() => jobs.filter((j) => j.status === 'active').length, [jobs]);
+  const pendingJobs = useMemo(() => jobs.filter((j) => j.status === "Pending").length, [jobs]);
   const byStatus = useCallback((s) => applications.filter((a) => a.status === s).length, [applications]);
 
   const { applied, shortlisted, interviews, selected, rejected } = useMemo(() => ({

@@ -6,7 +6,7 @@ console.log(status);
         PENDING: { cls: "bg-amber-100 text-amber-700", lbl: "Pending" },
         REJECTED: { cls: "bg-rose-100 text-rose-700", lbl: "Rejected" },
         active: { cls: "bg-blue-100 text-blue-700", lbl: "Active" },
-        "on-hold": { cls: "bg-amber-100 text-amber-700", lbl: "On Hold" },
+        "Pending": { cls: "bg-amber-100 text-amber-700", lbl: "Pending" },
     };
     const { cls, lbl } = cfg[status] || cfg.PENDING;
     return (
