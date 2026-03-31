@@ -14,7 +14,7 @@ const lbl =
     "block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide";
 
 const INITIAL_FORM = {
-    jobTitle: "", jobDescription: "", jobType: "Full-time", experienceLevel: "Mid-level",
+    jobTitle: "", jobDescription: "", jobType: "Full Time", experienceLevel: "Mid-level",
     minExperience: "", maxExperience: "", category: "", openings: 1, deadline: "",
     benefits: "", responsibilities: "", qualifications: "", tags: "",
     country: "", state: "", city: "", isRemote: false, remoteType: "On-site",

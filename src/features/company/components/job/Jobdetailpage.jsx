@@ -19,7 +19,7 @@ function normalizeJob(job) {
             job?.workExperience ??
             (typeof job?.minExperience === "number" ? job.minExperience : undefined) ??
             0,
-        requiredSkills: job?.requiredSkills ?? job?.skillRequired ?? [],
+        requiredSkills: job?.requiredSkills ?? [],
         applicationsCount: job?.applicationsCount ?? 0,
     };
 }
@@ -157,7 +157,7 @@ export function JobDetailPage({ job, onBack, onEdit }) {
                                         <div className="flex items-center gap-3 ml-4">
                                             <div className="text-right">
                                                 <span className="block text-xs font-bold text-indigo-600">
-                                                    {(skill.experience ?? skill.requiredExperience ?? 0)}+ yrs
+                                                    {(skill.experience ?? skill.experience ?? 0)}+ yrs
                                                 </span>
                                                 <span className="text-[10px] text-slate-400 font-medium">Experience</span>
                                             </div>

@@ -15,7 +15,7 @@ export function JobEditPage({ job, onBack, onSave }) {
     const initialSalaryEnabled = Boolean(job?.salary?.min ?? job?.salaryMin);
     const initialRequiredSkills = Array.isArray(job?.requiredSkills)
         ? job.requiredSkills
-        : (Array.isArray(job?.skillRequired) ? job.skillRequired : []);
+        : [];
 
     const csvFromArr = (arr) => Array.isArray(arr) ? arr.join(", ") : (arr ?? "");
     const arrFromCsv = (str) => (str || "")
@@ -60,7 +60,7 @@ export function JobEditPage({ job, onBack, onSave }) {
         initialRequiredSkills.map((s) => ({
             skillId: s.skillId?._id ?? s.skillId ?? "",
             skillName: s.skillName ?? s.skillId?.skillName ?? s.skillId?.name ?? "",
-            experience: Number(s.experience ?? s.requiredExperience ?? 0),
+            experience: Number(s.experience ?? s.experience ?? 0),
             rating: Number(s.rating ?? 3),
             isMandatory: s.isMandatory ?? true,
         }))

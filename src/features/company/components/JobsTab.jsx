@@ -10,14 +10,14 @@ import { getCompanyUser } from "../../../utils/auth";
 
 /* ── default filter state ── */
 const DEFAULT_FILTERS = {
-    jobType: [],          // ["Full-time", "Part-time", …]
+    jobType: [],          // ["Full Time", "Part Time", …]
     status: [],           // ["active", "pending", "closed"]
     experience: "",       // "0-2" | "3-5" | "6-10" | "10+"
     deadlineWithin: "",   // "7" | "14" | "30" days
     state: "",            // free-text state filter
 };
 
-const JOB_TYPES   = ["Full-time", "Part-time", "Contract", "Internship", "Remote"];
+const JOB_TYPES   = ["Full Time", "Part Time", "Contract", "Internship", "Remote"];
 const STATUSES    = ["active", "pending", "closed"];
 const EXP_RANGES  = [
     { label: "0 – 2 yrs",  value: "0-2"  },

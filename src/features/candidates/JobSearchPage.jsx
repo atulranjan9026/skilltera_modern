@@ -63,14 +63,14 @@ export default function JobSearchPage() {
       logo: '🏢',
       location: [job.city, job.state, job.country].filter(Boolean).join(', ') || 'Location not specified',
       salary: job.salary ? `${job.salary.currency} ${job.salary.min?.toLocaleString() || 'N/A'} - ${job.salary.max?.toLocaleString() || 'N/A'} ${job.salary.period || ''}`.trim() : 'Competitive',
-      jobType: job.jobType === 'Fulltime' ? 'Full-time' : job.jobType || 'Full-time',
+      jobType: job.jobType === 'Full Time' ? 'Full Time' : job.jobType || 'Full Time',
       experience: job.workExperience !== undefined ? `${job.workExperience} years` : 'Not specified',
       postedTime: job.postedOn ? new Date(job.postedOn).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently',
       jobDescription: job.jobDescription || '',
       skills: job.skillDetails?.map(s => ({
         name: s.skill || 'Unknown Skill',
         rating: s.rating || 0,
-        experience: s.requiredExperience || 0
+        experience: s.experience || 0
       })) || [],
       // Match score fields from ranking algorithm
       matchScore: job.matchScore,
