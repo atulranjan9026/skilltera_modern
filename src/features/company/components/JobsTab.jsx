@@ -110,6 +110,7 @@ export function JobsTab({
 }) {
     const [showFilters, setShowFilters] = useState(false);
     const [filters, setFilters] = useState(DEFAULT_FILTERS);
+    const [jobToDelete, setJobToDelete] = useState(null);
     const panelRef = useRef(null);
     const role = getCompanyUser()?.role;
     const canEditJobs = role === "company";
@@ -326,7 +327,11 @@ export function JobsTab({
                             {filteredJobs.map((job) => {
                                 const dl = daysLeft(job.lastDate);
                                 return (
-                                    <tr key={job._id} className="hover:bg-slate-50/60 transition-colors">
+                                    <tr 
+                                        key={job._id} 
+                                        onClick={() => onViewJob?.(job)}
+                                        className="hover:bg-slate-50/60 transition-colors cursor-pointer group"
+                                    >
                                         <td className="px-5 py-3.5">
                                             <div className="flex items-center gap-2.5">
                                                 <div className="w-8 h-8 bg-indigo-50 rounded-lg flex items-center justify-center text-sm flex-shrink-0">💼</div>
@@ -350,21 +355,36 @@ export function JobsTab({
                                         {/* <td className="px-5 py-3.5">{job.status }</td> */}
                                         <td className="px-5 py-3.5">
                                             <div className="flex items-center gap-2">
-                                                <button onClick={() => onViewJob?.(job)} className="text-indigo-600 hover:text-indigo-800 text-xs font-semibold whitespace-nowrap">
+                                                <button 
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        onViewJob?.(job);
+                                                    }} 
+                                                    className="text-indigo-600 group-hover:text-indigo-800 text-xs font-semibold whitespace-nowrap transition-colors"
+                                                >
                                                     View →
                                                 </button>
                                                 {canEditJobs && (
                                                     <>
                                                         <span className="text-slate-200">|</span>
                                                         <button
-                                                            onClick={() => {
-                                                                if (window.confirm("Are you sure you want to delete this job?")) {
-                                                                    onDeleteJob?.(job);
-                                                                }
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setJobToDelete(job);
                                                             }}
-                                                            className="text-rose-500 hover:text-rose-700 text-xs font-semibold whitespace-nowrap"
+                                                            className="text-rose-500 hover:text-rose-700 text-xs font-semibold whitespace-nowrap focus:outline-none transition-colors"
                                                         >
                                                             🗑️ Delete
+                                                        </button>
+                                                        <span className="text-slate-200">|</span>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                onEditJob?.(job);
+                                                            }}
+                                                            className="text-slate-500 hover:text-slate-800 text-xs font-semibold whitespace-nowrap transition-colors"
+                                                        >
+                                                            ✏️ Edit
                                                         </button>
                                                     </>
                                                 )}
@@ -385,6 +405,13 @@ export function JobsTab({
                     />
                 </div>
             )}
+
+            {/* Custom Delete Confirmation Modal */}
+            <DeleteConfirmModal
+                job={jobToDelete}
+                onClose={() => setJobToDelete(null)}
+                onConfirm={onDeleteJob}
+            />
         </div>
     );
 }
@@ -420,5 +447,44 @@ function ActivePill({ label, onRemove }) {
             {label}
             <button onClick={onRemove} className="text-indigo-400 hover:text-indigo-700 leading-none text-sm">×</button>
         </span>
+    );
+}
+
+function DeleteConfirmModal({ job, onClose, onConfirm }) {
+    if (!job) return null;
+
+    return (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-100">
+                <div className="p-6 flex flex-col items-center text-center">
+                    <div className="w-14 h-14 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mb-5 shadow-inner">
+                        <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-800 mb-2">Delete Job Posting</h3>
+                    <p className="text-sm text-slate-500 leading-relaxed px-2">
+                        Are you sure you want to delete <span className="font-semibold text-slate-700">"{job.jobTitle}"</span>? This action cannot be undone.
+                    </p>
+                </div>
+                <div className="p-5 bg-slate-50 border-t border-slate-100 flex gap-3 sm:px-6">
+                    <button
+                        onClick={onClose}
+                        className="flex-1 py-2.5 px-4 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-700 rounded-xl text-sm font-bold transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-200"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={() => {
+                            onConfirm?.(job);
+                            onClose();
+                        }}
+                        className="flex-1 py-2.5 px-4 bg-rose-500 hover:bg-rose-600 active:bg-rose-700 text-white rounded-xl text-sm font-bold transition-all shadow-md shadow-rose-200 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2"
+                    >
+                        Yes, Delete
+                    </button>
+                </div>
+            </div>
+        </div>
     );
 }

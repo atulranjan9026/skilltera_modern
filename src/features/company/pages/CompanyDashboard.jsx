@@ -189,6 +189,8 @@ export default function CompanyDashboard() {
     );
     setAssigningApp(null);
   };
+
+
   // ── Derived / memoised stats ──────────────────────────────────────────────
   const activeJobs = useMemo(() => jobs.filter((j) => j.status === 'APPROVED').length, [jobs]);
   const pendingJobs = useMemo(() => jobs.filter((j) => j.status === "Pending").length, [jobs]);

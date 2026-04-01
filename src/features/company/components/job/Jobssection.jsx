@@ -29,6 +29,36 @@ export function JobsSection(props) {
         setView("edit");
     }
 
+    async function handleDeleteJob(job) {
+        try {
+            const companyUser = getCompanyUser();
+            const companyId = companyUser._id || companyUser.id;
+            
+            if (!companyId) {
+                throw new Error("Company ID is required for delete");
+            }
+
+            // Delete the job
+            await companyService.deleteJob(companyId, job._id || job.jobId);
+            
+            // Show success notification
+            toast.success(`Job "${job.jobTitle}" deleted successfully!`);
+            
+            // Refresh the jobs list if the refresh function is provided
+            if (props.onRetry) {
+                props.onRetry();
+            }
+            
+            // Go back to list view
+            setView("list");
+            setSelectedJob(null);
+        } catch (error) {
+            console.error("Failed to delete job:", error);
+            const errMsg = error.response?.data?.message || error.message || "Failed to delete job.";
+            toast.error(errMsg);
+        }
+    }
+
     function handleBack() {
         setView("list");
         setSelectedJob(null);
@@ -40,34 +70,34 @@ export function JobsSection(props) {
             const companyUser = getCompanyUser();
             const companyId = companyUser._id || companyUser.id;
             const jobId = updatedJob._id || updatedJob.jobId;
-            
+
             if (!jobId) {
                 throw new Error("Job ID is required for update");
             }
-            
+
             if (!companyId) {
                 throw new Error("Company ID is required for update");
             }
-            
+
             // Clean the job object - remove conflicting ID fields
             const jobData = { ...updatedJob };
             delete jobData._id; // Remove _id from data being sent
             delete jobData.jobId; // Remove jobId from data being sent
             delete jobData.companyId; // Remove companyId from data being sent
-            
+
             await companyService.updateJob(companyId, jobId, jobData);
-            
+
             // ── Update local state immediately so Detail view reflects changes ──
             setSelectedJob(updatedJob);
-            
+
             // Show success notification
             toast.success("Job updated successfully!");
-            
+
             // Refresh the jobs list if the refresh function is provided
             if (props.onRetry) {
                 props.onRetry();
             }
-            
+
             // Go back to detail view after successful save
             setView("detail");
         } catch (error) {
@@ -108,6 +138,7 @@ export function JobsSection(props) {
             {...props}                  // pass through all your existing props
             onViewJob={handleViewJob}   // NEW
             onEditJob={handleEditJob}   // NEW
+            onDeleteJob={handleDeleteJob}   // NEW
         />
     );
 }
