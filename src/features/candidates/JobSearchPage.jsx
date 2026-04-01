@@ -67,8 +67,8 @@ export default function JobSearchPage() {
       experience: job.workExperience !== undefined ? `${job.workExperience} years` : 'Not specified',
       postedTime: job.postedOn ? new Date(job.postedOn).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently',
       jobDescription: job.jobDescription || '',
-      skills: job.skillDetails?.map(s => ({
-        name: s.skill || 'Unknown Skill',
+      skills: job.requiredSkills?.map(s => ({
+        name: s.skillName || 'Unknown Skill',
         rating: s.rating || 0,
         experience: s.experience || 0
       })) || [],
