@@ -16,10 +16,11 @@ export function ApplicationsTab({
     statusFilter, setStatusFilter,
     appSearch, setAppSearch,
     appsLoading, appsError, applications,
-    onRetry, handleAppsPage, handleStatusChange,
+    onRetry, handleAppsPage, handleStatusChange, handleDeleteApplication,
 }) {
     const [selectedCandidate, setSelectedCandidate] = useState(null);
     const [showFilters, setShowFilters] = useState(false);
+    const [applicationToDelete, setApplicationToDelete] = useState(null);
     const [advancedFilters, setAdvancedFilters] = useState({
         status: [],
         jobType: [],
@@ -431,6 +432,13 @@ export function ApplicationsTab({
                                                 >
                                                     Reject
                                                 </button>
+                                                <button
+                                                    onClick={() => setApplicationToDelete(app)}
+                                                    className="text-[10px] bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded-lg font-semibold transition-colors"
+                                                    title="Delete Application"
+                                                >
+                                                    🗑️
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -447,6 +455,44 @@ export function ApplicationsTab({
                         onNext={() => handleAppsPage(appsPage + 1)}
                         loading={appsLoading}
                     />
+                </div>
+            )}
+            
+            {/* Delete Confirmation Modal */}
+            {applicationToDelete && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+                    <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden border border-slate-100">
+                        <div className="p-6 flex flex-col items-center text-center">
+                            <div className="w-14 h-14 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-5 shadow-inner">
+                                <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-xl font-bold text-slate-800 mb-2">Delete Application</h3>
+                            <p className="text-sm text-slate-600 mb-6">
+                                Are you sure you want to delete the application from 
+                                <span className="font-semibold text-slate-700"> {applicationToDelete.candidate?.name || "this candidate"}</span>?
+                                This action cannot be undone.
+                            </p>
+                        </div>
+                        <div className="p-5 bg-slate-50 border-t border-slate-100 flex gap-3">
+                            <button
+                                onClick={() => setApplicationToDelete(null)}
+                                className="flex-1 py-2.5 px-4 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-bold transition-all shadow-sm"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => {
+                                    handleDeleteApplication?.(applicationToDelete._id);
+                                    setApplicationToDelete(null);
+                                }}
+                                className="flex-1 py-2.5 px-4 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-bold transition-all shadow-md shadow-red-200"
+                            >
+                                Delete Application
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

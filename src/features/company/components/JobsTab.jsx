@@ -375,19 +375,20 @@ export function JobsTab({
                                                 </button>
                                                 {canEditJobs && (
                                                     <>
-                                                        <span className="text-slate-200">|</span>
-                                                        <button
-                                                            onClick={e => { e.stopPropagation(); setJobToDelete(job); }}
-                                                            className="text-rose-500 hover:text-rose-700 text-xs font-semibold whitespace-nowrap transition-colors"
-                                                        >
-                                                            🗑️ Delete
-                                                        </button>
+                                                       
                                                         <span className="text-slate-200">|</span>
                                                         <button
                                                             onClick={e => { e.stopPropagation(); onEditJob?.(job); }}
                                                             className="text-slate-500 hover:text-slate-800 text-xs font-semibold whitespace-nowrap transition-colors"
                                                         >
                                                             ✏️ Edit
+                                                        </button>
+                                                         <span className="text-slate-200">|</span>
+                                                        <button
+                                                            onClick={e => { e.stopPropagation(); setJobToDelete(job); }}
+                                                            className="text-rose-500 hover:text-rose-700 text-xs font-semibold whitespace-nowrap transition-colors"
+                                                        >
+                                                            🗑️ Delete
                                                         </button>
                                                     </>
                                                 )}

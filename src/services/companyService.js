@@ -74,6 +74,12 @@ export const companyService = {
     return put(`/company/${companyId}/applications/${applicationId}`, { status });
   },
 
+  deleteApplication: async (companyId, applicationId) => {
+    clearCache(`GET:/company/${companyId}/applications`);
+    clearCache(`GET:/company/${companyId}/jobs`);
+    return del(`/company/${companyId}/applications/${applicationId}`);
+  },
+
   // ─── Skills ───────────────────────────────────────────────────────────────
 
   // FIX: only append ?search= when the search string is non-empty

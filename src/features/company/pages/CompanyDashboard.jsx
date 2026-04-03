@@ -173,6 +173,18 @@ export default function CompanyDashboard() {
     }
   };
 
+  // ── Application deletion ─────────────────────────────────────────────────────
+  const handleDeleteApplication = async (applicationId) => {
+    try {
+      await companyService.deleteApplication(companyId, applicationId);
+      setApplications((prev) => prev.filter((a) => a._id !== applicationId));
+      setTotalApps((prev) => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error("Failed to delete application:", error);
+      alert("Failed to delete application. Please try again.");
+    }
+  };
+
   const refreshAll = () => {
     fetchJobs(jobsPage, jobSearch);
     fetchApplications(appsPage, appSearch, statusFilter);
@@ -337,6 +349,7 @@ export default function CompanyDashboard() {
               onRetry={() => fetchApplications(appsPage, appSearch, statusFilter)}
               handleAppsPage={handleAppsPage}
               handleStatusChange={handleStatusChange}
+              handleDeleteApplication={handleDeleteApplication}
             />
           )}
 
