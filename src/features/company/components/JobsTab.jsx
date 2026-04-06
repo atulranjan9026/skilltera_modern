@@ -1,23 +1,14 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// JobsTab.jsx  (fully corrected)
-// Fixes applied:
-//  1. applyFilters wrapped in useMemo — no longer runs on every render
-//  2. normalizeJob imported from shared utils/normalizeJob (no more duplication)
-//  3. daysLeft / fmtShort imported from shared utils/normalizeJob
-//  4. Client-side filter warning added when filters are active (pagination caveat)
-//  5. DeleteConfirmModal jobToDelete state properly reset after confirm
-//  6. panelRef outside-click handler cleaned up on unmount correctly (was fine,
-//     kept for clarity)
+// JobsTab.jsx  — filters are now server-side (no client-side applyFilters)
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Spinner }        from '../ui/Spinner';
 import { EmptyState }     from '../ui/EmptyState';
 import { ErrorBanner }    from '../ui/ErrorBanner';
 import { JobStatusBadge } from '../ui/JobStatusBadge';
 import { JobTypePill }    from '../ui/JobTypePill';
 import { PaginationBar }  from '../ui/PaginationBar';
-// FIX 2 & 3: Import from shared util — no more duplicated normalizeJob
 import { normalizeJob, fmtShort, daysLeft } from '../../../utils/normalizeJob';
 import { getCompanyUser } from '../../../utils/auth';
 
@@ -54,39 +45,6 @@ function countActive(f) {
     );
 }
 
-function applyFilters(jobs, search, filters) {
-    return jobs.map(normalizeJob).filter(job => {
-        if (search) {
-            const q = search.toLowerCase();
-            if (
-                !job.jobTitle?.toLowerCase().includes(q) &&
-                !job.city?.toLowerCase().includes(q)
-            ) return false;
-        }
-        if (filters.jobType.length  && !filters.jobType.includes(job.jobType))   return false;
-        if (filters.status.length   && !filters.status.includes(job.status))     return false;
-
-        if (filters.experience) {
-            const exp = Number(job.workExperience ?? 0);
-            if (filters.experience === '0-2'  && (exp < 0  || exp > 2))  return false;
-            if (filters.experience === '3-5'  && (exp < 3  || exp > 5))  return false;
-            if (filters.experience === '6-10' && (exp < 6  || exp > 10)) return false;
-            if (filters.experience === '10+'  && exp < 10)               return false;
-        }
-
-        if (filters.deadlineWithin) {
-            const dl = daysLeft(job.lastDate);
-            if (dl === null || dl < 0 || dl > Number(filters.deadlineWithin)) return false;
-        }
-
-        if (filters.state && !job.state?.toLowerCase().includes(filters.state.toLowerCase())) {
-            return false;
-        }
-
-        return true;
-    });
-}
-
 // ═══════════════════════════════════════════════════════════════════════════
 export function JobsTab({
     totalJobs, activeJobs, pendingJobs,
@@ -98,9 +56,11 @@ export function JobsTab({
     onViewJob,
     onEditJob,
     onDeleteJob,
+    // NEW: filters are lifted to parent so they can trigger server fetches
+    filters,
+    setFilters,
 }) {
     const [showFilters, setShowFilters] = useState(false);
-    const [filters,     setFilters]     = useState(DEFAULT_FILTERS);
     const [jobToDelete, setJobToDelete] = useState(null);
     const panelRef = useRef(null);
     const role = getCompanyUser()?.role;
@@ -120,12 +80,6 @@ export function JobsTab({
 
     const activeCount = countActive(filters);
 
-    // FIX 1: Memoize filtered jobs — was recalculating on every render
-    const filteredJobs = useMemo(
-        () => applyFilters(jobs, jobSearch, filters),
-        [jobs, jobSearch, filters]
-    );
-
     function toggleArr(field, val) {
         setFilters(prev => ({
             ...prev,
@@ -140,6 +94,9 @@ export function JobsTab({
     }
 
     function clearAll() { setFilters(DEFAULT_FILTERS); }
+
+    // Normalize for display — jobs are already server-filtered
+    const displayJobs = jobs.map(normalizeJob);
 
     return (
         <div className="space-y-5">
@@ -302,24 +259,12 @@ export function JobsTab({
             {/* ── Table ── */}
             {jobsLoading ? (
                 <Spinner />
-            ) : filteredJobs.length === 0 ? (
+            ) : displayJobs.length === 0 ? (
                 <div className="bg-white rounded-2xl border border-slate-100 shadow-sm">
                     <EmptyState icon="💼" message="No jobs match your filters" />
                 </div>
             ) : (
                 <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-
-                    {/* FIX 4: Warn users that client-side filters only apply to the current page */}
-                    {activeCount > 0 && (
-                        <div className="px-5 py-2 bg-amber-50 border-b border-amber-100 text-xs text-amber-700 font-medium flex items-center gap-2">
-                            <span>⚠️</span>
-                            <span>
-                                These filters apply to this page only ({filteredJobs.length} of {jobs.length} shown).
-                                For full results across all pages, use the server-side search above.
-                            </span>
-                        </div>
-                    )}
-
                     <table className="w-full">
                         <thead>
                             <tr className="bg-slate-50 border-b border-slate-100">
@@ -329,7 +274,7 @@ export function JobsTab({
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
-                            {filteredJobs.map(job => {
+                            {displayJobs.map(job => {
                                 const dl = daysLeft(job.lastDate);
                                 return (
                                     <tr
@@ -375,7 +320,6 @@ export function JobsTab({
                                                 </button>
                                                 {canEditJobs && (
                                                     <>
-                                                       
                                                         <span className="text-slate-200">|</span>
                                                         <button
                                                             onClick={e => { e.stopPropagation(); onEditJob?.(job); }}
@@ -383,7 +327,7 @@ export function JobsTab({
                                                         >
                                                             ✏️ Edit
                                                         </button>
-                                                         <span className="text-slate-200">|</span>
+                                                        <span className="text-slate-200">|</span>
                                                         <button
                                                             onClick={e => { e.stopPropagation(); setJobToDelete(job); }}
                                                             className="text-rose-500 hover:text-rose-700 text-xs font-semibold whitespace-nowrap transition-colors"
@@ -419,7 +363,7 @@ export function JobsTab({
                 onClose={() => setJobToDelete(null)}
                 onConfirm={job => {
                     onDeleteJob?.(job);
-                    setJobToDelete(null); // FIX 5: explicitly reset after confirm
+                    setJobToDelete(null);
                 }}
             />
         </div>
