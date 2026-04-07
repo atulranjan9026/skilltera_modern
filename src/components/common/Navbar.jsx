@@ -14,6 +14,7 @@ export default function Navbar() {
     location.pathname.startsWith('/company');
   const isCandidateActive =
     location.pathname.startsWith('/auth/login') ||
+    location.pathname.startsWith('/auth/signup') ||
     location.pathname.startsWith('/auth');
 
   return (
@@ -41,19 +42,17 @@ export default function Navbar() {
             <div className="relative flex items-center bg-slate-100 rounded-xl p-1 gap-0.5">
               {/* Sliding pill */}
               <div
-                className={`absolute top-1 h-[calc(100%-8px)] w-[calc(50%-4px)] rounded-lg bg-white shadow-sm border border-slate-200 transition-all duration-300 ease-in-out ${
-                  isCompanyActive ? 'translate-x-[calc(100%+4px)]' : 'translate-x-0'
-                }`}
+                className={`absolute top-1 h-[calc(100%-8px)] w-[calc(50%-4px)] rounded-lg bg-white shadow-sm border border-slate-200 transition-all duration-300 ease-in-out ${isCompanyActive ? 'translate-x-[calc(100%+4px)]' : 'translate-x-0'
+                  }`}
                 style={{ left: '4px' }}
               />
 
               <Link
                 to="/auth/login"
-                className={`relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                  isCandidateActive
+                className={`relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium transition-colors duration-200 ${isCandidateActive
                     ? 'text-slate-900'
                     : 'text-slate-500 hover:text-slate-700'
-                }`}
+                  }`}
               >
                 <UserCircle2 size={15} />
                 Candidate
@@ -61,11 +60,10 @@ export default function Navbar() {
 
               <Link
                 to="/company/login"
-                className={`relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                  isCompanyActive
+                className={`relative z-10 flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium transition-colors duration-200 ${isCompanyActive
                     ? 'text-slate-900'
                     : 'text-slate-500 hover:text-slate-700'
-                }`}
+                  }`}
               >
                 <Building2 size={15} />
                 Company
@@ -104,11 +102,10 @@ export default function Navbar() {
             <Link
               to="/auth/login"
               onClick={() => setIsOpen(false)}
-              className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                isCandidateActive
+              className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${isCandidateActive
                   ? 'bg-primary-50 text-primary-700'
                   : 'text-slate-600 hover:bg-slate-50'
-              }`}
+                }`}
             >
               <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${isCandidateActive ? 'bg-primary-100' : 'bg-slate-100'}`}>
                 <UserCircle2 size={15} className={isCandidateActive ? 'text-primary-600' : 'text-slate-500'} />
@@ -119,11 +116,10 @@ export default function Navbar() {
             <Link
               to="/company/login"
               onClick={() => setIsOpen(false)}
-              className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                isCompanyActive
+              className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${isCompanyActive
                   ? 'bg-primary-50 text-primary-700'
                   : 'text-slate-600 hover:bg-slate-50'
-              }`}
+                }`}
             >
               <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${isCompanyActive ? 'bg-primary-100' : 'bg-slate-100'}`}>
                 <Building2 size={15} className={isCompanyActive ? 'text-primary-600' : 'text-slate-500'} />

@@ -41,13 +41,6 @@ export const authService = {
   },
 
   /**
-   * Register company
-   */
-  registerCompany: async (companyData) => {
-    return post('/auth/company/signup', companyData);
-  },
-
-  /**
    * Logout user
    */
   logout: async () => {
