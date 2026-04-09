@@ -62,12 +62,12 @@ export default function Footer() {
                     My Profile
                   </Link>
                 </li>
-                <li>
+                {/* <li>
                   <Link to="/companies" className="text-slate-600 hover:text-primary-600 transition-all duration-200 flex items-center gap-1 group text-xs">
                     <span className="w-1 h-1 bg-primary-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
                     Top Companies
                   </Link>
-                </li>
+                </li> */}
               </ul>
             </div>
 
@@ -77,7 +77,7 @@ export default function Footer() {
                 <div className="w-0.5 h-4 bg-primary-500 rounded-full"></div>
                 Resources
               </h4>
-              <ul className="space-y-1">
+              {/* <ul className="space-y-1">
                 <li>
                   <a href="#" className="text-slate-600 hover:text-primary-600 transition-all duration-200 flex items-center gap-1 group text-xs">
                     <span className="w-1 h-1 bg-primary-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
@@ -102,7 +102,7 @@ export default function Footer() {
                     Salary Insights
                   </a>
                 </li>
-              </ul>
+              </ul> */}
             </div>
 
             {/* Contact & Social */}
@@ -116,7 +116,7 @@ export default function Footer() {
               <div className="space-y-1 mb-3">
                 <div className="flex items-center gap-2 text-slate-600">
                   <Mail className="w-3 h-3 text-primary-500" />
-                  <span className="text-xs">skill@skilltera.com</span>
+                  <span className="text-xs">service@skilltera.info</span>
                 </div>
                 <div className="flex items-center gap-2 text-slate-600">
                   <Phone className="w-3 h-3 text-primary-500" />
@@ -130,7 +130,7 @@ export default function Footer() {
 
               {/* Social Links */}
               <div className="flex gap-2">
-                <a href="#" className="w-7 h-7 bg-white border border-slate-200 hover:bg-primary-500 rounded-lg flex items-center justify-center transition-all duration-200 group hover:scale-110">
+                <a href="https://www.linkedin.com/company/skilltera/posts/?feedView=all" className="w-7 h-7 bg-white border border-slate-200 hover:bg-primary-500 rounded-lg flex items-center justify-center transition-all duration-200 group hover:scale-110">
                   <Linkedin size={14} className="text-slate-600 group-hover:text-white" />
                 </a>
                 <a href="#" className="w-7 h-7 bg-white border border-slate-200 hover:bg-primary-500 rounded-lg flex items-center justify-center transition-all duration-200 group hover:scale-110">
