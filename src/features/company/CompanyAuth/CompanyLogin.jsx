@@ -219,7 +219,7 @@ export default function CompanyLogin() {
               Password
             </label>
             <Link
-              to="/auth/forgot-password"
+              to="/company/forgot-password"
               className="text-xs text-primary-500 hover:text-primary-600 font-medium"
             >
               Forgot?

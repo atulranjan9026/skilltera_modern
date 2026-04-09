@@ -6,6 +6,7 @@ import candidateRoutes from './candidateRoutes';
 import companyRoutes from './companyRoutes';
 import assessmentRoutes from './assessmentRoutes';
 import NotFound from '../pages/NotFound';
+import VerifyEmail from '../features/candidates/CandidatesAuth/VerifyEmail';
 
 export const router = createBrowserRouter(
   [
@@ -17,6 +18,7 @@ export const router = createBrowserRouter(
           index: true,
           element: <Navigate to="/jobs-search" replace />,
         },
+        { path: 'verify-email', element: <VerifyEmail /> },
         authRoutes,
         candidateRoutes,
         assessmentRoutes,

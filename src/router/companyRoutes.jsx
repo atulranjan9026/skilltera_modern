@@ -1,6 +1,8 @@
 // router/companyRoutes.jsx
 import { Navigate } from "react-router-dom";
 import CompanyLogin from "../features/company/CompanyAuth/CompanyLogin";
+import CompanyForgotPassword from "../features/company/CompanyAuth/CompanyForgotPassword";
+import CompanyResetPassword from "../features/company/CompanyAuth/CompanyResetPassword";
 import CompanyDashboard from "../features/company/pages/CompanyDashboard";
 import InterviewerDashboard from "../features/company/pages/InterviewerDashboard";
 import ChatPage from "../features/chat/pages/ChatPage";
@@ -19,6 +21,16 @@ const companyRoutes = {
       path: "login",
       element: <AuthLayout />,
       children: [{ index: true, element: <CompanyLogin /> }],
+    },
+    {
+      path: "forgot-password",
+      element: <AuthLayout />,
+      children: [{ index: true, element: <CompanyForgotPassword /> }],
+    },
+    {
+      path: "reset-password",
+      element: <AuthLayout />,
+      children: [{ index: true, element: <CompanyResetPassword /> }],
     },
 
     // ── Default redirect ─────────────────────────────────────────────────

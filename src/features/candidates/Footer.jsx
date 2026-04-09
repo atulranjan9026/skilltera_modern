@@ -116,7 +116,7 @@ export default function Footer() {
               <div className="space-y-1 mb-3">
                 <div className="flex items-center gap-2 text-slate-600">
                   <Mail className="w-3 h-3 text-primary-500" />
-                  <span className="text-xs">hello@skilltera.com</span>
+                  <span className="text-xs">skill@skilltera.com</span>
                 </div>
                 <div className="flex items-center gap-2 text-slate-600">
                   <Phone className="w-3 h-3 text-primary-500" />

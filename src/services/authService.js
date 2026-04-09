@@ -87,7 +87,21 @@ export const authService = {
   /**
    * Reset password
    */
-  resetPassword: async (token, newPassword) => {
-    return post('/candidates/auth/reset-password', { token, newPassword });
+  resetPassword: async (token, password, confirmPassword) => {
+    return post('/candidates/auth/reset-password', { token, password, confirmPassword });
+  },
+
+  /**
+   * Company - Forgot password
+   */
+  companyForgotPassword: async (email) => {
+    return post('/company/auth/forgot-password', { email });
+  },
+
+  /**
+   * Company - Reset password
+   */
+  companyResetPassword: async (token, password, confirmPassword) => {
+    return post('/company/auth/reset-password', { token, password, confirmPassword });
   },
 };

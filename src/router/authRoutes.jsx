@@ -2,6 +2,8 @@ import { Navigate } from 'react-router-dom';
 import AuthLayout from '../layouts/AuthLayout';
 import CandidateLogin from '../features/candidates/CandidatesAuth/CandidateLogin';
 import CandidateSignup from '../features/candidates/CandidatesAuth/CandidateSignup';
+import ForgotPassword from '../features/candidates/CandidatesAuth/ForgotPassword';
+import ResetPassword from '../features/candidates/CandidatesAuth/ResetPassword';
 // import CompanyLogin from '../features/company/CompanyAuth/CompanyLogin';
 
 /**
@@ -16,6 +18,8 @@ const authRoutes = {
     { index: true, element: <Navigate to="/auth/login" replace /> },
     { path: 'login', element: <CandidateLogin /> },
     { path: 'signup', element: <CandidateSignup /> },
+    { path: 'forgot-password', element: <ForgotPassword /> },
+    { path: 'reset-password', element: <ResetPassword /> },
     // { path: 'company-login', element: <CompanyLogin /> },
     { path: '*', element: <Navigate to="/auth/login" replace /> },
   ],

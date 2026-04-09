@@ -204,7 +204,7 @@ export default function ProfileEditor() {
                       Profile Strength
                     </span>
                     <span className="text-xs font-bold text-slate-700">
-                      {editedData.profileStrength}%
+                      {editedData?.profileStrength}%
                     </span>
                   </div>
                   <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">

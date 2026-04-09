@@ -41,7 +41,7 @@ const useChatSocket = (conversationId, onMessageReceived) => {
         const API_URL   = import.meta.env.VITE_API_URL || 'http://localhost:5000';
         const socketUrl = API_URL.endsWith('/api/v1/') ? API_URL.slice(0, -8) : API_URL;
 
-        console.log('[useChatSocket] Connecting to:', socketUrl, '| role:', role);
+        // console.log('[useChatSocket] Connecting to:', socketUrl, '| role:', role);
 
         socketRef.current = io(socketUrl, {
             reconnection: true,
@@ -56,7 +56,7 @@ const useChatSocket = (conversationId, onMessageReceived) => {
             console.log('[useChatSocket] ✓ Connected - ID:', socketRef.current.id);
 
             if (conversationId) {
-                console.log('[useChatSocket] Joining conversation:', conversationId);
+                // console.log('[useChatSocket] Joining conversation:', conversationId);
                 socketRef.current.emit('join_conversation', {
                     conversationId,
                     userId: user._id,
@@ -70,7 +70,7 @@ const useChatSocket = (conversationId, onMessageReceived) => {
         });
 
         socketRef.current.on('disconnect', (reason) => {
-            console.log('[useChatSocket] Disconnected:', reason);
+            // console.log('[useChatSocket] Disconnected:', reason);
         });
 
         socketRef.current.on('error', (err) => {
@@ -79,7 +79,7 @@ const useChatSocket = (conversationId, onMessageReceived) => {
 
         if (conversationId) {
             socketRef.current.on('receive_message', (msg) => {
-                console.log('[useChatSocket] Message received:', msg?._id);
+                // console.log('[useChatSocket] Message received:', msg?._id);
                 onMessageReceived(msg);
             });
         }
@@ -93,7 +93,7 @@ const useChatSocket = (conversationId, onMessageReceived) => {
 
     const sendMessage = (messageData) => {
         if (socketRef.current?.connected) {
-            console.log('[useChatSocket] Sending:', messageData.conversationId);
+            // console.log('[useChatSocket] Sending:', messageData.conversationId);
             socketRef.current.emit('send_message', messageData);
         } else {
             console.error('[useChatSocket] ✗ Not connected — cannot send');

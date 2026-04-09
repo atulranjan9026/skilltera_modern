@@ -163,6 +163,36 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const forgotPassword = async (email) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await authService.forgotPassword(email);
+      return response;
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || err.message || 'Failed to send reset email';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const resetPassword = async (token, password, confirmPassword) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await authService.resetPassword(token, password, confirmPassword);
+      return response;
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || err.message || 'Failed to reset password';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const value = {
     user,
     isLoading,
@@ -171,6 +201,8 @@ export const AuthProvider = ({ children }) => {
     loginWithGoogle,
     logout,
     signup,
+    forgotPassword,
+    resetPassword,
     refreshUser,
     isAuthenticated: !!user,
   };
