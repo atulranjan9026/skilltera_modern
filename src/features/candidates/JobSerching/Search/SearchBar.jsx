@@ -13,7 +13,7 @@ const AdvancedFilterModal = lazy(() => import("./AdvancedFilterModal"));
 /**
  * SearchBar Component - Unified Search with Advanced Filters
  */
-export default function SearchBar({ onSearch, onNotificationsClick, onChatClick }) {
+export default function SearchBar({ onSearch, onNotificationsClick, onChatClick, unreadNotifications = 0, unreadMessages = 0 }) {
   const [jobTitle, setJobTitle] = React.useState('');
   const [location, setLocation] = React.useState('');
   const [showFilterModal, setShowFilterModal] = React.useState(false);
@@ -21,10 +21,6 @@ export default function SearchBar({ onSearch, onNotificationsClick, onChatClick 
   const [locationSuggestions, setLocationSuggestions] = React.useState({ cities: [], states: [], countries: [] });
   const [showJobSuggestions, setShowJobSuggestions] = React.useState(false);
   const [showLocationSuggestions, setShowLocationSuggestions] = React.useState(false);
-
-  // Mock badge counts - replace with real data from context/API
-  const unreadNotifications = 3;
-  const unreadMessages = 2;
 
   // Advanced filter states
   const [filters, setFilters] = React.useState({
@@ -156,12 +152,12 @@ export default function SearchBar({ onSearch, onNotificationsClick, onChatClick 
       <div className="flex items-start gap-4">
 
         {/* ── Left spacer: mirrors the right action zone to keep search visually centered ── */}
-        <div className="hidden md:flex w-24 flex-shrink-0" aria-hidden="true" />
+        <div className="hidden md:flex w-52 flex-shrink-0" aria-hidden="true" />
 
         {/* ── Center: Search bar + filter chips ── */}
         <div className="flex-1 min-w-0 space-y-3">
-          <div className="bg-white rounded-xl shadow-md border border-slate-200">
-            <div className="flex flex-col md:flex-row items-center divide-y md:divide-y-0 md:divide-x divide-slate-100">
+          <div className="justify-center bg-white rounded-xl shadow-md border border-slate-200 max-w-4xl">
+            <div className="flex flex-col md:flex-row items-center divide-y md:divide-y-0 md:divide-x divide-slate-100 ">
 
               {/* Job Title Input */}
               <div className="relative flex-1 w-full">

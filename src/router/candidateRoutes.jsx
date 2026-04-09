@@ -6,6 +6,7 @@ import UserDashboard from '../features/candidates/UserDashboard';
 import ProfilePage from '../features/candidates/ProfilePage';
 import SettingsPage from '../features/candidates/SettingsPage';
 import JobDetailsPage from '../features/candidates/JobDetailsPage';
+import NotificationsPage from '../features/candidates/NotificationsPage';
 import AssessmentHubPage from '../features/assessment/AssessmentHubPage';
 import TestResultsPage from '../features/assessment/components/TestResultsPage';
 import ChatPage from '../features/chat/pages/ChatPage';
@@ -52,6 +53,10 @@ const jobRoutes = {
     {
       path: '/chat',
       element: <ChatPage />,
+    },
+    {
+      path: '/notifications',
+      element: <NotificationsPage />,
     },
   ],
 };

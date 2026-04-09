@@ -16,6 +16,8 @@ import SearchBar from './JobSerching/Search/SearchBar';
 import JobListings from './JobSerching/JobCard/JobListings';
 import EmptyState from '../../components/common/EmptyState';
 import { candidateService } from '../../services/candidateService';
+import { chatService } from '../../services/chatService';
+import { notificationsService } from '../../services/notificationsService';
 import { useAuthContext } from '../../store/context/AuthContext';
 import { useTestCompletion } from '../assessment/hooks/useTestCompletion';
 import { toast } from '../../utils/toast';
@@ -39,6 +41,9 @@ export default function JobSearchPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [jobsPerPage] = useState(9);
 
+    const [unreadMessages, setUnreadMessages] = useState(0);
+    const [unreadNotifications, setUnreadNotifications] = useState(0);
+
     const [filters, setFilters] = useState({
         jobType:         [],
         experienceLevel: [],
@@ -52,18 +57,8 @@ export default function JobSearchPage() {
         location:  '',
     });
 
-    // ── FIX 1: Fetch saved jobs ONCE on mount, not on every search change ──
-    useEffect(() => {
-        fetchSavedJobs();
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-    // ── FIX 2: JSON.stringify prevents infinite loops from new object refs ──
-    useEffect(() => {
-        fetchActiveJobs();
-    }, [currentPage, JSON.stringify(searchQuery), JSON.stringify(filters)]); // eslint-disable-line react-hooks/exhaustive-deps
-
     // ─────────────────────────────────────────────────────────────────────────
-    // Data fetchers
+    // Data fetchers - Define BEFORE useEffect hooks
     // ─────────────────────────────────────────────────────────────────────────
 
     const fetchSavedJobs = async () => {
@@ -304,6 +299,60 @@ export default function JobSearchPage() {
         }
     };
 
+    const fetchUnreadMessages = async () => {
+        try {
+            const response = await chatService.getUserConversations();
+            if (response?.success) {
+                const conversations = response.conversations || [];
+                console.log('Fetched conversations for unread count:', conversations);
+                const totalUnread = conversations.reduce((sum, conv) => sum + (conv.candidateUnread || 0), 0);
+                console.log('Total unread messages:', totalUnread);
+                setUnreadMessages(totalUnread);
+            }
+        } catch (err) {
+            console.error('Failed to fetch unread messages:', err);
+            setUnreadMessages(0);
+        }
+    };
+
+    const fetchUnreadNotifications = async () => {
+        try {
+            const response = await notificationsService.getUnreadCount(user._id);
+            if (response?.success) {
+                setUnreadNotifications(response.count || 0);
+            } else {
+                setUnreadNotifications(0);
+            }
+        } catch (err) {
+            console.error('Failed to fetch unread notifications:', err);
+            setUnreadNotifications(0);
+        }
+    };
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Effects - Run after function definitions
+    // ─────────────────────────────────────────────────────────────────────────
+
+    // ── FIX 1: Fetch saved jobs ONCE on mount (when user is ready) ──
+    useEffect(() => {
+        if (user?._id) {
+            fetchSavedJobs();
+        }
+    }, [user?._id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // ── FIX 2: JSON.stringify prevents infinite loops from new object refs ──
+    useEffect(() => {
+        fetchActiveJobs();
+    }, [currentPage, JSON.stringify(searchQuery), JSON.stringify(filters)]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Fetch unread messages and notifications count
+    useEffect(() => {
+        if (user?._id) {
+            fetchUnreadMessages();
+            fetchUnreadNotifications();
+        }
+    }, [user?._id]);
+
     // ─────────────────────────────────────────────────────────────────────────
     // Derived values
     // ─────────────────────────────────────────────────────────────────────────
@@ -323,7 +372,10 @@ export default function JobSearchPage() {
                 <div className="container mx-auto px-4">
                     <SearchBar
                         onSearch={handleSearch}
+                        onNotificationsClick={() => navigate('/notifications')}
                         onChatClick={() => navigate('/chat')}
+                        unreadNotifications={unreadNotifications}
+                        unreadMessages={unreadMessages}
                     />
                 </div>
             </div>

@@ -3,13 +3,54 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Search, Briefcase, MapPin } from 'lucide-react';
 import SearchBar from './JobSerching/Search/SearchBar';
 import { THEME_CLASSES } from '../../theme';
+import { chatService } from '../../services/chatService';
+import { notificationsService } from '../../services/notificationsService';
+import { useAuthContext } from '../../store/context/AuthContext';
 
 /**
  * Landing Page - Hero section with job search and CTAs
  */
 export default function LandingPage() {
   const navigate = useNavigate();
+  const { user } = useAuthContext();
   const [searchQuery, setSearchQuery] = React.useState('');
+  const [unreadMessages, setUnreadMessages] = React.useState(0);
+  const [unreadNotifications, setUnreadNotifications] = React.useState(0);
+
+  const fetchUnreadMessages = async () => {
+    try {
+      const response = await chatService.getUserConversations();
+      if (response?.success) {
+        const conversations = response.conversations || [];
+        const totalUnread = conversations.reduce((sum, conv) => sum + (conv.candidateUnread || 0), 0);
+        setUnreadMessages(totalUnread);
+      }
+    } catch (err) {
+      console.error('Failed to fetch unread messages:', err);
+      setUnreadMessages(0);
+    }
+  };
+
+  const fetchUnreadNotifications = async () => {
+    try {
+      const response = await notificationsService.getUnreadCount(user._id);
+      if (response?.success) {
+        setUnreadNotifications(response.count || 0);
+      } else {
+        setUnreadNotifications(0);
+      }
+    } catch (err) {
+      console.error('Failed to fetch unread notifications:', err);
+      setUnreadNotifications(0);
+    }
+  };
+
+  React.useEffect(() => {
+    if (user?._id) {
+      fetchUnreadMessages();
+      fetchUnreadNotifications();
+    }
+  }, [user?._id]);
 
   const handleSearch = (query) => {
     setSearchQuery(JSON.stringify(query));
@@ -56,7 +97,13 @@ export default function LandingPage() {
 
           {/* Search Bar */}
           <div className="max-w-4xl mx-auto mb-12">
-            <SearchBar onSearch={handleSearch} onChatClick={() => navigate('/chat')} />
+            <SearchBar 
+              onSearch={handleSearch} 
+              onNotificationsClick={() => {/* TODO: navigate to notifications */}}
+              onChatClick={() => navigate('/chat')} 
+              unreadNotifications={unreadNotifications}
+              unreadMessages={unreadMessages}
+            />
           </div>
 
           {/* Quick Stats */}

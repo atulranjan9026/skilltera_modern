@@ -32,8 +32,7 @@ export default function Footer() {
                   </h3>
                 </div>
                 <p className="text-slate-600 text-xs leading-relaxed mb-3 max-w-md">
-                  Connecting talented professionals with their dream careers.
-                </p>
+Empowering careers through AI-driven assessments and personalized job matching. Connect with top companies and unlock your professional potential.                </p>
               </div>
             </div>
 
@@ -71,40 +70,6 @@ export default function Footer() {
               </ul>
             </div>
 
-            {/* Resources */}
-            <div>
-              <h4 className="font-semibold text-sm mb-2 text-slate-900 flex items-center gap-1">
-                <div className="w-0.5 h-4 bg-primary-500 rounded-full"></div>
-                Resources
-              </h4>
-              {/* <ul className="space-y-1">
-                <li>
-                  <a href="#" className="text-slate-600 hover:text-primary-600 transition-all duration-200 flex items-center gap-1 group text-xs">
-                    <span className="w-1 h-1 bg-primary-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
-                    Career Guide
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-slate-600 hover:text-primary-600 transition-all duration-200 flex items-center gap-1 group text-xs">
-                    <span className="w-1 h-1 bg-primary-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
-                    Resume Tips
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-slate-600 hover:text-primary-600 transition-all duration-200 flex items-center gap-1 group text-xs">
-                    <span className="w-1 h-1 bg-primary-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
-                    Interview Prep
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-slate-600 hover:text-primary-600 transition-all duration-200 flex items-center gap-1 group text-xs">
-                    <span className="w-1 h-1 bg-primary-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
-                    Salary Insights
-                  </a>
-                </li>
-              </ul> */}
-            </div>
-
             {/* Contact & Social */}
             <div>
               <h4 className="font-semibold text-sm mb-2 text-slate-900 flex items-center gap-1">
@@ -128,7 +93,16 @@ export default function Footer() {
                 </div>
               </div>
 
-              {/* Social Links */}
+              
+            </div>
+
+            {/* Social Media */}
+            <div>
+              <h4 className="font-semibold text-sm mb-2 text-slate-900 flex items-center gap-1">
+                <div className="w-0.5 h-4 bg-primary-500 rounded-full"></div>
+                Social Media
+              </h4>
+            {/* Social Links */}
               <div className="flex gap-2">
                 <a href="https://www.linkedin.com/company/skilltera/posts/?feedView=all" className="w-7 h-7 bg-white border border-slate-200 hover:bg-primary-500 rounded-lg flex items-center justify-center transition-all duration-200 group hover:scale-110">
                   <Linkedin size={14} className="text-slate-600 group-hover:text-white" />
@@ -144,6 +118,8 @@ export default function Footer() {
                 </a>
               </div>
             </div>
+
+            
           </div>
         </div>
 
