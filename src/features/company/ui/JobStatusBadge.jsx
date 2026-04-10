@@ -1,5 +1,5 @@
 export function JobStatusBadge({ status }) {
-console.log(status);
+// console.log(status);
 
     const cfg = {
         APPROVED: { cls: "bg-emerald-100 text-emerald-700", lbl: "Approved" },

@@ -18,9 +18,12 @@ export const companyService = {
 
   getJobs: async (companyId, page = 1, params = {}) => {
     const qs = new URLSearchParams({ page, limit: 10 });
-    if (params.search)  qs.set("search",  params.search);
-    if (params.status)  qs.set("status",  params.status);
-    if (params.jobType) qs.set("jobType", params.jobType);
+    if (params.search)          qs.set("search",          params.search);
+    if (params.status)          qs.set("status",          params.status);
+    if (params.jobType)         qs.set("jobType",         params.jobType);
+    if (params.experience)      qs.set("experience",      params.experience);
+    if (params.deadlineWithin)  qs.set("deadlineWithin",  params.deadlineWithin);
+    if (params.state)           qs.set("state",           params.state);
     return get(`/company/${companyId}/jobs?${qs}`, false);
   },
 

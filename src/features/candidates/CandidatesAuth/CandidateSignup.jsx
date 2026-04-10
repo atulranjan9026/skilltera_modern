@@ -34,10 +34,8 @@ export default function CandidateSignup() {
     try {
       setSuccessMessage('');
       await signup({
-        name: data.name,
         email: data.email,
         password: data.password,
-        phone: data.phone || '',
       });
       setSuccessMessage(
         'Account created successfully! Please check your email to verify your account before logging in.'
@@ -135,27 +133,6 @@ export default function CandidateSignup() {
       {/* ── Email Sign Up Form ────────────────────────────────────────────── */}
       {signUpMethod === 'email' && (
         <form onSubmit={handleSubmit(onEmailSignup)} className="space-y-3">
-          {/* Full Name */}
-          <div>
-            <label htmlFor="name" className="block text-xs font-medium text-slate-700 mb-0.5">
-              Full Name
-            </label>
-            <input
-              type="text"
-              id="name"
-              className={inputClass(errors.name)}
-              placeholder="John Doe"
-              {...register('name', {
-                required: 'Full name is required',
-                minLength: { value: 2, message: 'Name must be at least 2 characters' },
-                maxLength: { value: 100, message: 'Name cannot exceed 100 characters' },
-              })}
-            />
-            {errors.name && (
-              <p className="text-red-500 text-xs mt-0.5">{errors.name.message}</p>
-            )}
-          </div>
-
           {/* Email */}
           <div>
             <label htmlFor="email" className="block text-xs font-medium text-slate-700 mb-0.5">
@@ -223,28 +200,6 @@ export default function CandidateSignup() {
             />
             {errors.confirmPassword && (
               <p className="text-red-500 text-xs mt-0.5">{errors.confirmPassword.message}</p>
-            )}
-          </div>
-
-          {/* Phone (optional) */}
-          <div>
-            <label htmlFor="phone" className="block text-xs font-medium text-slate-700 mb-0.5">
-              Phone Number (Optional)
-            </label>
-            <input
-              type="tel"
-              id="phone"
-              className={inputClass(errors.phone)}
-              placeholder="+1 234 567 8900"
-              {...register('phone', {
-                pattern: {
-                  value: /^[0-9]{10,15}$/,
-                  message: 'Please provide a valid phone number (10-15 digits)',
-                },
-              })}
-            />
-            {errors.phone && (
-              <p className="text-red-500 text-xs mt-0.5">{errors.phone.message}</p>
             )}
           </div>
 
