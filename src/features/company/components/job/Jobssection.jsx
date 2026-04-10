@@ -8,11 +8,14 @@ import { toast } from "../../../../utils/toast";
 
 // ── Default filter state (mirrors JobsTab's internal DEFAULT_FILTERS) ────────
 const DEFAULT_FILTERS = {
-    jobType:        [],
-    status:         [],
-    experience:     '',
-    deadlineWithin: '',
-    state:          '',
+    jobType:         [],
+    status:          [],
+    experience:      '',
+    deadlineWithin:  '',
+    hiringManagerId: '',
+    lobId:           '',
+    backupHiringManagerId: '',
+    recruiterIds:    [],
 };
 
 /**

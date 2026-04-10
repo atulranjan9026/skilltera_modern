@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Spinner }        from '../ui/Spinner';
 import { EmptyState }     from '../ui/EmptyState';
 import { ErrorBanner }    from '../ui/ErrorBanner';
@@ -7,6 +7,7 @@ import { JobTypePill }    from '../ui/JobTypePill';
 import { PaginationBar }  from '../ui/PaginationBar';
 import { normalizeJob, fmtShort, daysLeft } from '../../../utils/normalizeJob';
 import { getCompanyUser } from '../../../utils/auth';
+import { companyService } from '../../../services/companyService';
 
 // ── Default filter state ────────────────────────────────────────────────────
 const DEFAULT_FILTERS = {
@@ -14,6 +15,10 @@ const DEFAULT_FILTERS = {
     status:          [],   // ["APPROVED", "Pending", "Closed", "Draft"]
     experience:      '',   // "0-2" | "3-5" | "6-10" | "10+"
     deadlineWithin:  '',   // "7" | "14" | "30" days
+    hiringManagerId: '',   // hiring manager ID filter
+    lobId:           '',   // line of business ID filter
+    backupHiringManagerId: '', // backup hiring manager ID filter
+    recruiterIds:    [],   // array of recruiter IDs
 };
 
 const JOB_TYPES = ['Full Time', 'Part Time', 'Contract', 'Internship', 'Remote'];
@@ -35,7 +40,11 @@ function countActive(f) {
         f.jobType.length +
         f.status.length  +
         (f.experience     ? 1 : 0) +
-        (f.deadlineWithin ? 1 : 0)
+        (f.deadlineWithin ? 1 : 0) +
+        (f.hiringManagerId ? 1 : 0) +
+        (f.lobId ? 1 : 0) +
+        (f.backupHiringManagerId ? 1 : 0) +
+        f.recruiterIds.length
     );
 }
 
@@ -55,10 +64,41 @@ export function JobsTab({
     setFilters,
 }) {
     const [jobToDelete, setJobToDelete] = useState(null);
+    const [hiringManagers, setHiringManagers] = useState([]);
+    const [backupHiringManagers, setBackupHiringManagers] = useState([]);
+    const [recruiters, setRecruiters] = useState([]);
+    const [lobs, setLobs] = useState([]);
     const role = getCompanyUser()?.role;
     const canEditJobs = role === 'company';
 
     const activeCount = countActive(filters);
+    
+    console.log("hiringManagers :", hiringManagers);
+    console.log("backupHiringManagers :", backupHiringManagers);
+    console.log("recruiters :", recruiters);
+    console.log("lobs :", lobs);
+
+    // Fetch dropdown data
+    useEffect(() => {
+        const fetchDropdownData = async () => {
+            try {
+                const [hms, bhms, recs, lobData] = await Promise.all([
+                    companyService.getHiringManagers(),
+                    companyService.getBackupHiringManagers(),
+                    companyService.getRecruiters(),
+                    companyService.getLOBs(),
+                ]);
+                setHiringManagers(hms?.hiringManagers || []);
+                setBackupHiringManagers(bhms?.backupHiringManagers || []);
+                setRecruiters(recs?.recruiters || []);
+                setLobs(lobData?.lobs || []);
+            } catch (error) {
+                console.error('Failed to fetch dropdown data:', error);
+                // Keep arrays empty if API fails
+            }
+        };
+        fetchDropdownData();
+    }, []);
 
     function toggleArr(field, val) {
         setFilters(prev => ({
@@ -71,6 +111,15 @@ export function JobsTab({
 
     function setField(field, val) {
         setFilters(prev => ({ ...prev, [field]: prev[field] === val ? '' : val }));
+    }
+
+    function toggleRecruiter(recruiterId) {
+        setFilters(prev => ({
+            ...prev,
+            recruiterIds: prev.recruiterIds.includes(recruiterId)
+                ? prev.recruiterIds.filter(id => id !== recruiterId)
+                : [...prev.recruiterIds, recruiterId],
+        }));
     }
 
     function clearAll() { setFilters(DEFAULT_FILTERS); }
@@ -105,7 +154,7 @@ export function JobsTab({
             <div className="flex items-center gap-3 flex-wrap">
 
                 {/* Search */}
-                <div className="relative w-72">
+                <div className="relative w-52">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">🔍</span>
                     <input
                         value={jobSearch}
@@ -208,6 +257,89 @@ export function JobsTab({
                         </div>
                     </div>
 
+                    {/* Hiring Manager Filter */}
+                    <div className="relative">
+                        <select
+                            value={filters.hiringManagerId}
+                            onChange={(e) => setField('hiringManagerId', e.target.value)}
+                            className="appearance-none bg-white border border-slate-200 rounded-lg px-3 py-1.5 pr-8 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                        >
+                            <option value="">Hiring Manager</option>
+                            {hiringManagers.map(hm => (
+                                <option key={hm._id} value={hm._id}>{hm.name || hm.email}</option>
+                            ))}
+                        </select>
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                            <svg className="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    {/* LOB Filter */}
+                    <div className="relative">
+                        <select
+                            value={filters.lobId}
+                            onChange={(e) => setField('lobId', e.target.value)}
+                            className="appearance-none bg-white border border-slate-200 rounded-lg px-3 py-1.5 pr-8 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                        >
+                            <option value="">Line of Business</option>
+                            {lobs.map(lob => (
+                                <option key={lob._id} value={lob._id}>{lob.name}</option>
+                            ))}
+                        </select>
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                            <svg className="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    {/* Backup Hiring Manager Filter */}
+                    <div className="relative">
+                        <select
+                            value={filters.backupHiringManagerId}
+                            onChange={(e) => setField('backupHiringManagerId', e.target.value)}
+                            className="appearance-none bg-white border border-slate-200 rounded-lg px-3 py-1.5 pr-8 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                        >
+                            <option value="">Backup HM</option>
+                            {backupHiringManagers.map(bhm => (
+                                <option key={bhm._id} value={bhm._id}>{bhm.name || bhm.email}</option>
+                            ))}
+                        </select>
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                            <svg className="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    {/* Recruiters Filter */}
+                    <div className="relative">
+                        <select
+                            value=""
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                if (value) {
+                                    toggleRecruiter(value);
+                                }
+                            }}
+                            className="appearance-none bg-white border border-slate-200 rounded-lg px-3 py-1.5 pr-8 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                        >
+                            <option value="">Recruiters</option>
+                            {recruiters.map(rec => (
+                                <option key={rec._id} value={rec._id} disabled={filters.recruiterIds.includes(rec._id)}>
+                                    {rec.name || rec.email} {filters.recruiterIds.includes(rec._id) ? '✓' : ''}
+                                </option>
+                            ))}
+                        </select>
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                            <svg className="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    </div>
+
                     {/* Clear All Button */}
                     {activeCount > 0 && (
                         <button
@@ -240,6 +372,31 @@ export function JobsTab({
                                 onRemove={() => setFilters(p => ({ ...p, deadlineWithin: '' }))}
                             />
                         )}
+                        {filters.hiringManagerId && (
+                            <ActivePill
+                                label={`HM: ${hiringManagers.find(hm => hm._id === filters.hiringManagerId)?.name || filters.hiringManagerId.slice(-8)}`}
+                                onRemove={() => setFilters(p => ({ ...p, hiringManagerId: '' }))}
+                            />
+                        )}
+                        {filters.lobId && (
+                            <ActivePill
+                                label={`LOB: ${lobs.find(lob => lob._id === filters.lobId)?.name || filters.lobId.slice(-8)}`}
+                                onRemove={() => setFilters(p => ({ ...p, lobId: '' }))}
+                            />
+                        )}
+                        {filters.backupHiringManagerId && (
+                            <ActivePill
+                                label={`Backup HM: ${backupHiringManagers.find(bhm => bhm._id === filters.backupHiringManagerId)?.name || filters.backupHiringManagerId.slice(-8)}`}
+                                onRemove={() => setFilters(p => ({ ...p, backupHiringManagerId: '' }))}
+                            />
+                        )}
+                        {filters.recruiterIds.map(recId => (
+                            <ActivePill
+                                key={recId}
+                                label={`Recruiter: ${recruiters.find(rec => rec._id === recId)?.name || recId.slice(-8)}`}
+                                onRemove={() => toggleRecruiter(recId)}
+                            />
+                        ))}
                     </div>
                 )}
             </div>

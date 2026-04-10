@@ -23,6 +23,10 @@ export const companyService = {
     if (params.jobType)         qs.set("jobType",         params.jobType);
     if (params.experience)      qs.set("experience",      params.experience);
     if (params.deadlineWithin)  qs.set("deadlineWithin",  params.deadlineWithin);
+    if (params.hiringManagerId) qs.set("hiringManagerId", params.hiringManagerId);
+    if (params.lobId)           qs.set("lobId",           params.lobId);
+    if (params.backupHiringManagerId) qs.set("backupHiringManagerId", params.backupHiringManagerId);
+    if (params.recruiterIds)    qs.set("recruiterIds",    params.recruiterIds.join(','));
     return get(`/company/${companyId}/jobs?${qs}`, false);
   },
 

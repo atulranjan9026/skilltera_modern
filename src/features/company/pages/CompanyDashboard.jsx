@@ -24,10 +24,14 @@ import ChatPage from "../../chat/pages/ChatPage";
 
 // ── Default filter state (keep in sync with JobsTab / Jobssection) ──────────
 const DEFAULT_FILTERS = {
-    jobType:        [],
-    status:         [],
-    experience:     '',
-    deadlineWithin: '',
+    jobType:         [],
+    status:          [],
+    experience:      '',
+    deadlineWithin:  '',
+    hiringManagerId: '',
+    lobId:           '',
+    backupHiringManagerId: '',
+    recruiterIds:    [],
 };
 
 // ─── Main Dashboard ────────────────────────────────────────────────────────────
@@ -89,6 +93,10 @@ export default function CompanyDashboard() {
         if (filters.status.length)         params.status         = filters.status.join(',');
         if (filters.experience)            params.experience     = filters.experience;
         if (filters.deadlineWithin)        params.deadlineWithin = filters.deadlineWithin;
+        if (filters.hiringManagerId)       params.hiringManagerId = filters.hiringManagerId;
+        if (filters.lobId)                 params.lobId          = filters.lobId;
+        if (filters.backupHiringManagerId) params.backupHiringManagerId = filters.backupHiringManagerId;
+        if (filters.recruiterIds.length)   params.recruiterIds   = filters.recruiterIds;
 
         return params;
     }
