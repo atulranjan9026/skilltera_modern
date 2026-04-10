@@ -23,7 +23,6 @@ export const companyService = {
     if (params.jobType)         qs.set("jobType",         params.jobType);
     if (params.experience)      qs.set("experience",      params.experience);
     if (params.deadlineWithin)  qs.set("deadlineWithin",  params.deadlineWithin);
-    if (params.state)           qs.set("state",           params.state);
     return get(`/company/${companyId}/jobs?${qs}`, false);
   },
 

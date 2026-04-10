@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// JobsTab.jsx  — filters are now server-side (no client-side applyFilters)
-// ─────────────────────────────────────────────────────────────────────────────
-
 import { useState, useRef, useEffect } from 'react';
 import { Spinner }        from '../ui/Spinner';
 import { EmptyState }     from '../ui/EmptyState';
@@ -18,7 +14,6 @@ const DEFAULT_FILTERS = {
     status:          [],   // ["APPROVED", "Pending", "Closed", "Draft"]
     experience:      '',   // "0-2" | "3-5" | "6-10" | "10+"
     deadlineWithin:  '',   // "7" | "14" | "30" days
-    state:           '',   // free-text state filter
 };
 
 const JOB_TYPES = ['Full Time', 'Part Time', 'Contract', 'Internship', 'Remote'];
@@ -40,8 +35,7 @@ function countActive(f) {
         f.jobType.length +
         f.status.length  +
         (f.experience     ? 1 : 0) +
-        (f.deadlineWithin ? 1 : 0) +
-        (f.state          ? 1 : 0)
+        (f.deadlineWithin ? 1 : 0)
     );
 }
 
@@ -208,16 +202,6 @@ export function JobsTab({
                                 </div>
                             </FilterSection>
 
-                            <FilterSection label="State">
-                                <input
-                                    value={filters.state}
-                                    onChange={e => setFilters(p => ({ ...p, state: e.target.value }))}
-                                    placeholder="e.g. Maharashtra"
-                                    className="w-full border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700
-                                        placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-300"
-                                />
-                            </FilterSection>
-
                             <button
                                 onClick={() => setShowFilters(false)}
                                 className="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold py-2 rounded-xl transition-colors"
@@ -248,9 +232,6 @@ export function JobsTab({
                                 label={DEADLINE_OPTIONS.find(d => d.value === filters.deadlineWithin)?.label}
                                 onRemove={() => setFilters(p => ({ ...p, deadlineWithin: '' }))}
                             />
-                        )}
-                        {filters.state && (
-                            <ActivePill label={filters.state} onRemove={() => setFilters(p => ({ ...p, state: '' }))} />
                         )}
                     </div>
                 )}

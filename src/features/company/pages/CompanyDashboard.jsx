@@ -28,7 +28,6 @@ const DEFAULT_FILTERS = {
     status:         [],
     experience:     '',
     deadlineWithin: '',
-    state:          '',
 };
 
 // ─── Main Dashboard ────────────────────────────────────────────────────────────
@@ -90,7 +89,6 @@ export default function CompanyDashboard() {
         if (filters.status.length)         params.status         = filters.status.join(',');
         if (filters.experience)            params.experience     = filters.experience;
         if (filters.deadlineWithin)        params.deadlineWithin = filters.deadlineWithin;
-        if (filters.state)                 params.state          = filters.state;
 
         return params;
     }
