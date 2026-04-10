@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { Spinner }        from '../ui/Spinner';
 import { EmptyState }     from '../ui/EmptyState';
 import { ErrorBanner }    from '../ui/ErrorBanner';
@@ -54,23 +54,9 @@ export function JobsTab({
     filters,
     setFilters,
 }) {
-    const [showFilters, setShowFilters] = useState(false);
     const [jobToDelete, setJobToDelete] = useState(null);
-    const panelRef = useRef(null);
     const role = getCompanyUser()?.role;
     const canEditJobs = role === 'company';
-
-    // Close filter panel on outside click
-    useEffect(() => {
-        if (!showFilters) return;
-        function handler(e) {
-            if (panelRef.current && !panelRef.current.contains(e.target)) {
-                setShowFilters(false);
-            }
-        }
-        document.addEventListener('mousedown', handler);
-        return () => document.removeEventListener('mousedown', handler);
-    }, [showFilters]);
 
     const activeCount = countActive(filters);
 
@@ -130,85 +116,106 @@ export function JobsTab({
                     />
                 </div>
 
-                {/* Filter button + dropdown */}
-                <div className="relative" ref={panelRef}>
-                    <button
-                        onClick={() => setShowFilters(v => !v)}
-                        className={`flex items-center gap-2 border text-xs font-semibold px-4 py-2 rounded-xl transition-all
-                            ${activeCount > 0
-                                ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
-                                : 'bg-white border-slate-200 text-slate-600 hover:border-indigo-400 hover:text-indigo-600'
-                            }`}
-                    >
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h18M7 12h10M11 20h2" />
-                        </svg>
-                        Filters
-                        {activeCount > 0 && (
-                            <span className="bg-white text-indigo-600 text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                                {activeCount}
-                            </span>
-                        )}
-                    </button>
-
-                    {/* Filter Panel */}
-                    {showFilters && (
-                        <div className="absolute left-0 top-[calc(100%+8px)] z-50 w-80 bg-white rounded-2xl border border-slate-200 shadow-2xl p-5 space-y-5">
-                            <div className="flex items-center justify-between">
-                                <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-                                    Advanced Filters
-                                </span>
-                                {activeCount > 0 && (
-                                    <button onClick={clearAll} className="text-[10px] font-semibold text-rose-500 hover:text-rose-700">
-                                        Clear all
-                                    </button>
-                                )}
-                            </div>
-
-                            <FilterSection label="Job Type">
-                                <div className="flex flex-wrap gap-1.5">
-                                    {JOB_TYPES.map(t => (
-                                        <Chip key={t} label={t} active={filters.jobType.includes(t)} onClick={() => toggleArr('jobType', t)} />
-                                    ))}
-                                </div>
-                            </FilterSection>
-
-                            <FilterSection label="Status">
-                                <div className="flex flex-wrap gap-1.5">
-                                    {STATUSES.map(s => (
-                                        <Chip
-                                            key={s}
-                                            label={s.charAt(0).toUpperCase() + s.slice(1)}
-                                            active={filters.status.includes(s)}
-                                            onClick={() => toggleArr('status', s)}
-                                        />
-                                    ))}
-                                </div>
-                            </FilterSection>
-
-                            <FilterSection label="Experience Range">
-                                <div className="flex flex-wrap gap-1.5">
-                                    {EXP_RANGES.map(({ label, value }) => (
-                                        <Chip key={value} label={label} active={filters.experience === value} onClick={() => setField('experience', value)} />
-                                    ))}
-                                </div>
-                            </FilterSection>
-
-                            <FilterSection label="Deadline">
-                                <div className="flex flex-wrap gap-1.5">
-                                    {DEADLINE_OPTIONS.map(({ label, value }) => (
-                                        <Chip key={value} label={label} active={filters.deadlineWithin === value} onClick={() => setField('deadlineWithin', value)} />
-                                    ))}
-                                </div>
-                            </FilterSection>
-
-                            <button
-                                onClick={() => setShowFilters(false)}
-                                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold py-2 rounded-xl transition-colors"
-                            >
-                                Apply Filters
-                            </button>
+                {/* Individual Filter Dropdowns */}
+                <div className="flex items-center gap-2 flex-wrap">
+                    {/* Job Type Filter */}
+                    <div className="relative">
+                        <select
+                            value=""
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                if (value) {
+                                    toggleArr('jobType', value);
+                                }
+                            }}
+                            className="appearance-none bg-white border border-slate-200 rounded-lg px-3 py-1.5 pr-8 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                        >
+                            <option value="">Job Type</option>
+                            {JOB_TYPES.map(t => (
+                                <option key={t} value={t} disabled={filters.jobType.includes(t)}>
+                                    {t} {filters.jobType.includes(t) ? '✓' : ''}
+                                </option>
+                            ))}
+                        </select>
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                            <svg className="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
                         </div>
+                    </div>
+
+                    {/* Status Filter */}
+                    <div className="relative">
+                        <select
+                            value=""
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                if (value) {
+                                    toggleArr('status', value);
+                                }
+                            }}
+                            className="appearance-none bg-white border border-slate-200 rounded-lg px-3 py-1.5 pr-8 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                        >
+                            <option value="">Status</option>
+                            {STATUSES.map(s => (
+                                <option key={s} value={s} disabled={filters.status.includes(s)}>
+                                    {s.charAt(0).toUpperCase() + s.slice(1)} {filters.status.includes(s) ? '✓' : ''}
+                                </option>
+                            ))}
+                        </select>
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                            <svg className="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    {/* Experience Range Filter */}
+                    <div className="relative">
+                        <select
+                            value={filters.experience}
+                            onChange={(e) => setField('experience', e.target.value)}
+                            className="appearance-none bg-white border border-slate-200 rounded-lg px-3 py-1.5 pr-8 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                        >
+                            <option value="">Experience</option>
+                            {EXP_RANGES.map(({ label, value }) => (
+                                <option key={value} value={value}>{label}</option>
+                            ))}
+                        </select>
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                            <svg className="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    {/* Deadline Filter */}
+                    <div className="relative">
+                        <select
+                            value={filters.deadlineWithin}
+                            onChange={(e) => setField('deadlineWithin', e.target.value)}
+                            className="appearance-none bg-white border border-slate-200 rounded-lg px-3 py-1.5 pr-8 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                        >
+                            <option value="">Deadline</option>
+                            {DEADLINE_OPTIONS.map(({ label, value }) => (
+                                <option key={value} value={value}>{label}</option>
+                            ))}
+                        </select>
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                            <svg className="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    {/* Clear All Button */}
+                    {activeCount > 0 && (
+                        <button
+                            onClick={clearAll}
+                            className="text-[10px] font-semibold text-rose-500 hover:text-rose-700 px-2 py-1 rounded ml-2"
+                        >
+                            Clear all
+                        </button>
                     )}
                 </div>
 
