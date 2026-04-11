@@ -173,6 +173,64 @@ export function JobDetailPage({ job, onBack, onEdit }) {
                             </div>
                         </Section>
                     )}
+
+                    {/* ── Enterprise Management ── */}
+                    {Object.keys(j.enterpriseAssignment || {}).length > 0 && (
+                        <Section title="Enterprise Management" icon="🏢">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                {j.enterpriseAssignment?.lobId && (
+                                    <Stat 
+                                        label="Line of Business (LOB)" 
+                                        mono={false} 
+                                        value={
+                                            typeof j.enterpriseAssignment.lobId === 'object' 
+                                                ? j.enterpriseAssignment.lobId.name || `${j.enterpriseAssignment.lobId.firstName || ''} ${j.enterpriseAssignment.lobId.lastName || ''}`.trim() || j.enterpriseAssignment.lobId.email || j.enterpriseAssignment.lobId._id
+                                                : j.enterpriseAssignment.lobId
+                                        } 
+                                        icon="📁" 
+                                    />
+                                )}
+                                {j.enterpriseAssignment?.hiringManagerId && (
+                                    <Stat 
+                                        label="Hiring Manager" 
+                                        mono={false} 
+                                        value={
+                                            typeof j.enterpriseAssignment.hiringManagerId === 'object'
+                                                ? j.enterpriseAssignment.hiringManagerId.name || `${j.enterpriseAssignment.hiringManagerId.firstName || ''} ${j.enterpriseAssignment.hiringManagerId.lastName || ''}`.trim() || j.enterpriseAssignment.hiringManagerId.email || j.enterpriseAssignment.hiringManagerId._id
+                                                : j.enterpriseAssignment.hiringManagerId
+                                        } 
+                                        icon="👔" 
+                                    />
+                                )}
+                                {j.enterpriseAssignment?.backupHiringManagerId && (
+                                    <Stat 
+                                        label="Backup Hiring Manager" 
+                                        mono={false} 
+                                        value={
+                                            typeof j.enterpriseAssignment.backupHiringManagerId === 'object'
+                                                ? j.enterpriseAssignment.backupHiringManagerId.name || `${j.enterpriseAssignment.backupHiringManagerId.firstName || ''} ${j.enterpriseAssignment.backupHiringManagerId.lastName || ''}`.trim() || j.enterpriseAssignment.backupHiringManagerId.email || j.enterpriseAssignment.backupHiringManagerId._id
+                                                : j.enterpriseAssignment.backupHiringManagerId
+                                        } 
+                                        icon="👥" 
+                                    />
+                                )}
+                                {j.enterpriseAssignment?.recruiterIds && Array.isArray(j.enterpriseAssignment.recruiterIds) && j.enterpriseAssignment.recruiterIds.length > 0 && (
+                                    <Stat 
+                                        label="Recruiters" 
+                                        mono={false} 
+                                        value={
+                                            j.enterpriseAssignment.recruiterIds.map(r => 
+                                                typeof r === 'object'
+                                                    ? r.name || `${r.firstName || ''} ${r.lastName || ''}`.trim() || r.email || r._id
+                                                    : r
+                                            ).join(', ')
+                                        } 
+                                        icon="🤝" 
+                                    />
+                                )}
+                            </div>
+                        </Section>
+                    )}
                 </div>
 
                 {/* ── Right Column (Sidebar) ── */}

@@ -72,11 +72,6 @@ export function JobsTab({
     const canEditJobs = role === 'company';
 
     const activeCount = countActive(filters);
-    
-    console.log("hiringManagers :", hiringManagers);
-    console.log("backupHiringManagers :", backupHiringManagers);
-    console.log("recruiters :", recruiters);
-    console.log("lobs :", lobs);
 
     // Fetch dropdown data
     useEffect(() => {

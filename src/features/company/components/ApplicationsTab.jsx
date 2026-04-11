@@ -457,7 +457,7 @@ export function ApplicationsTab({
                     />
                 </div>
             )}
-            
+
             {/* Delete Confirmation Modal */}
             {applicationToDelete && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
@@ -470,7 +470,7 @@ export function ApplicationsTab({
                             </div>
                             <h3 className="text-xl font-bold text-slate-800 mb-2">Delete Application</h3>
                             <p className="text-sm text-slate-600 mb-6">
-                                Are you sure you want to delete the application from 
+                                Are you sure you want to delete the application from
                                 <span className="font-semibold text-slate-700"> {applicationToDelete.candidate?.name || "this candidate"}</span>?
                                 This action cannot be undone.
                             </p>
